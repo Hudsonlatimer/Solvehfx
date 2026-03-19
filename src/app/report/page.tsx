@@ -54,6 +54,7 @@ function ReportFlow() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
+  const [referenceNumber, setReferenceNumber] = useState<string | null>(null);
 
   const handleLocationSelect = async (loc: { lat: number; lng: number; address: string }) => {
     setLat(loc.lat);
@@ -126,6 +127,7 @@ function ReportFlow() {
 
       const data = await res.json();
       setReportId(data.report.id);
+      setReferenceNumber(data.report.reference_number || null);
       setSubmitted(true);
     } catch (err) {
       console.error('Submit error:', err);
@@ -239,6 +241,7 @@ function ReportFlow() {
             <h2 className="text-lg font-semibold mb-4">Confirm & Submit</h2>
             <SubmitConfirmation
               reportId={reportId}
+              referenceNumber={referenceNumber}
               title={title}
               category={category}
               address={address}

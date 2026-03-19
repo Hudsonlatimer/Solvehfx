@@ -5,6 +5,13 @@ import { determineAuthority } from '@/lib/districts';
 import { dispatchEmails } from '@/lib/resend';
 import type { RoadAuthority } from '@/lib/types';
 
+function generateReferenceNumber(): string {
+  const prefix = 'SHX';
+  const timestamp = Date.now().toString(36).toUpperCase().slice(-4);
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `${prefix}-${timestamp}${random}`;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -108,6 +115,9 @@ export async function POST(request: NextRequest) {
     // Determine road authority
     const authority: RoadAuthority = determineAuthority(category, isHighway);
 
+    // Generate unique reference number
+    const reference_number = generateReferenceNumber();
+
     // Insert report
     const { data: report, error } = await serviceClient
       .from('reports')
@@ -124,6 +134,7 @@ export async function POST(request: NextRequest) {
         status: 'open',
         is_anonymous: is_anonymous || false,
         user_id: is_anonymous ? null : user?.id || null,
+        reference_number,
       })
       .select('*')
       .single();

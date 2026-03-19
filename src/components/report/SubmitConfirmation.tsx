@@ -9,6 +9,7 @@ import { AUTHORITY_EMAILS, type RoadAuthority, type District } from '@/lib/types
 
 interface SubmitConfirmationProps {
   reportId: string | null;
+  referenceNumber: string | null;
   title: string;
   category: string;
   address: string;
@@ -22,6 +23,7 @@ interface SubmitConfirmationProps {
 
 export default function SubmitConfirmation({
   reportId,
+  referenceNumber,
   title,
   category,
   address,
@@ -54,9 +56,25 @@ export default function SubmitConfirmation({
           </p>
         </div>
 
+        {/* Reference number card */}
+        {referenceNumber && (
+          <div className="mx-auto max-w-sm rounded-xl border border-primary/20 bg-primary/5 p-4">
+            <p className="text-xs text-text-secondary mb-1">Your tracking reference</p>
+            <p className="text-2xl font-bold text-primary font-mono tracking-wider">{referenceNumber}</p>
+            <p className="text-xs text-text-secondary mt-2">
+              Save this number to check your report status anytime
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          {referenceNumber && (
+            <Link href={`/track/${referenceNumber}`}>
+              <Button variant="primary">Track Your Report</Button>
+            </Link>
+          )}
           <Link href={`/reports/${reportId}`}>
-            <Button variant="primary">View Your Report</Button>
+            <Button variant="outline">View Report Details</Button>
           </Link>
           <Link href="/report">
             <Button variant="outline">Report Another Issue</Button>

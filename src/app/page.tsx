@@ -16,8 +16,10 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   let totalReports = 0;
   let resolvedThisMonth = 0;
+  let totalResolved = 0;
   let recentReports: { id: string; title: string; category: string; address: string | null; status: string; created_at: string }[] = [];
   let uniqueDistrictCount = 16;
+  let avgResolutionDays = 0;
 
   try {
     const supabase = await createClient();
@@ -35,6 +37,27 @@ export default async function HomePage() {
       .gte('resolved_at', thirtyDaysAgo);
     resolvedThisMonth = resolved || 0;
 
+    const { count: allResolved } = await supabase
+      .from('reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'resolved');
+    totalResolved = allResolved || 0;
+
+    // Calculate average resolution time
+    const { data: resolvedReports } = await supabase
+      .from('reports')
+      .select('created_at, resolved_at')
+      .eq('status', 'resolved')
+      .not('resolved_at', 'is', null)
+      .limit(100);
+    if (resolvedReports && resolvedReports.length > 0) {
+      const totalDays = resolvedReports.reduce((sum, r) => {
+        const days = (new Date(r.resolved_at!).getTime() - new Date(r.created_at).getTime()) / (1000 * 60 * 60 * 24);
+        return sum + days;
+      }, 0);
+      avgResolutionDays = Math.round(totalDays / resolvedReports.length);
+    }
+
     const { data: reports } = await supabase
       .from('reports')
       .select('id, title, category, address, status, created_at')
@@ -50,6 +73,8 @@ export default async function HomePage() {
   } catch {
     // Supabase unavailable — render with defaults
   }
+
+  const resolutionRate = totalReports > 0 ? Math.round((totalResolved / totalReports) * 100) : 0;
 
   return (
     <div>
@@ -116,6 +141,62 @@ export default async function HomePage() {
               <p className="text-sm text-text-secondary mt-1">Districts Active</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Impact dashboard */}
+      {totalReports > 0 && (
+        <section className="bg-[#FAFBFC] border-b border-gray-100 py-8 px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-text-primary">Community Impact</h2>
+              <Link href="/districts" className="text-xs text-primary hover:underline">
+                View district scorecards &rarr;
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+                <p className="text-2xl font-bold text-primary tabular-nums">{resolutionRate}%</p>
+                <p className="text-xs text-text-secondary mt-1">Resolution Rate</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+                <p className="text-2xl font-bold text-success tabular-nums">{totalResolved}</p>
+                <p className="text-xs text-text-secondary mt-1">Issues Resolved</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+                <p className="text-2xl font-bold text-primary tabular-nums">{avgResolutionDays || '—'}</p>
+                <p className="text-xs text-text-secondary mt-1">Avg Days to Fix</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+                <p className="text-2xl font-bold text-primary tabular-nums">{uniqueDistrictCount}/16</p>
+                <p className="text-xs text-text-secondary mt-1">Districts Active</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Track report CTA */}
+      <section className="bg-white border-b border-gray-100 py-6 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <Link
+            href="/track"
+            className="flex items-center gap-4 rounded-xl border border-primary/10 bg-primary/5 p-4 hover:bg-primary/10 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm text-text-primary group-hover:text-primary transition-colors">Track Your Report</p>
+              <p className="text-xs text-text-secondary">Already submitted a report? Enter your reference number to check its status — no account needed.</p>
+            </div>
+            <svg className="w-5 h-5 text-text-secondary group-hover:text-primary transition-colors flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </Link>
         </div>
       </section>
 

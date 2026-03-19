@@ -80,6 +80,7 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-3">Report</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/report" className="hover:text-white transition-colors">Submit an Issue</Link></li>
+              <li><Link href="/track" className="hover:text-white transition-colors">Track Your Report</Link></li>
               <li><Link href="/map" className="hover:text-white transition-colors">Issue Map</Link></li>
               <li><Link href="/reports" className="hover:text-white transition-colors">All Reports</Link></li>
             </ul>

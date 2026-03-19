@@ -4,6 +4,7 @@ export type RoadAuthority = 'hrm' | 'province' | 'transit';
 export interface Report {
   id: string;
   user_id: string | null;
+  reference_number: string;
   title: string;
   description: string;
   category: string;

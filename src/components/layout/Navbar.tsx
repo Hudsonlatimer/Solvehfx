@@ -10,6 +10,7 @@ export default function Navbar() {
   const links = [
     { href: '/map', label: 'Map' },
     { href: '/reports', label: 'Reports' },
+    { href: '/track', label: 'Track' },
     { href: '/districts', label: 'Districts' },
     { href: '/how-it-works', label: 'How It Works' },
     { href: '/blog', label: 'Blog' },
