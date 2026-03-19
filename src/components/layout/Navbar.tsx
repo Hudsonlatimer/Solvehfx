@@ -12,6 +12,7 @@ export default function Navbar() {
     { href: '/reports', label: 'Reports' },
     { href: '/districts', label: 'Districts' },
     { href: '/how-it-works', label: 'How It Works' },
+    { href: '/blog', label: 'Blog' },
     { href: '/about', label: 'About' },
   ];
 

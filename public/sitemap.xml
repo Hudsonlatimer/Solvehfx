@@ -32,4 +32,28 @@
     <loc>https://solvehfx.ca/about</loc>
     <priority>0.5</priority>
   </url>
+  <url>
+    <loc>https://solvehfx.ca/blog</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://solvehfx.ca/blog/how-to-report-pothole-halifax</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://solvehfx.ca/blog/halifax-311-vs-solvehfx</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://solvehfx.ca/blog/find-your-halifax-district-councillor</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://solvehfx.ca/blog/report-graffiti-halifax</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://solvehfx.ca/blog/broken-streetlight-halifax</loc>
+    <priority>0.7</priority>
+  </url>
 </urlset>
