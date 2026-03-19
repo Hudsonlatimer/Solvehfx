@@ -15,20 +15,25 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function DistrictsPage() {
-  const supabase = await createClient();
-
-  // Get report counts per district
-  const { data: reportCounts } = await supabase
-    .from('reports')
-    .select('district_id');
-
   const countMap = new Map<number, number>();
-  reportCounts?.forEach((r) => {
-    if (r.district_id) {
-      countMap.set(r.district_id, (countMap.get(r.district_id) || 0) + 1);
-    }
-  });
+
+  try {
+    const supabase = await createClient();
+    const { data: reportCounts } = await supabase
+      .from('reports')
+      .select('district_id');
+
+    reportCounts?.forEach((r) => {
+      if (r.district_id) {
+        countMap.set(r.district_id, (countMap.get(r.district_id) || 0) + 1);
+      }
+    });
+  } catch {
+    // Supabase unavailable — render with zero counts
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">

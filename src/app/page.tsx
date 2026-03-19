@@ -11,32 +11,45 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://solvehfx.ca' },
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
-  const supabase = await createClient();
+  let totalReports = 0;
+  let resolvedThisMonth = 0;
+  let recentReports: { id: string; title: string; category: string; address: string | null; status: string; created_at: string }[] = [];
+  let uniqueDistrictCount = 16;
 
-  const { count: totalReports } = await supabase
-    .from('reports')
-    .select('*', { count: 'exact', head: true });
+  try {
+    const supabase = await createClient();
 
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { count: resolvedThisMonth } = await supabase
-    .from('reports')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'resolved')
-    .gte('resolved_at', thirtyDaysAgo);
+    const { count } = await supabase
+      .from('reports')
+      .select('*', { count: 'exact', head: true });
+    totalReports = count || 0;
 
-  const { data: recentReports } = await supabase
-    .from('reports')
-    .select('id, title, category, address, status, created_at')
-    .order('created_at', { ascending: false })
-    .limit(5);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { count: resolved } = await supabase
+      .from('reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'resolved')
+      .gte('resolved_at', thirtyDaysAgo);
+    resolvedThisMonth = resolved || 0;
 
-  const { data: activeDistricts } = await supabase
-    .from('reports')
-    .select('district_id')
-    .not('district_id', 'is', null);
+    const { data: reports } = await supabase
+      .from('reports')
+      .select('id, title, category, address, status, created_at')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    recentReports = reports || [];
 
-  const uniqueDistricts = new Set(activeDistricts?.map((r) => r.district_id));
+    const { data: activeDistricts } = await supabase
+      .from('reports')
+      .select('district_id')
+      .not('district_id', 'is', null);
+    uniqueDistrictCount = new Set(activeDistricts?.map((r) => r.district_id)).size || 16;
+  } catch {
+    // Supabase unavailable — render with defaults
+  }
 
   return (
     <div>
@@ -99,7 +112,7 @@ export default async function HomePage() {
               <p className="text-sm text-text-secondary mt-1">Resolved (30d)</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-primary tabular-nums">{uniqueDistricts.size || 16}</p>
+              <p className="text-3xl font-bold text-primary tabular-nums">{uniqueDistrictCount}</p>
               <p className="text-sm text-text-secondary mt-1">Districts Active</p>
             </div>
           </div>
