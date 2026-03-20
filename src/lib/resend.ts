@@ -29,8 +29,11 @@ export async function dispatchEmails({ report, district, authority }: DispatchPa
   const authorityEmail = getResend().emails.send({
     from: 'SolveHFX Reports <reports@solvehfx.ca>',
     to: [authorityInfo.email],
-    subject: `[SolveHFX] New Report: ${report.title} — ${report.address || 'Unknown location'}`,
+    subject: `[SolveHFX] New Report: ${report.title} — ${report.address || 'Unknown location'} [Ref: ${report.reference_number}]`,
     text: `A resident has reported a civic issue via SolveHFX.
+
+Reference Number: ${report.reference_number}
+${report.contact_email ? `Contact Email: ${report.contact_email}` : '(No contact email provided)'}
 
 Issue Type: ${categoryLabel}
 Location: ${report.address || 'Not specified'}
@@ -44,6 +47,7 @@ ${report.description}
 ${report.photo_url ? `Photo: ${report.photo_url}` : ''}
 
 View full report: ${APP_URL}/reports/${report.id}
+Track report status: ${APP_URL}/track/${report.reference_number}
 
 ${district?.councillor_name ? `This report was also sent to Councillor ${district.councillor_name}.` : ''}
 
@@ -57,8 +61,11 @@ solvehfx.ca`,
       ? getResend().emails.send({
           from: 'SolveHFX Reports <reports@solvehfx.ca>',
           to: [district.councillor_email],
-          subject: `[SolveHFX] Constituent Report: ${report.title} — ${report.address || 'Unknown'}, ${district.name}`,
+          subject: `[SolveHFX] Constituent Report: ${report.title} — ${report.address || 'Unknown'}, ${district.name} [Ref: ${report.reference_number}]`,
           text: `A constituent in your district has submitted a civic issue report.
+
+Reference Number: ${report.reference_number}
+${report.contact_email ? `Constituent Email: ${report.contact_email}` : '(No contact email provided — constituent chose to remain anonymous)'}
 
 Issue Type: ${categoryLabel}
 Location: ${report.address || 'Not specified'}
@@ -70,6 +77,7 @@ ${report.description}
 ${report.photo_url ? `Photo: ${report.photo_url}` : ''}
 
 View full report: ${APP_URL}/reports/${report.id}
+Track report status: ${APP_URL}/track/${report.reference_number}
 
 This report was also forwarded to ${authorityInfo.name} (${authorityInfo.email}).
 

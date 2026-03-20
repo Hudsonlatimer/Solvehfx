@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
       is_anonymous,
       isHighway,
       force,
+      email,
     } = body as {
       title: string;
       description: string;
@@ -90,6 +91,7 @@ export async function POST(request: NextRequest) {
       is_anonymous?: boolean;
       isHighway?: boolean;
       force?: boolean;
+      email?: string | null;
     };
 
     if (!title || !description || !category || lat == null || lng == null) {
@@ -193,6 +195,7 @@ export async function POST(request: NextRequest) {
         user_id: is_anonymous ? null : user?.id || null,
         reference_number,
         client_ip: clientIp,
+        contact_email: email || null,
       })
       .select('*')
       .single();

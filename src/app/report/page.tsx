@@ -16,7 +16,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import type { AnalyzePhotoResponse, District, RoadAuthority } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
 
-const STEPS = ['Location', 'Photo', 'Review', 'Submit'];
+const STEPS = ['Location', 'Photo', 'Review', 'Contact', 'Submit'];
 
 export default function ReportPage() {
   return (
@@ -49,6 +49,10 @@ function ReportFlow() {
   const [category, setCategory] = useState(preselectedCategory || 'other');
   const [confidence, setConfidence] = useState(0);
   const [isAnonymous, setIsAnonymous] = useState(false);
+
+  // Email for follow-up (optional)
+  const [email, setEmail] = useState('');
+  const [emailOptional, setEmailOptional] = useState(true);
 
   // Submit
   const [submitting, setSubmitting] = useState(false);
@@ -122,6 +126,7 @@ function ReportFlow() {
           address,
           photo_url: photoUrl,
           is_anonymous: isAnonymous,
+          email: email || null,
           force: forceDuplicate,
         }),
       });
@@ -157,6 +162,8 @@ function ReportFlow() {
         return true; // Photo is optional
       case 2:
         return title.trim() !== '' && description.trim() !== '';
+      case 3:
+        return true; // Email is optional
       default:
         return true;
     }
@@ -249,6 +256,37 @@ function ReportFlow() {
         )}
 
         {step === 3 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Optional: Contact Info</h2>
+            <p className="text-text-secondary mb-6 text-sm">
+              Provide your email so HRM can follow up if they need more details. This is completely optional.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Email Address (Optional)
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div className="rounded-lg bg-blue-50 border border-blue-100 p-4 text-sm text-blue-900">
+                <p className="font-medium mb-1">Why provide your email?</p>
+                <ul className="space-y-1 text-xs list-disc list-inside">
+                  <li>HRM can contact you if they need clarification</li>
+                  <li>You'll get follow-up from your councillor</li>
+                  <li>You can use your reference number {referenceNumber ? `(${referenceNumber})` : '(shown after submit)'} to check status anytime</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Confirm & Submit</h2>
 

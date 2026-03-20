@@ -16,6 +16,7 @@ export interface Report {
   photo_url: string | null;
   status: ReportStatus;
   is_anonymous: boolean;
+  contact_email: string | null;
   created_at: string;
   resolved_at: string | null;
   districts?: District;
