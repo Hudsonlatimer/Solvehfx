@@ -65,6 +65,36 @@ const faqs = [
     answer:
       'SolveHFX automatically detects if your issue is on a provincial road (like the 102 or 103 highway) and routes it to Nova Scotia Public Works instead of HRM 311.',
   },
+  {
+    question: 'Why do you CC my district councillor?',
+    answer:
+      'We CC your councillor for escalation, not routine service. If your issue doesn\'t get addressed through the normal 311 queue, your councillor can apply political pressure and request status updates. Councillors are elected to advocate for constituent concerns. Use this for recurring, ignored, or systemic issues—not for every single report.',
+  },
+  {
+    question: 'Should I report to 311 or tell my councillor?',
+    answer:
+      'Report to 311 first (via SolveHFX). That\'s the official process. Only contact your councillor directly if: (1) you\'ve reported to 311 and nothing happened after 4+ weeks, or (2) it\'s a systemic issue affecting your whole block. Councillors appreciate constituent feedback, but they\'re not service delivery agents.',
+  },
+  {
+    question: 'What\'s the difference between HRM and provincial roads?',
+    answer:
+      'HRM (Halifax Regional Municipality) manages most streets inside the urban core. The province manages 100-series highways (102, 103, 104, 118), some rural roads, and certain arterial routes. SolveHFX automatically detects which authority manages your road and routes accordingly. You can see which authority on the map.',
+  },
+  {
+    question: 'How do I avoid frivolous or spam reports?',
+    answer:
+      'Report only legitimate civic issues: potholes, broken lights, flooding, graffiti, etc. Don\'t report things like "long grass" (property standards has its own process) or minor aesthetic preferences. Multiple frivolous reports waste tax dollars and train HRM to ignore reporting tools. Be responsible.',
+  },
+  {
+    question: 'Can I see which councillors respond to reports?',
+    answer:
+      'Yes. SolveHFX tracks councillor response rates on our public scorecards (coming soon). You can see which districts and councillors consistently address resident concerns. Transparency drives accountability.',
+  },
+  {
+    question: 'What if I report the same issue twice?',
+    answer:
+      'SolveHFX prevents duplicate reports on the same location within 48 hours. If an issue persists after a month with no action, you can report again—but include that context ("I reported this 4 weeks ago, still not fixed").',
+  },
 ];
 
 // FAQ structured data for Google rich results

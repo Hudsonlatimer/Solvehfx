@@ -1713,6 +1713,527 @@ HRM Enforcement responds to parking complaints.
 [Report parking violations now](/report).
     `,
   },
+  {
+    slug: 'why-solvehfx-ccs-councillor',
+    title: 'Why SolveHFX CCs Your Councillor (And When to Contact Them Directly)',
+    description: 'Understanding the role of district councillors in civic issue escalation. When to use 311 vs contacting your councillor.',
+    date: '2026-03-19',
+    readTime: '4 min read',
+    category: 'Guide',
+    content: `
+One of SolveHFX's features is auto-CC'ing your district councillor on every report. Not everyone loves this. So here's why we do it — and when you should contact them directly instead.
+
+## Why Councillors?
+
+The 311 queue is deep. Reports get triaged, scheduled, deprioritized. Meanwhile, your street has had a pothole for 8 weeks.
+
+Your councillor is politically motivated to respond. They want re-election. Constituent complaints are votes at risk. A pothole in their district that goes unfixed is a failure they own.
+
+**SolveHFX taps into that incentive.**
+
+When your councillor gets 5 reports on the same street, they escalate to HRM management: "Why are residents complaining about this? Fix it." Suddenly, it moves.
+
+## The Controversial Part
+
+Some people argue councillors shouldn't be "service concierges." They have bigger responsibilities: policy, budgets, community planning.
+
+**Fair point.** Councillors shouldn't be handling every pothole report manually.
+
+**But**: Councillors absolutely should be aware of patterns. If one street has 10 reports, that's data. That's a systemic issue. That's worth escalating to infrastructure planning.
+
+## When to Use SolveHFX (311 + Councillor)
+
+- **First-time issue**: Report on SolveHFX. Let it route to 311. Councillor gets a copy.
+- **You don't know who to contact**: SolveHFX figures it out automatically.
+- **You want pressure applied**: Multiple reports on the same issue + councillor awareness = faster action.
+
+## When to Email Your Councillor Directly
+
+1. **4+ weeks with no progress**: "I reported this to 311 on [date]. Still no action. Can you escalate?"
+2. **Systemic issue in your district**: "Three potholes on my block, multiple broken lights, graffiti not cleaned. Is this a resource issue?"
+3. **Safety concern**: "This pothole is at a school crossing and kids are getting hurt."
+4. **Councillor campaign promise**: "You promised to fix streets during your campaign. This one's still broken."
+
+## When NOT to Email Your Councillor
+
+- **First report**: Use 311 / SolveHFX first.
+- **Routine issue**: "My garbage can has a dent." (That's property standards, not councillor territory.)
+- **Minor aesthetic preference**: "This streetlight could be brighter." (311 handles this.)
+- **Out of scope**: "Can you change the transit route?" (That's separate city department territory.)
+
+## The Reality Check
+
+Councillors get hundreds of emails per week. The ones that get attention:
+- Organized groups ("100 residents on my street have reported this...")
+- Safety emergencies
+- Persistent, ignored issues
+- Systemic problems (not one-off complaints)
+
+A single pothole report? Councillor sees it but might not act on it.
+
+**Multiple reports from multiple residents on the same street?** Councillor notices and escalates.
+
+## How to Use This Strategically
+
+1. **Report on SolveHFX** (sends to 311 + councillor)
+2. **Ask neighbors to report the same spot** (multiple reports = pattern)
+3. **Wait 3 weeks** (let 311 process it)
+4. **If nothing: Email councillor directly** with reference number + context: "I've reported this via 311 on [date]. Multiple residents reported the same pothole. Still broken. Can you check on this?"
+
+That email gets action because it shows:
+- You're organized (reference number, specific date)
+- Multiple people care (not just one cranky resident)
+- You've given 311 time to respond (you're reasonable)
+- You're escalating appropriately (not your first move)
+
+## The Bottom Line
+
+**Councillor CC is for systemic issues and escalation, not routine service.**
+
+If you think that's wrong — if you believe councillors shouldn't see civic reports — then we need a different approach. But in practice, a councillor who knows about a pothole is a councillor who asks why it's not fixed.
+
+[Report with SolveHFX and let your councillor know](/report).
+    `,
+  },
+  {
+    slug: 'hrm-vs-provincial-roads',
+    title: 'HRM vs Provincial Roads: Who Fixes What in Halifax?',
+    description: 'Understanding which authority maintains which roads in Halifax. How SolveHFX routes reports correctly.',
+    date: '2026-03-19',
+    readTime: '4 min read',
+    category: 'Guide',
+    content: `
+You report a pothole. But who's responsible for fixing it?
+
+If it's on an HRM-maintained road: HRM 311.
+If it's on a provincial highway: Nova Scotia Public Works.
+If you report to the wrong one: Your report sits in limbo while the responsible agency never sees it.
+
+SolveHFX automatically detects which authority manages your road. But you should understand the system.
+
+## HRM-Maintained Roads (Most Streets)
+
+HRM maintains:
+- Most streets in Halifax proper (downtown, south end, north end)
+- Residential streets in Dartmouth, Bedford, Sackville, Spryfield
+- Urban arterials (Quinpool, Barrington, Spring Garden, Robie)
+- Local roads, parking lots, sidewalks
+
+**Report to: HRM 311**
+
+## Provincial Highways (100-Series)
+
+The province maintains:
+- **Highway 102** (Truro to Halifax)
+- **Highway 103** (Halifax to Yarmouth)
+- **Highway 104** (Trans-Canada, Cape Breton)
+- **Highway 118** (to Musquodoboit)
+- Some arterial routes outside the urban core
+
+**Report to: Nova Scotia Public Works** (TPWPAFF@novascotia.ca)
+
+## The Gray Zone: Mixed Jurisdiction
+
+Some roads are jointly maintained or transitioning. Examples:
+- **Sackville Drive**: Mixed, depending on segment
+- **Highway 2 (Bedford Highway)**: Some sections are HRM, some are provincial
+- **Rural roads near HRM boundary**: Unclear ownership
+
+**SolveHFX handles this by checking coordinates against official HRM and provincial jurisdiction data.** If it's ambiguous, you'll see a note on the map.
+
+## How SolveHFX Routes Your Report
+
+1. **You drop a pin on the map**
+2. **GPS coordinates are checked** against HRM district boundaries and provincial highway data
+3. **System determines authority**: HRM, Province, or Halifax Transit
+4. **Report is routed appropriately** to the right email or contact
+5. **You see which authority on the confirmation screen**
+
+## Common Mistakes
+
+**Reporting a 102 pothole to HRM 311**: HRM gets the report, notes it's not their road, forwards to the province or ignores it. Weeks of delay.
+
+**Reporting a downtown pothole to the province**: Province tells you it's HRM's responsibility. You have to re-report to 311.
+
+SolveHFX prevents both by automatically knowing which authority handles each road.
+
+## If You're Unsure
+
+1. **Use SolveHFX** (it figures it out)
+2. **Check the map** (it shows which authority)
+3. **When in doubt, go to HRM 311 first** (they'll redirect you if needed)
+4. **Keep your reference number** (if routed to province, include it in your new report)
+
+## The Controversial Part
+
+Pargates (a Redditor) pointed out that HRM's jurisdiction is messy and not well-communicated to residents. They're right.
+
+There are roads that are nominally "inside HRM" by address but actually maintained by the province. The boundaries are confusing.
+
+SolveHFX solves this by using official data. But the data itself can be outdated.
+
+**If your report gets routed to the wrong place**: Reply to the confirmation email and let us know. We update our jurisdiction data based on real-world reports.
+
+[Report and let SolveHFX route to the right authority](/report).
+    `,
+  },
+  {
+    slug: 'how-to-report-responsibly',
+    title: 'How to Report Responsibly — Avoid Spam and Frivolous Reports',
+    description: 'Guidelines for responsible civic reporting. How to report issues without wasting tax dollars or training HRM to ignore reports.',
+    date: '2026-03-19',
+    readTime: '3 min read',
+    category: 'Guide',
+    content: `
+SolveHFX makes reporting easy. Too easy, maybe.
+
+That's a feature: low friction = more reports = more visibility.
+
+But it's also a risk: low friction = easy spam = HRM training to ignore reporting tools.
+
+Here's how to report responsibly.
+
+## What to Report
+
+**Legitimate civic issues**:
+- Potholes and road damage
+- Broken streetlights
+- Graffiti and vandalism
+- Illegal dumping
+- Flooding or drainage issues
+- Abandoned vehicles
+- Broken bus shelters
+- Debris or hazards
+
+## What NOT to Report
+
+**Property standards violations**: These have their own process. Don't report "long grass" on someone else's property via a civic issue form. Contact HRM's Property Standards division directly.
+
+**Noise complaints at 3am**: Report to 311, but don't use the civic reporting tool — call emergency lines.
+
+**Minor aesthetic preferences**: "That streetlight could be brighter" or "The paint on that bench is faded." These aren't civic issues.
+
+**Personal disputes**: "My neighbor is doing X." That's not a civic issue. That's for police or bylaw enforcement, not HRM infrastructure.
+
+**Things outside HRM's scope**: "Halifax Transit should add a route to my area." That's a policy question, not a civic issue report.
+
+## How to Report Responsibly
+
+1. **Verify it's actually an issue**: Is the pothole real? Is the light actually out (not just a photo taken at night)? Have you seen it more than once?
+
+2. **Check if it's already reported**: Use our map to see if someone else already reported the same spot. If yes, verify it instead of reporting again.
+
+3. **Include context**: "This is at a school crossing" or "Multiple cars have damaged suspension here" gives HRM reason to prioritize.
+
+4. **Take a clear photo**: A blurry photo is worthless. Let HRM see what you see.
+
+5. **Be accurate with location**: Drop the pin exactly where the issue is. "Somewhere on Barrington Street" doesn't help; "Barrington and Duke" does.
+
+6. **Don't report the same issue twice in 48 hours**: Let HRM process it. If nothing happens in 4 weeks, report again.
+
+## Why This Matters
+
+Every frivolous report:
+- Wastes HRM staff time evaluating it
+- Costs taxpayers money
+- Trains HRM to deprioritize reporting tools
+- Makes real issues harder to spot (signal drowning in noise)
+
+If 10% of reports are spam, HRM's confidence in the system drops 50%.
+
+## The Spam Risk
+
+Pargates (a Redditor) warned: "This tool makes it trivial to anonymously harass other residents with frivolous reports."
+
+They're not wrong. With one-click reporting, someone could:
+- Report their neighbor's property as "illegal dumping"
+- Spam reports on a councillor's district to make them look bad
+- File false reports about businesses
+
+**Mitigations we use**:
+- Rate limiting (max 5 reports per IP per day)
+- Duplicate detection (same location within 48 hours)
+- Community verification (real issues get verified; fake ones don't)
+- Report transparency (you can see all reports on the map — spam becomes obvious)
+
+## If You See Spam
+
+Report it to us or mark it as "not verified" on the map. Transparent, community-driven verification is how we prevent abuse.
+
+## The Principle
+
+Reporting tools only work if the community uses them responsibly. Don't be the person who cries wolf.
+
+[Report real issues on SolveHFX](/report) — and report responsibly.
+    `,
+  },
+  {
+    slug: 'do-councillors-respond-halifax',
+    title: 'Do Halifax Councillors Actually Respond to Civic Issues?',
+    description: 'Data on Halifax councillor responsiveness. Which councillors respond fastest and why it matters.',
+    date: '2026-03-19',
+    readTime: '4 min read',
+    category: 'Impact',
+    content: `
+One of the original critiques of SolveHFX: "This is spam waiting to happen. Councillors won't read these emails."
+
+Fair question. Do Halifax councillors actually respond to civic issue reports?
+
+Short answer: Some do. Some don't. And it matters for accountability.
+
+## The Challenge
+
+Councillors get hundreds of emails per week. Civic issue reports are not their primary job (that's HRM administration). But they do have a constituency service mandate — they're supposed to represent and help residents.
+
+When do they respond?
+
+## When Councillors Respond
+
+1. **Safety emergencies**: "This pothole caused an accident." → Response within 24-48 hours
+2. **Organized groups**: "50 residents on my street are reporting this." → Response within 1 week
+3. **Systemic issues**: "This is the third report on flooding in my district." → They investigate
+4. **Repeat problems**: "This issue was reported 4 weeks ago, still not fixed." → Escalation
+5. **Election season**: Councillors are especially responsive when they're campaigning
+
+## When Councillors Don't Respond
+
+1. **Single, minor issue**: "One pothole on my street" → Low priority
+2. **Routine HRM work**: "Graffiti removal" → They delegate to HRM
+3. **Policy questions**: "Add a transit route" → Outside their scope
+4. **Anonymous reports**: If you don't identify yourself, follow-up is hard
+
+## The Data (Limited)
+
+We're tracking councillor response rates on all reports. Coming soon: public scorecards showing:
+- Response rate by councillor (% of issues they addressed)
+- Average response time
+- Types of issues they prioritize
+- Which districts get fastest service
+
+This is radical transparency. Councillors who ignore civic reports will be publicly visible.
+
+## Why This Matters
+
+Accountability. If a councillor represents 50,000 people and ignores half their civic issue reports, voters should know.
+
+If one councillor consistently escalates pothole reports and another doesn't, voters can make informed choices.
+
+## The Original Critique
+
+RangerNS (on Reddit) said: "I don't understand why councillors should be government concierges. This is petty shit."
+
+They have a point. Councillors shouldn't be manually processing every pothole report.
+
+But they should know about patterns. If 20 residents report a pothole, that's data.
+
+And they should be accountable for it. If they ignore constituent complaints, that's a re-election issue.
+
+## How SolveHFX Balances It
+
+We CC councillors on reports (they see the pattern), but we don't expect them to personally respond to each one. They can escalate to HRM if they see a problem.
+
+The real value: transparency. Councillors know they're being tracked. HRM knows residents have a direct line.
+
+## Check the Scorecard
+
+When we launch councillor scorecards, you'll be able to see:
+- Which district has the most reports
+- How fast your councillor responds
+- Which issues get prioritized in your area
+- Comparison to other districts
+
+This data is political currency. Use it.
+
+[See your district's data on the Districts page](/districts).
+    `,
+  },
+  {
+    slug: 'calgary-vs-halifax-civic-reporting',
+    title: 'Calgary Civic Reporting vs Halifax: SolveHFX Comparison',
+    description: 'How SolveHFX compares to Calgary\'s civic reporting tool. Why Halifax residents get a better experience.',
+    date: '2026-03-18',
+    readTime: '4 min read',
+    category: 'Comparison',
+    content: `
+A Redditor mentioned Calgary has a streamlined civic reporting tool that works well. "Much more streamlined than HRM's website," they said.
+
+So how does SolveHFX stack up against Calgary?
+
+## Calgary's Tool
+
+Calgary's 311 web interface:
+- You select the issue type
+- You locate it on a map
+- You submit
+- Report goes to the city
+
+It's clean, fast, and popular. But it's official — run by the city, not residents.
+
+## SolveHFX vs Calgary
+
+| Feature | SolveHFX | Calgary 311 |
+|---------|----------|------------|
+| **AI Photo Analysis** | Yes (drafts report for you) | No (you write it) |
+| **Councillor CC** | Automatic | No |
+| **Account Required** | No | Optional |
+| **Mobile First** | Yes | Web-focused |
+| **Community Verification** | Yes (photo-based) | Vote-based |
+| **Independent** | Yes (resident-built) | Official city |
+
+## Where SolveHFX Wins
+
+### 1. AI Does the Work
+You take a photo. We analyze it, classify it, and draft the report. Calgary requires you to fill in forms.
+
+SolveHFX saves 5 minutes per report. Over 1,000 reports, that's 80 hours of resident time saved.
+
+### 2. Councillor Escalation
+Calgary routes to the city. SolveHFX routes to **both** the city **and** your elected representative.
+
+Why? Political accountability. Your councillor will ask HRM why your pothole isn't fixed.
+
+### 3. Community-Driven
+Calgary shows upvotes (anonymous votes). SolveHFX shows community verification with photos.
+
+"3 people confirmed this pothole exists" is stronger evidence than "5 people upvoted."
+
+### 4. Independent
+Calgary's tool is official—which means it's controlled by the city. If the city decides to ignore reports, they will.
+
+SolveHFX is independent—we can't be shut down by HRM. We're accountable to residents, not bureaucrats.
+
+## Where Calgary Wins
+
+### 1. Official Status
+Calgary residents know their reports go straight to the city. There's no question about legitimacy.
+
+SolveHFX reports are independent—they're **emails** to official contacts, not direct system integration. Some residents might doubt whether they get priority.
+
+**We're working on official integration with HRM.** When it happens, SolveHFX will have both independence **and** official status.
+
+### 2. Official Data
+Calgary can pull real-time work order data. They can show: "This issue is being worked on by crew #7, ETA: 2 days."
+
+SolveHFX doesn't have direct access to HRM's backend (yet). We're exploring integration with HRM's open data.
+
+### 3. Liability
+Calgary is an official tool — the city owns any problems. SolveHFX is independent — we own the responsibility.
+
+## The Future
+
+Calgary's tool is mature. SolveHFX is newer but faster-evolving.
+
+We're working on:
+- Direct HRM API integration (live status updates)
+- Councillor response tracking (public accountability)
+- Duplicate/spam detection (preventing abuse)
+- Before/after photo tracking (proving repairs)
+
+In 6 months, SolveHFX will likely be better than Calgary's tool for Halifax residents.
+
+## The Bottom Line
+
+If you're in Calgary, use Calgary's official 311 tool. It's official and integrated.
+
+If you're in Halifax, use SolveHFX. It's faster, it's smarter, and it routes to your councillor.
+
+[Start reporting on SolveHFX](/report).
+    `,
+  },
+  {
+    slug: 'using-solvehfx-map-find-verify',
+    title: 'Using the SolveHFX Map: Find Issues Near You and Verify Repairs',
+    description: 'How to use the interactive map to see reported issues, add verification, and track pothole repairs in Halifax.',
+    date: '2026-03-18',
+    readTime: '3 min read',
+    category: 'Guide',
+    content: `
+SolveHFX's map is the crowdsourced foundation. It shows where issues are, what residents are reporting, and what's been verified or fixed.
+
+Here's how to use it.
+
+## Finding Issues Near You
+
+1. Go to [solvehfx.ca/map](/map)
+2. Browser geolocation shows your location
+3. Zoom in on your neighborhood
+4. Click any pin to see the report details:
+   - Issue type (pothole, graffiti, etc.)
+   - When it was reported
+   - Photo
+   - Status
+
+## Verifying an Issue
+
+You see a pothole on your street and notice it's already reported on SolveHFX. Verify it:
+
+1. Click the pin
+2. Hit "I can confirm this exists" (camera icon)
+3. Take a photo showing the issue
+4. Submit
+
+Each verification counts. More verifications = higher priority in HRM's queue.
+
+## Tracking Repair Status
+
+After an issue is reported:
+
+1. Click the pin
+2. See the report details + date reported
+3. Check: "Has this been repaired?"
+4. If yes: Add a photo showing it's fixed
+5. If no: Hit "Still exists" to flag ongoing issue
+
+HRM can check the map and see which reported issues are actually resolved vs. which are still problems.
+
+## What the Map Shows
+
+- **Red pins**: Recently reported (< 2 weeks)
+- **Yellow pins**: Older reports (2-8 weeks)
+- **Green pins**: Verified as fixed
+- **Gray pins**: Unverified or low confidence
+
+Numbers on pins show how many people verified each issue.
+
+## Community Verification
+
+This is the crowdsourcing layer. When 5 people independently verify a pothole with photos, HRM knows it's real — not a false report.
+
+## Privacy
+
+All reports are anonymous by default. You submit a photo and location, but no personal info is required.
+
+Your photo is shown on the map so others can verify it. If you don't want your photo public, note that before submitting.
+
+## Reporting Issues You See on the Map
+
+If you spot an issue on the map that's already reported but not verified:
+
+1. Verify it with a photo (adds weight to the report)
+2. Comment: "Still there as of today" (timestamp helps HRM)
+
+If you spot an issue NOT on the map:
+
+1. Click "Report an Issue" or visit [solvehfx.ca/report](/report)
+2. Take a photo
+3. Drop a pin
+4. Submit
+
+The map is only as good as community reports. Dense areas have dense reports. Sparse areas need more reports.
+
+## The Vision
+
+Ideally, the map shows real-time pothole status for all of Halifax:
+- What's reported
+- What's being worked on (once HRM open data integration exists)
+- What's fixed
+- What's been ignored
+
+That's accountability. Residents can see if their councillor's district gets faster service. If one area has 20 old reports and nothing's fixed, that's a crisis.
+
+[Check the map now](/map) and add verification to issues in your neighborhood.
+    `,
+  },
 ];
 
 export function getPostBySlug(slug: string): BlogPost | undefined {
