@@ -49,15 +49,13 @@ ${report.photo_url ? `Photo: ${report.photo_url}` : ''}
 View full report: ${APP_URL}/reports/${report.id}
 Track report status: ${APP_URL}/track/${report.reference_number}
 
-${district?.councillor_name ? `This report was also sent to Councillor ${district.councillor_name}.` : ''}
-
 ---
 SolveHFX — Civic reporting for Halifax
 solvehfx.ca`,
   });
 
   const councillorEmail =
-    district?.councillor_email
+    report.notify_councillor && district?.councillor_email
       ? getResend().emails.send({
           from: 'SolveHFX Reports <reports@solvehfx.ca>',
           to: [district.councillor_email],

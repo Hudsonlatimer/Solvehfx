@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
       isHighway,
       force,
       email,
+      notify_councillor,
     } = body as {
       title: string;
       description: string;
@@ -92,6 +93,7 @@ export async function POST(request: NextRequest) {
       isHighway?: boolean;
       force?: boolean;
       email?: string | null;
+      notify_councillor?: boolean;
     };
 
     if (!title || !description || !category || lat == null || lng == null) {
@@ -196,6 +198,7 @@ export async function POST(request: NextRequest) {
         reference_number,
         client_ip: clientIp,
         contact_email: email || null,
+        notify_councillor: notify_councillor || false,
       })
       .select('*')
       .single();

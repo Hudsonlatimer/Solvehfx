@@ -54,6 +54,9 @@ function ReportFlow() {
   const [email, setEmail] = useState('');
   const [emailOptional, setEmailOptional] = useState(true);
 
+  // Councillor notification (optional)
+  const [notifyCouncillor, setNotifyCouncillor] = useState(false);
+
   // Submit
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -128,6 +131,7 @@ function ReportFlow() {
           is_anonymous: isAnonymous,
           email: email || null,
           force: forceDuplicate,
+          notify_councillor: notifyCouncillor,
         }),
       });
 

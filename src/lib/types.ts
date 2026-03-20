@@ -17,6 +17,7 @@ export interface Report {
   status: ReportStatus;
   is_anonymous: boolean;
   contact_email: string | null;
+  notify_councillor: boolean;
 
   // Response tracking
   hrm_responded: boolean;
