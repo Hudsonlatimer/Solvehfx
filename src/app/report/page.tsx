@@ -72,7 +72,7 @@ function ReportFlow() {
       const res = await fetch('/api/districts/lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat: loc.lat, lng: loc.lng, category }),
+        body: JSON.stringify({ lat: loc.lat, lng: loc.lng, category, address: loc.address }),
       });
       if (res.ok) {
         const data = await res.json();

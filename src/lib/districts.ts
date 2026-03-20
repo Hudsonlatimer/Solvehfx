@@ -24,12 +24,28 @@ export function getCategoryById(id: string) {
   return ISSUE_CATEGORIES.find((c) => c.id === id);
 }
 
-export function determineAuthority(categoryId: string, isHighway: boolean = false): RoadAuthority {
+// Known provincial roads and bridges in Nova Scotia
+const PROVINCIAL_ROADS = [
+  'McKay', 'Macdonald', 'Macdonalds', 'Highway', 'Hwy',
+  'Trans-Canada', 'TCH', 'A-104', 'A-102', 'A-100',
+  'A-104', 'A-107', 'A-109', 'A-111', 'A-113',
+  'Route 2', 'Route 3', 'Route 7', 'Route 19'
+];
+
+function isProvincialRoad(address: string | null | undefined): boolean {
+  if (!address) return false;
+  const addressUpper = address.toUpperCase();
+  return PROVINCIAL_ROADS.some(road => addressUpper.includes(road.toUpperCase()));
+}
+
+export function determineAuthority(categoryId: string, isHighway: boolean = false, address?: string | null): RoadAuthority {
   const category = getCategoryById(categoryId);
   if (!category) return 'hrm';
 
   if (category.authority === 'transit') return 'transit';
   if (category.authority === 'auto') {
+    // Check if it's a known provincial road
+    if (isProvincialRoad(address)) return 'province';
     return isHighway ? 'province' : 'hrm';
   }
   return 'hrm';

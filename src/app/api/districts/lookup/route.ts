@@ -5,11 +5,12 @@ import type { DistrictLookupResponse } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { lat, lng, category, isHighway } = (await request.json()) as {
+    const { lat, lng, category, isHighway, address } = (await request.json()) as {
       lat: number;
       lng: number;
       category?: string;
       isHighway?: boolean;
+      address?: string;
     };
 
     if (typeof lat !== 'number' || typeof lng !== 'number') {
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
         .limit(1);
 
       const fallbackDistrict = fallback?.[0] || null;
-      const authority = category ? determineAuthority(category, isHighway) : 'hrm';
+      const authority = category ? determineAuthority(category, isHighway, address) : 'hrm';
 
       return NextResponse.json({
         district: fallbackDistrict,
