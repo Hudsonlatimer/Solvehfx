@@ -2,12 +2,12 @@ import type { District, RoadAuthority } from './types';
 import { ISSUE_CATEGORIES } from './types';
 
 export const HRM_DISTRICTS: District[] = [
-  { id: 1, name: 'Waverley-Fall River-Musquodoboit Valley', councillor_name: 'David Hendsbee', councillor_email: 'd.hendsbee@halifax.ca' },
+  { id: 1, name: 'Waverley-Fall River-Musquodoboit Valley', councillor_name: 'Cathy Deagle Gammon', councillor_email: 'c.deaglegammon@halifax.ca' },
   { id: 2, name: 'Lawrencetown-The Lakes-Chezzetcook-Eastern Shore', councillor_name: 'David Hendsbee', councillor_email: 'd.hendsbee@halifax.ca' },
-  { id: 3, name: 'Dartmouth South-Woodside-Eastern Passage', councillor_name: 'Cathy Deagle Gammon', councillor_email: 'c.deaglegammon@halifax.ca' },
-  { id: 4, name: 'Cole Harbour-Preston-Westphal-Cherry Brook', councillor_name: 'Tony Mancini', councillor_email: 't.mancini@halifax.ca' },
+  { id: 3, name: 'Dartmouth South-Woodside-Eastern Passage', councillor_name: 'Becky Kent', councillor_email: 'b.kent@halifax.ca' },
+  { id: 4, name: 'Cole Harbour-Preston-Westphal-Cherry Brook', councillor_name: 'Trish Purdy', councillor_email: 't.purdy@halifax.ca' },
   { id: 5, name: 'Dartmouth Centre', councillor_name: 'Sam Austin', councillor_email: 's.austin@halifax.ca' },
-  { id: 6, name: 'Dartmouth East-Burnside', councillor_name: 'Trish Purdy', councillor_email: 't.purdy@halifax.ca' },
+  { id: 6, name: 'Dartmouth East-Burnside', councillor_name: 'Tony Mancini', councillor_email: 't.mancini@halifax.ca' },
   { id: 7, name: 'Halifax South Downtown', councillor_name: 'Laura White', councillor_email: 'l.white@halifax.ca' },
   { id: 8, name: 'Halifax Peninsula North', councillor_name: 'Virginia Hinch', councillor_email: 'v.hinch@halifax.ca' },
   { id: 9, name: 'Halifax West Armdale', councillor_name: 'Shawn Cleary', councillor_email: 's.cleary@halifax.ca' },
