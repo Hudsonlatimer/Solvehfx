@@ -115,7 +115,13 @@ export default function Footer() {
                   Follow on Facebook
                 </a>
               </li>
-              <li className="pt-1 text-xs text-white/50">HRM 311: contactus@311.halifax.ca</li>
+              <li className="pt-3 border-t border-white/10">
+                <a href="mailto:support@solvehfx.ca" className="text-white hover:text-accent transition-colors font-medium">
+                  support@solvehfx.ca
+                </a>
+                <p className="text-xs text-white/50 mt-0.5">Business inquiries & questions</p>
+              </li>
+              <li className="text-xs text-white/50">HRM 311: contactus@311.halifax.ca</li>
             </ul>
           </div>
         </div>
