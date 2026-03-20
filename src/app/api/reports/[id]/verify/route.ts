@@ -11,16 +11,10 @@ export async function POST(
     const supabase = await createClient();
     const serviceClient = await createServiceClient();
 
+    // User is optional — anonymous verification is allowed
     const {
       data: { user },
     } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'You must be logged in to verify a report' },
-        { status: 401 }
-      );
-    }
 
     const body = await request.json();
     const { type, photo_url } = body as {
@@ -46,26 +40,28 @@ export async function POST(
       return NextResponse.json({ error: 'Report not found' }, { status: 404 });
     }
 
-    // Check for existing verification from this user
-    const { data: existing } = await serviceClient
-      .from('verifications')
-      .select('id')
-      .eq('report_id', id)
-      .eq('user_id', user.id)
-      .single();
+    // If logged in, check for duplicate verification
+    if (user) {
+      const { data: existing } = await serviceClient
+        .from('verifications')
+        .select('id')
+        .eq('report_id', id)
+        .eq('user_id', user.id)
+        .single();
 
-    if (existing) {
-      return NextResponse.json(
-        { error: 'You have already verified this report' },
-        { status: 409 }
-      );
+      if (existing) {
+        return NextResponse.json(
+          { error: 'You have already verified this report' },
+          { status: 409 }
+        );
+      }
     }
 
     const { data: verification, error } = await serviceClient
       .from('verifications')
       .insert({
         report_id: id,
-        user_id: user.id,
+        user_id: user?.id || null,
         type,
         photo_url: photo_url || null,
       })
