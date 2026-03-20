@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         .limit(1);
 
       const fallbackDistrict = fallback?.[0] || null;
-      const authority = category ? determineAuthority(category, isHighway, address) : 'hrm';
+      const authority = category ? await determineAuthority(category, isHighway, address) : 'hrm';
 
       return NextResponse.json({
         district: fallbackDistrict,
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       } satisfies DistrictLookupResponse);
     }
 
-    const authority = category ? determineAuthority(category, isHighway) : 'hrm';
+    const authority = category ? await determineAuthority(category, isHighway, address) : 'hrm';
 
     return NextResponse.json({
       district: district?.[0] || null,

@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine road authority
-    const authority: RoadAuthority = determineAuthority(category, isHighway, address);
+    const authority: RoadAuthority = await determineAuthority(category, isHighway, address);
 
     // Generate unique reference number
     const reference_number = generateReferenceNumber();

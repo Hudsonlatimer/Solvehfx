@@ -24,13 +24,21 @@ export function getCategoryById(id: string) {
   return ISSUE_CATEGORIES.find((c) => c.id === id);
 }
 
-// Known provincial roads and bridges in Nova Scotia
+// Known provincial roads and bridges (fallback for when dataset lookup unavailable)
 const PROVINCIAL_ROADS = [
   'McKay', 'Macdonald', 'Macdonalds', 'Highway', 'Hwy',
   'Trans-Canada', 'TCH', 'A-104', 'A-102', 'A-100',
   'A-104', 'A-107', 'A-109', 'A-111', 'A-113',
-  'Route 2', 'Route 3', 'Route 7', 'Route 19'
+  'Route 2', 'Route 3', 'Route 7', 'Route 19', 'Dunbrack'
 ];
+
+async function lookupRoadOwnership(address: string): Promise<'PROV' | 'HRM' | null> {
+  // TODO: Integrate Nova Scotia Street Centrelines dataset (OWN field)
+  // When available, call the dataset API with the street name
+  // Parse response to check if OWN === 'PROV' or 'HRM'
+  // For now, returns null to use fallback logic
+  return null;
+}
 
 function isProvincialRoad(address: string | null | undefined): boolean {
   if (!address) return false;
@@ -38,13 +46,19 @@ function isProvincialRoad(address: string | null | undefined): boolean {
   return PROVINCIAL_ROADS.some(road => addressUpper.includes(road.toUpperCase()));
 }
 
-export function determineAuthority(categoryId: string, isHighway: boolean = false, address?: string | null): RoadAuthority {
+export async function determineAuthority(categoryId: string, isHighway: boolean = false, address?: string | null): Promise<RoadAuthority> {
   const category = getCategoryById(categoryId);
   if (!category) return 'hrm';
 
   if (category.authority === 'transit') return 'transit';
   if (category.authority === 'auto') {
-    // Check if it's a known provincial road
+    // Try dataset lookup first (Nova Scotia Street Centrelines OWN field)
+    if (address) {
+      const ownership = await lookupRoadOwnership(address);
+      if (ownership === 'PROV') return 'province';
+      if (ownership === 'HRM') return 'hrm';
+    }
+    // Fallback: keyword matching + isHighway flag
     if (isProvincialRoad(address)) return 'province';
     return isHighway ? 'province' : 'hrm';
   }
