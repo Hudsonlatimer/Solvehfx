@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
       photo_url,
       is_anonymous,
       isHighway,
+      force,
     } = body as {
       title: string;
       description: string;
@@ -88,6 +89,7 @@ export async function POST(request: NextRequest) {
       photo_url?: string;
       is_anonymous?: boolean;
       isHighway?: boolean;
+      force?: boolean;
     };
 
     if (!title || !description || !category || lat == null || lng == null) {
@@ -95,6 +97,61 @@ export async function POST(request: NextRequest) {
         { error: 'title, description, category, lat, and lng are required' },
         { status: 400 }
       );
+    }
+
+    // Rate limiting: max 5 reports per IP per day
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    const today = new Date().toISOString().split('T')[0];
+    const ipKey = `rate:${clientIp}:${today}`;
+
+    // Check rate limit (in production, use Redis; for now, check DB)
+    const { data: recentReports } = await serviceClient
+      .from('reports')
+      .select('id')
+      .eq('client_ip', clientIp)
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+    if ((recentReports?.length || 0) >= 5) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Max 5 reports per day per IP.' },
+        { status: 429 }
+      );
+    }
+
+    // Duplicate detection: check if issue already reported within ~100m (0.001 degrees) in last 48 hours
+    if (!force) {
+      const radiusLng = 0.001; // ~100 meters at equator
+      const radiusLat = 0.001;
+      const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+
+      const { data: nearbyReports } = await serviceClient
+        .from('reports')
+        .select('id, created_at, title, lat, lng, category')
+        .gte('created_at', fortyEightHoursAgo)
+        .gte('lat', lat - radiusLat)
+        .lte('lat', lat + radiusLat)
+        .gte('lng', lng - radiusLng)
+        .lte('lng', lng + radiusLng)
+        .eq('category', category);
+
+      if (nearbyReports && nearbyReports.length > 0) {
+        const existingReport = nearbyReports[0];
+        const daysAgo = Math.floor((Date.now() - new Date(existingReport.created_at).getTime()) / (1000 * 60 * 60 * 24));
+        return NextResponse.json(
+          {
+            error: 'Duplicate detected',
+            duplicate: {
+              message: `This issue was already reported ${daysAgo === 0 ? 'today' : `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`}`,
+              existingReport: {
+                title: existingReport.title,
+                createdAt: existingReport.created_at,
+                distance: `~${Math.round(Math.abs(lat - existingReport.lat) * 111)}m away`,
+              },
+            },
+          },
+          { status: 409 }
+        );
+      }
     }
 
     // Get current user (may be null for anonymous)
@@ -135,6 +192,7 @@ export async function POST(request: NextRequest) {
         is_anonymous: is_anonymous || false,
         user_id: is_anonymous ? null : user?.id || null,
         reference_number,
+        client_ip: clientIp,
       })
       .select('*')
       .single();

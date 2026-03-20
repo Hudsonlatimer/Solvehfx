@@ -19,6 +19,8 @@ interface SubmitConfirmationProps {
   submitted: boolean;
   submitting: boolean;
   onSubmit: () => void;
+  isDuplicate?: boolean;
+  onForceDuplicate?: () => void;
 }
 
 export default function SubmitConfirmation({
@@ -33,6 +35,8 @@ export default function SubmitConfirmation({
   submitted,
   submitting,
   onSubmit,
+  isDuplicate,
+  onForceDuplicate,
 }: SubmitConfirmationProps) {
   const cat = getCategoryById(category);
   const authorityInfo = AUTHORITY_EMAILS[authority];
@@ -137,10 +141,21 @@ export default function SubmitConfirmation({
         size="lg"
         className="w-full"
         loading={submitting}
-        onClick={onSubmit}
+        onClick={() => {
+          if (isDuplicate && onForceDuplicate) {
+            onForceDuplicate();
+          }
+          onSubmit();
+        }}
       >
-        Submit Report
+        {isDuplicate ? 'Submit Anyway (Help Verify)' : 'Submit Report'}
       </Button>
+
+      {isDuplicate && (
+        <p className="text-xs text-text-secondary text-center">
+          Multiple reports help prioritize repairs. Click to add your verification.
+        </p>
+      )}
     </div>
   );
 }
