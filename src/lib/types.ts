@@ -17,6 +17,15 @@ export interface Report {
   status: ReportStatus;
   is_anonymous: boolean;
   contact_email: string | null;
+
+  // Response tracking
+  hrm_responded: boolean;
+  hrm_response_date: string | null;
+  councillor_responded: boolean;
+  councillor_response_date: string | null;
+  hrm_work_order_id: string | null;
+  estimated_resolution_date: string | null;
+
   created_at: string;
   resolved_at: string | null;
   districts?: District;

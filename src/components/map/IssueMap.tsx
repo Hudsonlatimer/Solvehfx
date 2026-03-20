@@ -251,10 +251,13 @@ function MapPopup({ report, onVerified }: { report: Report; onVerified: () => vo
         {report.title}
       </p>
 
-      {/* Address + Date */}
+      {/* Address + Date + Reference */}
       <p className="text-xs text-text-secondary mb-0.5">{report.address || 'Halifax, NS'}</p>
-      <p className="text-xs text-text-secondary mb-2">
+      <p className="text-xs text-text-secondary mb-1">
         Reported {reportedDate} &middot; {daysSince === 0 ? 'today' : `${daysSince}d ago`}
+      </p>
+      <p className="text-xs font-mono text-primary mb-2">
+        Ref: <strong>{report.reference_number}</strong>
       </p>
 
       {/* Verification stats */}

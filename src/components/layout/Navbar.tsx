@@ -11,6 +11,7 @@ export default function Navbar() {
     { href: '/map', label: 'Map' },
     { href: '/reports', label: 'Reports' },
     { href: '/track', label: 'Track' },
+    { href: '/scorecards', label: 'Scorecards' },
     { href: '/districts', label: 'Districts' },
     { href: '/how-it-works', label: 'How It Works' },
     { href: '/blog', label: 'Blog' },
