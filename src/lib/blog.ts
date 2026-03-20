@@ -1558,10 +1558,11 @@ Councillors respond to constituent issues because:
 
 ## What to Tell Your Councillor
 
-Email template:
+Email your councillor with this template:
 
-```
-Subject: Road Safety Issue on [Street Name]
+**Subject**: Road Safety Issue on [Street Name]
+
+**Body**:
 
 Dear Councillor [Name],
 
@@ -1575,7 +1576,6 @@ I'd appreciate your help escalating this within HRM. Reference number: [SHX-XXXX
 
 Thank you,
 [Your Name]
-```
 
 ## Councillor Response Times
 
@@ -1718,4 +1718,3 @@ HRM Enforcement responds to parking complaints.
 export function getPostBySlug(slug: string): BlogPost | undefined {
   return BLOG_POSTS.find((post) => post.slug === slug);
 }
-`,
