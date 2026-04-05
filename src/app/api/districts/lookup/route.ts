@@ -28,17 +28,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      // Fallback: try raw PostGIS query
-      const { data: fallback } = await supabase
-        .from('districts')
-        .select('id, name, councillor_name, councillor_email')
-        .limit(1);
-
-      const fallbackDistrict = fallback?.[0] || null;
+      console.error('find_district RPC failed:', error);
       const authority = category ? await determineAuthority(category, isHighway, address) : 'hrm';
 
       return NextResponse.json({
-        district: fallbackDistrict,
+        district: null,
         road_authority: authority,
       } satisfies DistrictLookupResponse);
     }

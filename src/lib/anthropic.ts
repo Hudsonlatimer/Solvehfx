@@ -11,7 +11,7 @@ export async function analyzePhoto(
   mimeType: string
 ): Promise<{ category: string; title: string; description: string; confidence: number }> {
   const response = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
+    model: 'claude-3-5-sonnet-20240620',
     max_tokens: 500,
     messages: [
       {
