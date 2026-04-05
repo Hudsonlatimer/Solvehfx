@@ -45,6 +45,18 @@ CREATE TABLE IF NOT EXISTS reports (
   resolved_at TIMESTAMPTZ
 );
 
+-- Ensure all columns exist (in case table was created previously)
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS client_ip TEXT;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS is_anonymous BOOLEAN DEFAULT false;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS contact_email TEXT;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS notify_councillor BOOLEAN DEFAULT false;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS hrm_responded BOOLEAN DEFAULT false;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS hrm_response_date TIMESTAMPTZ;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS councillor_responded BOOLEAN DEFAULT false;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS councillor_response_date TIMESTAMPTZ;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS hrm_work_order_id TEXT;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS estimated_resolution_date TIMESTAMPTZ;
+
 -- 4. Create Verifications table
 CREATE TABLE IF NOT EXISTS verifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
