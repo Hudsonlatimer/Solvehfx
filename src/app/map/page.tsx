@@ -53,43 +53,74 @@ function MapPageContent() {
     fetchReports();
   }, [category, district, status]);
 
+  const activeFilters = [category, district, status].filter(Boolean).length;
+
   return (
-    <div className="h-[calc(100dvh-4rem)] flex flex-col md:flex-row">
-      {/* Mobile filter toggle */}
-      <button
-        className="md:hidden p-3 bg-white border-b border-gray-200 text-sm font-medium text-primary flex items-center gap-2"
-        onClick={() => setShowFilters(!showFilters)}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-        </svg>
-        {showFilters ? 'Hide Filters' : 'Show Filters'}
-      </button>
+    <div className="h-[calc(100dvh-4rem)] flex flex-col md:flex-row bg-bg-elev">
+      {/* Mobile filter toggle bar */}
+      <div className="md:hidden flex items-center justify-between gap-3 px-4 py-3 border-b border-rule bg-bg-elev sticky top-16 z-10">
+        <div className="text-[12.5px] text-text-secondary">
+          {loading ? 'Loading…' : (
+            <>
+              <span className="num font-semibold text-text-primary">
+                {reports.length}
+              </span>{' '}
+              report{reports.length === 1 ? '' : 's'}
+            </>
+          )}
+        </div>
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 rounded-lg border border-rule px-3 py-1.5 text-[13px] font-medium text-text-primary hover:border-primary/30 hover:bg-primary/[0.03] transition-colors"
+          onClick={() => setShowFilters((v) => !v)}
+          aria-expanded={showFilters}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+          </svg>
+          {showFilters ? 'Hide filters' : 'Filters'}
+          {activeFilters > 0 && (
+            <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary text-white text-[10px] font-semibold px-1 num">
+              {activeFilters}
+            </span>
+          )}
+        </button>
+      </div>
 
       {/* Sidebar */}
-      <div
+      <aside
         className={`${
           showFilters ? 'block' : 'hidden'
-        } md:block w-full md:w-72 p-4 overflow-y-auto bg-bg border-r border-gray-200 flex-shrink-0`}
+        } md:block w-full md:w-80 flex-shrink-0 overflow-y-auto bg-bg-elev border-r border-rule`}
       >
-        <MapFilters
-          selectedCategory={category}
-          selectedDistrict={district}
-          selectedStatus={status}
-          onCategoryChange={setCategory}
-          onDistrictChange={setDistrict}
-          onStatusChange={setStatus}
-        />
-        <div className="mt-3 text-xs text-text-secondary text-center">
-          {loading ? 'Loading...' : `${reports.length} reports`}
+        <div className="p-5 sm:p-6">
+          <div className="hidden md:flex items-center justify-between mb-5">
+            <h2 className="text-[14px] font-semibold tracking-tight text-text-primary">
+              Filter map
+            </h2>
+            <span className="text-[12px] text-text-muted num">
+              {loading ? '…' : `${reports.length} on map`}
+            </span>
+          </div>
+          <MapFilters
+            selectedCategory={category}
+            selectedDistrict={district}
+            selectedStatus={status}
+            onCategoryChange={setCategory}
+            onDistrictChange={setDistrict}
+            onStatusChange={setStatus}
+          />
         </div>
-      </div>
+      </aside>
 
       {/* Map */}
       <div className="flex-1 relative">
-        <IssueMap reports={reports} focusDistrict={district ? parseInt(district, 10) : null} />
+        <IssueMap
+          reports={reports}
+          focusDistrict={district ? parseInt(district, 10) : null}
+        />
         {loading && reports.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-bg/80">
+          <div className="absolute inset-0 flex items-center justify-center bg-bg-elev/80 backdrop-blur-sm">
             <LoadingSpinner size="lg" />
           </div>
         )}

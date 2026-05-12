@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import Button from '@/components/ui/Button';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import { BLOG_POSTS, getPostBySlug } from '@/lib/blog';
 
 interface Props {
@@ -40,11 +41,8 @@ export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
 
-  if (!post) {
-    notFound();
-  }
+  if (!post) notFound();
 
-  // JSON-LD Article structured data
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -60,6 +58,10 @@ export default async function BlogPostPage({ params }: Props) {
       '@type': 'Organization',
       name: 'SolveHFX',
       url: 'https://solvehfx.ca',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://solvehfx.ca/icon-512.png',
+      },
     },
     mainEntityOfPage: `https://solvehfx.ca/blog/${slug}`,
   };
@@ -70,34 +72,46 @@ export default async function BlogPostPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
-      <article className="max-w-3xl mx-auto px-4 py-12">
-        <div className="mb-8">
-          <Link
-            href="/blog"
-            className="text-sm text-text-secondary hover:text-primary transition-colors mb-4 inline-block"
-          >
-            &larr; Back to blog
-          </Link>
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-xs font-semibold text-accent uppercase tracking-wide">
+
+      <section className="border-b border-rule bg-bg-elev">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 pt-10 sm:pt-14 pb-10">
+          <Breadcrumbs
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Blog', href: '/blog' },
+              { label: post.title },
+            ]}
+          />
+          <div className="mt-6 flex items-center gap-3 text-[11.5px] text-text-muted tracking-tight">
+            <span className="font-semibold tracking-[0.14em] uppercase text-accent-hover">
               {post.category}
             </span>
-            <span className="text-xs text-text-secondary">{post.date}</span>
-            <span className="text-xs text-text-secondary">{post.readTime}</span>
+            <span className="text-text-muted/60">·</span>
+            <time className="num">{post.date}</time>
+            <span className="text-text-muted/60">·</span>
+            <span>{post.readTime}</span>
           </div>
-          <h1 className="text-3xl font-bold text-text-primary leading-tight">
+          <h1 className="mt-4 text-[clamp(2rem,5vw,3.25rem)] leading-[1.05] tracking-tight text-balance">
             {post.title}
           </h1>
+          <p className="mt-5 text-[16.5px] text-text-secondary max-w-2xl leading-relaxed">
+            {post.description}
+          </p>
         </div>
+      </section>
 
-        <div className="prose prose-gray max-w-none">
+      <article className="mx-auto max-w-2xl px-4 sm:px-6 py-12 sm:py-16">
+        <div>
           {post.content.split('\n').map((line, i) => {
             const trimmed = line.trim();
             if (!trimmed) return null;
 
             if (trimmed.startsWith('## ')) {
               return (
-                <h2 key={i} className="text-xl font-semibold text-text-primary mt-8 mb-3">
+                <h2
+                  key={i}
+                  className="text-[22px] sm:text-[24px] tracking-tight leading-[1.2] mt-10 mb-3"
+                >
                   {trimmed.replace('## ', '')}
                 </h2>
               );
@@ -105,7 +119,10 @@ export default async function BlogPostPage({ params }: Props) {
 
             if (trimmed.startsWith('### ')) {
               return (
-                <h3 key={i} className="text-lg font-semibold text-text-primary mt-6 mb-2">
+                <h3
+                  key={i}
+                  className="text-[18px] tracking-tight mt-7 mb-2.5"
+                >
                   {trimmed.replace('### ', '')}
                 </h3>
               );
@@ -115,10 +132,15 @@ export default async function BlogPostPage({ params }: Props) {
               const match = trimmed.match(/^- \*\*(.+?)\*\*:?\s*(.*)$/);
               if (match) {
                 return (
-                  <div key={i} className="flex gap-2 ml-4 mb-2 text-sm text-text-secondary">
-                    <span className="text-primary mt-1.5 flex-shrink-0">•</span>
+                  <div
+                    key={i}
+                    className="flex gap-3 ml-1 mb-2.5 text-[15px] text-text-secondary leading-[1.65]"
+                  >
+                    <span aria-hidden className="mt-2 inline-block h-1 w-1 shrink-0 rounded-full bg-primary/50" />
                     <p>
-                      <strong className="text-text-primary">{match[1]}</strong>
+                      <strong className="text-text-primary font-medium">
+                        {match[1]}
+                      </strong>
                       {match[2] ? `: ${match[2]}` : ''}
                     </p>
                   </div>
@@ -128,45 +150,66 @@ export default async function BlogPostPage({ params }: Props) {
 
             if (trimmed.startsWith('- ')) {
               return (
-                <div key={i} className="flex gap-2 ml-4 mb-2 text-sm text-text-secondary">
-                  <span className="text-primary mt-1.5 flex-shrink-0">•</span>
+                <div
+                  key={i}
+                  className="flex gap-3 ml-1 mb-2.5 text-[15px] text-text-secondary leading-[1.65]"
+                >
+                  <span aria-hidden className="mt-2 inline-block h-1 w-1 shrink-0 rounded-full bg-primary/50" />
                   <p>{trimmed.replace('- ', '')}</p>
                 </div>
               );
             }
 
             if (trimmed.startsWith('|')) {
-              return null; // Skip markdown tables for simplicity
+              return null;
             }
 
             if (trimmed === '---') {
-              return <hr key={i} className="my-8 border-gray-200" />;
+              return <hr key={i} className="my-10 border-rule" />;
             }
 
-            // Parse inline links and bold
             const rendered = trimmed
-              .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-              .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary hover:underline">$1</a>');
+              .replace(/\*\*(.+?)\*\*/g, '<strong class="text-text-primary font-medium">$1</strong>')
+              .replace(
+                /\[(.+?)\]\((.+?)\)/g,
+                '<a href="$2" class="text-primary hover:underline underline-offset-4">$1</a>'
+              );
 
             return (
               <p
                 key={i}
-                className="text-sm text-text-secondary leading-relaxed mb-4"
+                className="text-[15.5px] text-text-secondary leading-[1.75] mb-5"
                 dangerouslySetInnerHTML={{ __html: rendered }}
               />
             );
           })}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-gray-200 text-center">
-          <h3 className="text-lg font-semibold text-text-primary mb-3">
-            Ready to report an issue?
-          </h3>
-          <Link href="/report">
-            <Button variant="primary" size="lg">
-              Report an Issue
-            </Button>
-          </Link>
+        <div className="mt-14 pt-10 border-t border-rule">
+          <div className="rounded-2xl border border-rule bg-bg-elev p-6 text-center">
+            <h3 className="text-[20px] tracking-tight">
+              Ready to report an issue?
+            </h3>
+            <p className="mt-2 text-[14px] text-text-secondary">
+              The first one takes about a minute.
+            </p>
+            <div className="mt-5">
+              <Link href="/report">
+                <Button variant="primary" size="lg">
+                  Report an issue
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link
+              href="/blog"
+              className="text-[13.5px] text-text-secondary hover:text-text-primary transition-colors"
+            >
+              ← Back to all posts
+            </Link>
+          </div>
         </div>
       </article>
     </>

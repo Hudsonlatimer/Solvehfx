@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
+import Reveal from '@/components/ui/Reveal';
 import { ISSUE_CATEGORIES } from '@/lib/types';
 import { createClient } from '@/lib/supabase/server';
 
@@ -13,11 +14,20 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
+type ReportRow = {
+  id: string;
+  title: string;
+  category: string;
+  address: string | null;
+  status: string;
+  created_at: string;
+};
+
 export default async function HomePage() {
   let totalReports = 0;
   let resolvedThisMonth = 0;
   let totalResolved = 0;
-  let recentReports: { id: string; title: string; category: string; address: string | null; status: string; created_at: string }[] = [];
+  let recentReports: ReportRow[] = [];
   let uniqueDistrictCount = 16;
   let avgResolutionDays = 0;
 
@@ -43,7 +53,6 @@ export default async function HomePage() {
       .eq('status', 'resolved');
     totalResolved = allResolved || 0;
 
-    // Calculate average resolution time
     const { data: resolvedReports } = await supabase
       .from('reports')
       .select('created_at, resolved_at')
@@ -52,7 +61,9 @@ export default async function HomePage() {
       .limit(100);
     if (resolvedReports && resolvedReports.length > 0) {
       const totalDays = resolvedReports.reduce((sum, r) => {
-        const days = (new Date(r.resolved_at!).getTime() - new Date(r.created_at).getTime()) / (1000 * 60 * 60 * 24);
+        const days =
+          (new Date(r.resolved_at!).getTime() - new Date(r.created_at).getTime()) /
+          (1000 * 60 * 60 * 24);
         return sum + days;
       }, 0);
       avgResolutionDays = Math.round(totalDays / resolvedReports.length);
@@ -62,439 +73,597 @@ export default async function HomePage() {
       .from('reports')
       .select('id, title, category, address, status, created_at')
       .order('created_at', { ascending: false })
-      .limit(5);
+      .limit(6);
     recentReports = reports || [];
 
     const { data: activeDistricts } = await supabase
       .from('reports')
       .select('district_id')
       .not('district_id', 'is', null);
-    uniqueDistrictCount = new Set(activeDistricts?.map((r) => r.district_id)).size || 16;
+    uniqueDistrictCount =
+      new Set(activeDistricts?.map((r) => r.district_id)).size || 16;
   } catch {
     // Supabase unavailable — render with defaults
   }
 
-  const resolutionRate = totalReports > 0 ? Math.round((totalResolved / totalReports) * 100) : 0;
+  const resolutionRate =
+    totalReports > 0 ? Math.round((totalResolved / totalReports) * 100) : 0;
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative bg-primary overflow-hidden">
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-[#001f3a]" />
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-          backgroundSize: '32px 32px',
-        }} />
+      {/* ───────────────────── Hero ───────────────────── */}
+      <section className="relative isolate overflow-hidden bg-primary text-white">
+        {/* layered gradient + dot grid */}
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              'radial-gradient(80% 60% at 20% 0%, #0057A8 0%, transparent 60%), linear-gradient(180deg, #003865 0%, #00203D 100%)',
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        {/* subtle bottom seam */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24"
+          style={{
+            background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.18))',
+          }}
+        />
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm text-white/90 mb-6 backdrop-blur-sm">
-              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              Civic reporting for Halifax
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-20 pb-16 sm:pt-28 sm:pb-24 lg:pt-32 lg:pb-28">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-[12.5px] text-white/80 backdrop-blur-sm">
+              <span className="relative inline-flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+              </span>
+              Independent civic reporting · Halifax Regional Municipality
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-5">
-              Fix Halifax.{' '}
-              <span className="text-accent">Together.</span>
+            <h1 className="mt-7 text-[clamp(2.5rem,6.5vw,5rem)] leading-[1.02] tracking-tight text-balance">
+              Fix Halifax.
+              <br />
+              <span className="text-accent italic" style={{ fontWeight: 400 }}>
+                Together.
+              </span>
             </h1>
 
-            <p className="text-lg text-white/70 leading-relaxed mb-10 max-w-xl">
-              Snap a photo. AI writes the report. We send it to HRM 311 and your
-              district councillor. 60 seconds to make your neighbourhood better.
+            <p className="mt-7 max-w-xl text-[17px] leading-[1.55] text-white/72">
+              Snap a photo of a pothole, broken light, or anything else.
+              Our AI drafts the report. We send it straight to{' '}
+              <span className="text-white">HRM 311</span> and your{' '}
+              <span className="text-white">district councillor</span>. Sixty
+              seconds, no account.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="mt-9 flex flex-col sm:flex-row gap-3">
               <Link href="/report">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto text-base px-8">
-                  Report an Issue
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                  Report an issue
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
                 </Button>
               </Link>
               <Link href="/map">
                 <Button
                   variant="ghost"
                   size="lg"
-                  className="w-full sm:w-auto text-white/80 hover:text-white hover:bg-white/10 border border-white/20 text-base px-8"
+                  className="w-full sm:w-auto text-white/80 hover:text-white hover:bg-white/10 border border-white/15"
                 >
-                  View Issue Map
+                  See the issue map
                 </Button>
               </Link>
             </div>
+
+            {/* Inline proof — replaces the orphan stat strip */}
+            <dl className="mt-14 grid grid-cols-3 gap-x-6 gap-y-2 max-w-2xl border-t border-white/10 pt-8">
+              <div>
+                <dt className="text-[11.5px] uppercase tracking-[0.12em] text-white/55">Reports filed</dt>
+                <dd className="stat text-[34px] sm:text-[40px] leading-none mt-2 text-white">
+                  {totalReports.toLocaleString('en-CA')}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[11.5px] uppercase tracking-[0.12em] text-white/55">Resolved · 30d</dt>
+                <dd className="stat text-[34px] sm:text-[40px] leading-none mt-2 text-accent">
+                  {resolvedThisMonth.toLocaleString('en-CA')}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[11.5px] uppercase tracking-[0.12em] text-white/55">HRM districts</dt>
+                <dd className="stat text-[34px] sm:text-[40px] leading-none mt-2 text-white">
+                  <span className="text-white">{uniqueDistrictCount}</span>
+                  <span className="text-white/40">/16</span>
+                </dd>
+              </div>
+            </dl>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 py-8">
-          <div className="grid grid-cols-3 gap-4 sm:gap-8">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary tabular-nums">{totalReports || 0}</p>
-              <p className="text-sm text-text-secondary mt-1">Reports Filed</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-success tabular-nums">{resolvedThisMonth || 0}</p>
-              <p className="text-sm text-text-secondary mt-1">Resolved (30d)</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary tabular-nums">{uniqueDistrictCount}</p>
-              <p className="text-sm text-text-secondary mt-1">Districts Active</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Impact dashboard */}
-      {totalReports > 0 && (
-        <section className="bg-[#FAFBFC] border-b border-gray-100 py-8 px-4 sm:px-6">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-text-primary">Community Impact</h2>
-              <Link href="/districts" className="text-xs text-primary hover:underline">
-                View district scorecards &rarr;
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-                <p className="text-2xl font-bold text-primary tabular-nums">{resolutionRate}%</p>
-                <p className="text-xs text-text-secondary mt-1">Resolution Rate</p>
-              </div>
-              <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-                <p className="text-2xl font-bold text-success tabular-nums">{totalResolved}</p>
-                <p className="text-xs text-text-secondary mt-1">Issues Resolved</p>
-              </div>
-              <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-                <p className="text-2xl font-bold text-primary tabular-nums">{avgResolutionDays || '—'}</p>
-                <p className="text-xs text-text-secondary mt-1">Avg Days to Fix</p>
-              </div>
-              <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-                <p className="text-2xl font-bold text-primary tabular-nums">{uniqueDistrictCount}/16</p>
-                <p className="text-xs text-text-secondary mt-1">Districts Active</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Track report CTA */}
-      <section className="bg-white border-b border-gray-100 py-6 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
+      {/* ─────────── Track / quick-action band ─────────── */}
+      <section className="border-b border-rule bg-bg-elev">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-5">
           <Link
             href="/track"
-            className="flex items-center gap-4 rounded-xl border border-primary/10 bg-primary/5 p-4 hover:bg-primary/10 transition-colors group"
+            className="group flex items-center gap-4 rounded-xl border border-rule bg-bg/40 px-4 py-3.5 hover:border-primary/30 hover:bg-primary/[0.03] transition-colors"
           >
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <circle cx="11" cy="11" r="8" />
                 <path d="M21 21l-4.35-4.35" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-text-primary group-hover:text-primary transition-colors">Track Your Report</p>
-              <p className="text-xs text-text-secondary">Already submitted a report? Enter your reference number to check its status — no account needed.</p>
+              <p className="font-medium text-[14.5px] text-text-primary leading-tight">
+                Already submitted a report? Track it.
+              </p>
+              <p className="text-[12.5px] text-text-secondary mt-0.5 leading-snug">
+                Use your reference number to check status — no account needed.
+              </p>
             </div>
-            <svg className="w-5 h-5 text-text-secondary group-hover:text-primary transition-colors flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <span className="text-text-secondary group-hover:text-primary transition-colors" aria-hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </span>
           </Link>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-sm font-semibold text-accent uppercase tracking-wide text-center">How it works</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mt-2 mb-14">
-            Three steps. Sixty seconds.
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 sm:gap-8">
-            {[
-              {
-                step: '01',
-                title: 'Spot it',
-                desc: 'See a pothole, broken light, or graffiti in your neighbourhood.',
-                icon: (
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /><path d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-                  </svg>
-                ),
-              },
-              {
-                step: '02',
-                title: 'Snap it',
-                desc: 'Take a photo. Our AI identifies the issue and drafts a formal report.',
-                icon: (
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" /><circle cx="12" cy="13" r="4" />
-                  </svg>
-                ),
-              },
-              {
-                step: '03',
-                title: 'Send it',
-                desc: 'We route your report to HRM 311 and your district councillor automatically.',
-                icon: (
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                  </svg>
-                ),
-              },
-            ].map((item) => (
-              <div key={item.step} className="relative">
-                <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center text-primary mb-4">
-                  {item.icon}
+      {/* ───────────────── Impact dashboard ───────────────── */}
+      {totalReports > 0 && (
+        <section className="border-b border-rule bg-bg-elev">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <Reveal>
+              <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
+                <div>
+                  <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+                    Community impact
+                  </p>
+                  <h2 className="mt-2 text-3xl sm:text-[34px] leading-[1.05] tracking-tight">
+                    What we&apos;ve done together.
+                  </h2>
                 </div>
-                <p className="text-xs font-bold text-accent mb-1">{item.step}</p>
-                <h3 className="text-lg font-semibold text-text-primary mb-2">{item.title}</h3>
-                <p className="text-sm text-text-secondary leading-relaxed">{item.desc}</p>
+                <Link
+                  href="/districts"
+                  className="text-sm text-primary hover:underline underline-offset-4"
+                >
+                  District scorecards →
+                </Link>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Smart routing */}
-      <section className="bg-[#FAFBFC] py-12 sm:py-20 px-4 sm:px-6 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-sm font-semibold text-accent uppercase tracking-wide text-center">Smart routing</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mt-2 mb-4">
-            We know who to call
-          </h2>
-          <p className="text-center text-text-secondary max-w-xl mx-auto mb-12">
-            SolveHFX automatically detects whether your issue should go to the municipality,
-            the province, or Halifax Transit — so you don&apos;t have to figure it out.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {[
-              {
-                name: 'HRM 311',
-                desc: 'Potholes, sidewalks, graffiti, parks, streetlights, water, property standards',
-                email: 'contactus@311.halifax.ca',
-                color: 'bg-blue-50 border-blue-100',
-                dot: 'bg-blue-500',
-              },
-              {
-                name: 'NS Public Works',
-                desc: 'Potholes and road damage on 100-series highways and provincial roads',
-                email: 'TPWPAFF@novascotia.ca',
-                color: 'bg-amber-50 border-amber-100',
-                dot: 'bg-amber-500',
-              },
-              {
-                name: 'Halifax Transit',
-                desc: 'Bus stop damage, transit service complaints, shelter issues',
-                email: 'halifax.transit@halifax.ca',
-                color: 'bg-green-50 border-green-100',
-                dot: 'bg-green-500',
-              },
-            ].map((auth) => (
-              <div key={auth.name} className={`rounded-xl border p-5 ${auth.color}`}>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className={`w-2 h-2 rounded-full ${auth.dot}`} />
-                  <h3 className="font-semibold text-text-primary text-sm">{auth.name}</h3>
-                </div>
-                <p className="text-sm text-text-secondary leading-relaxed mb-3">{auth.desc}</p>
-                <p className="text-xs text-text-secondary/70 font-mono">{auth.email}</p>
+            </Reveal>
+            <Reveal delay={80}>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <ImpactCard label="Resolution rate" value={`${resolutionRate}%`} tone="primary" />
+                <ImpactCard label="Issues resolved" value={totalResolved} tone="accent" />
+                <ImpactCard
+                  label="Avg days to fix"
+                  value={avgResolutionDays || '—'}
+                  tone="primary"
+                />
+                <ImpactCard
+                  label="Districts active"
+                  value={`${uniqueDistrictCount}/16`}
+                  tone="primary"
+                />
               </div>
-            ))}
-          </div>
-
-          <p className="text-center text-sm text-text-secondary mt-8">
-            Every report is also CC&apos;d to your <strong>district councillor</strong> — all 16 HRM districts covered.
-          </p>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-sm font-semibold text-accent uppercase tracking-wide text-center">Categories</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mt-2 mb-12">
-            Report any civic issue
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2">
-            {ISSUE_CATEGORIES.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/report?category=${cat.id}`}
-                className="group flex flex-col items-center gap-1.5 p-3 rounded-xl border border-gray-100 bg-white hover:border-primary/20 hover:shadow-sm transition-all text-center"
-              >
-                <span className="text-2xl group-hover:scale-110 transition-transform">{cat.icon}</span>
-                <span className="text-[11px] sm:text-xs text-text-secondary group-hover:text-text-primary leading-tight">{cat.label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Recent reports */}
-      {recentReports && recentReports.length > 0 && (
-        <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white border-t border-gray-100">
-          <div className="max-w-3xl mx-auto">
-            <p className="text-sm font-semibold text-accent uppercase tracking-wide text-center">Latest activity</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mt-2 mb-10">
-              Recent reports
-            </h2>
-            <div className="space-y-2">
-              {recentReports.map((r) => {
-                const cat = ISSUE_CATEGORIES.find((c) => c.id === r.category);
-                return (
-                  <Link
-                    key={r.id}
-                    href={`/reports/${r.id}`}
-                    className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
-                  >
-                    <span className="text-xl flex-shrink-0 w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
-                      {cat?.icon || '📍'}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-text-primary truncate group-hover:text-primary transition-colors">
-                        {r.title}
-                      </p>
-                      <p className="text-xs text-text-secondary truncate mt-0.5">
-                        {r.address || 'Halifax, NS'}
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <span className={`inline-block w-2 h-2 rounded-full mb-1 ${
-                        r.status === 'resolved' ? 'bg-success' : r.status === 'in_progress' ? 'bg-warning' : 'bg-status-open'
-                      }`} />
-                      <p className="text-[11px] text-text-secondary">
-                        {new Date(r.created_at).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-            <div className="text-center mt-8">
-              <Link href="/reports">
-                <Button variant="outline" size="sm">
-                  View all reports
-                </Button>
-              </Link>
-            </div>
+            </Reveal>
           </div>
         </section>
       )}
 
-      {/* What makes us different */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-[#FAFBFC] border-t border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-sm font-semibold text-accent uppercase tracking-wide text-center">Why SolveHFX</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mt-2 mb-12">
-            Not just another 311 form
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                icon: (
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2a4 4 0 014 4c0 3-4 6-4 6s-4-3-4-6a4 4 0 014-4z" /><circle cx="12" cy="6" r="1" /><path d="M8.5 14.5A7 7 0 003 21h18a7 7 0 00-5.5-6.5" />
-                  </svg>
-                ),
-                title: 'No account needed',
-                desc: 'Submit anonymously in 60 seconds. No login, no signup, no friction.',
-              },
-              {
-                icon: (
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
-                  </svg>
-                ),
-                title: 'Councillor CC',
-                desc: 'Every report goes to 311 AND your district councillor. Accountability built in.',
-              },
-              {
-                icon: (
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
-                ),
-                title: 'AI-powered',
-                desc: 'Photo analysis identifies the issue, classifies it, and writes a professional report for you.',
-              },
-              {
-                icon: (
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" />
-                  </svg>
-                ),
-                title: 'Community verified',
-                desc: 'Neighbours confirm issues still exist or mark them fixed. Crowdsourced accountability.',
-              },
-            ].map((item) => (
-              <div key={item.title} className="bg-white rounded-xl border border-gray-100 p-5">
-                <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center text-primary mb-3">
-                  {item.icon}
+      {/* ───────────────── How it works ───────────────── */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <Reveal className="text-center">
+            <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+              How it works
+            </p>
+            <h2 className="mt-2 text-3xl sm:text-[40px] leading-[1.05] tracking-tight">
+              Three steps. Sixty seconds.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-text-secondary text-[15.5px] leading-relaxed">
+              Reporting a civic issue in Halifax shouldn&apos;t take an
+              afternoon of forms and phone trees.
+            </p>
+          </Reveal>
+
+          <div className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-12 relative">
+            {/* connecting line on desktop */}
+            <div aria-hidden className="hidden sm:block absolute left-[16.66%] right-[16.66%] top-6 h-px bg-rule" />
+
+            {STEPS.map((s, i) => (
+              <Reveal key={s.title} delay={i * 80}>
+                <div className="relative">
+                  <div className="relative z-10 mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-rule bg-bg-elev text-primary shadow-civic">
+                    {s.icon}
+                  </div>
+                  <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/60 text-center">
+                    Step {String(i + 1).padStart(2, '0')}
+                  </p>
+                  <h3 className="mt-1.5 text-[20px] tracking-tight text-center">
+                    {s.title}
+                  </h3>
+                  <p className="mt-2 text-[14.5px] leading-relaxed text-text-secondary text-center max-w-xs mx-auto">
+                    {s.desc}
+                  </p>
                 </div>
-                <h3 className="font-semibold text-text-primary text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-text-secondary leading-relaxed">{item.desc}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA + Social */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
-            See something? Say something.
-          </h2>
-          <p className="text-text-secondary mb-8 max-w-md mx-auto">
-            It takes 60 seconds. No account required. Your report goes straight to the people who can fix it.
-          </p>
-          <Link href="/report">
-            <Button variant="primary" size="lg" className="text-base px-10">
-              Report an Issue
-            </Button>
-          </Link>
+      {/* ───────────── Smart routing — the trust section ───────────── */}
+      <section className="bg-primary text-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+            backgroundSize: '32px 32px',
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl">
+          <Reveal>
+            <div className="grid lg:grid-cols-[1fr_2fr] gap-10 lg:gap-16 items-start">
+              <div>
+                <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-accent">
+                  Smart routing
+                </p>
+                <h2 className="mt-2 text-3xl sm:text-[36px] leading-[1.08] tracking-tight text-balance">
+                  We figure out who&apos;s actually responsible.
+                </h2>
+                <p className="mt-5 text-white/70 text-[15.5px] leading-relaxed max-w-md">
+                  HRM, Province, or Halifax Transit — your issue lands with
+                  the right authority and gets CC&apos;d to your district
+                  councillor automatically. All sixteen districts covered.
+                </p>
+              </div>
 
-          {/* Social follow */}
-          <div className="mt-12 pt-8 border-t border-gray-100">
-            <p className="text-sm text-text-secondary mb-4">Follow SolveHFX for updates</p>
-            <div className="flex items-center justify-center gap-3">
-              <a
-                href="https://x.com/SolveHFX"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Follow on X"
-                className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-primary hover:text-white text-text-secondary flex items-center justify-center transition-all"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </a>
-              <a
-                href="https://instagram.com/SolveHFX"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Follow on Instagram"
-                className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gradient-to-br hover:from-purple-600 hover:to-pink-500 hover:text-white text-text-secondary flex items-center justify-center transition-all"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                  <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                </svg>
-              </a>
-              <a
-                href="https://facebook.com/SolveHFX"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Follow on Facebook"
-                className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-[#1877F2] hover:text-white text-text-secondary flex items-center justify-center transition-all"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-              </a>
+              <div className="grid sm:grid-cols-3 gap-3">
+                {ROUTING.map((auth) => (
+                  <div
+                    key={auth.name}
+                    className="rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`h-2 w-2 rounded-full ${auth.dot}`} />
+                      <h3 className="font-medium text-[14.5px] tracking-tight">{auth.name}</h3>
+                    </div>
+                    <p className="text-[13px] leading-relaxed text-white/65 mb-4">
+                      {auth.desc}
+                    </p>
+                    <p className="text-[11.5px] text-white/40 font-mono break-all">
+                      {auth.email}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ───────────────── Categories ───────────────── */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-bg-elev border-y border-rule">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
+              <div>
+                <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+                  What can I report?
+                </p>
+                <h2 className="mt-2 text-3xl sm:text-[34px] leading-[1.05] tracking-tight">
+                  Anything that affects your neighbourhood.
+                </h2>
+              </div>
+              <p className="text-sm text-text-secondary max-w-xs">
+                28 categories, automatically routed to the right authority.
+              </p>
+            </div>
+          </Reveal>
+          <Reveal delay={60}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2.5">
+              {ISSUE_CATEGORIES.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/report?category=${cat.id}`}
+                  className="group flex flex-col items-start gap-2.5 rounded-xl border border-rule bg-bg-elev p-3.5 hover:border-primary/25 hover:bg-primary/[0.02] hover:shadow-civic transition-all"
+                >
+                  <span className="text-[20px] leading-none group-hover:scale-110 transition-transform">
+                    {cat.icon}
+                  </span>
+                  <span className="text-[12.5px] font-medium leading-tight text-text-primary">
+                    {cat.label}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ───────────────── Recent reports ───────────────── */}
+      {recentReports && recentReports.length > 0 && (
+        <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl">
+            <Reveal>
+              <div className="flex items-end justify-between gap-6 mb-8">
+                <div>
+                  <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+                    Latest activity
+                  </p>
+                  <h2 className="mt-2 text-3xl sm:text-[34px] leading-[1.05] tracking-tight">
+                    What Halifax is reporting.
+                  </h2>
+                </div>
+                <Link
+                  href="/reports"
+                  className="text-sm text-primary hover:underline underline-offset-4"
+                >
+                  View all →
+                </Link>
+              </div>
+            </Reveal>
+
+            <Reveal delay={60}>
+              <ul className="divide-y divide-rule border-y border-rule">
+                {recentReports.map((r) => {
+                  const cat = ISSUE_CATEGORIES.find((c) => c.id === r.category);
+                  return (
+                    <li key={r.id}>
+                      <Link
+                        href={`/reports/${r.id}`}
+                        className="group flex items-center gap-4 py-4 hover:bg-bg/60 -mx-2 px-2 rounded-lg transition-colors"
+                      >
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-bg-elev border border-rule text-[20px]">
+                          {cat?.icon || '📍'}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-[14.5px] text-text-primary truncate group-hover:text-primary transition-colors">
+                            {r.title}
+                          </p>
+                          <p className="text-[12.5px] text-text-secondary truncate mt-0.5">
+                            {r.address || 'Halifax, NS'}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                          <StatusBadge status={r.status} />
+                          <time className="text-[11.5px] text-text-muted num">
+                            {new Date(r.created_at).toLocaleDateString('en-CA', {
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </time>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Reveal>
           </div>
+        </section>
+      )}
+
+      {/* ───────────── Why SolveHFX ───────────── */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-bg-elev border-t border-rule">
+        <div className="mx-auto max-w-6xl">
+          <Reveal className="text-center">
+            <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+              Why SolveHFX
+            </p>
+            <h2 className="mt-2 text-3xl sm:text-[40px] leading-[1.05] tracking-tight">
+              Not another forgotten form.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-text-secondary text-[15.5px] leading-relaxed">
+              Built by Halifax residents who got tired of issues disappearing
+              into a 311 queue.
+            </p>
+          </Reveal>
+
+          <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {WHY.map((item, i) => (
+              <Reveal key={item.title} delay={i * 60}>
+                <article className="h-full rounded-2xl border border-rule bg-bg-elev p-6 hover:border-primary/20 hover:shadow-civic-md transition-all">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/8 text-primary mb-5">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-[16.5px] tracking-tight mb-2">{item.title}</h3>
+                  <p className="text-[13.5px] text-text-secondary leading-relaxed">
+                    {item.desc}
+                  </p>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────────── Closing CTA ───────────────── */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <Reveal>
+            <h2 className="text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-tight text-balance">
+              See something?
+              <br />
+              <span className="italic text-primary" style={{ fontWeight: 400 }}>
+                Say something.
+              </span>
+            </h2>
+            <p className="mt-6 text-[16px] text-text-secondary leading-relaxed max-w-md mx-auto">
+              Sixty seconds. No account. Your report goes straight to the
+              people who can fix it.
+            </p>
+            <div className="mt-9 flex items-center justify-center gap-3">
+              <Link href="/report">
+                <Button variant="primary" size="lg">
+                  Report an issue
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </Button>
+              </Link>
+              <Link href="/how-it-works">
+                <Button variant="ghost" size="lg">
+                  How it works
+                </Button>
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
     </div>
   );
 }
+
+/* ──────────────────────── helpers ──────────────────────── */
+
+function ImpactCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string | number;
+  tone: 'primary' | 'accent';
+}) {
+  return (
+    <div className="rounded-xl border border-rule bg-bg-elev p-5 sm:p-6">
+      <p className="stat text-[34px] sm:text-[38px] leading-none">
+        <span className={tone === 'accent' ? 'text-accent-hover' : 'text-primary'}>
+          {value}
+        </span>
+      </p>
+      <p className="mt-3 text-[12.5px] text-text-secondary tracking-tight">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, { dot: string; label: string; text: string }> = {
+    open: { dot: 'bg-status-open', label: 'Open', text: 'text-status-open' },
+    in_progress: { dot: 'bg-status-in-progress', label: 'In progress', text: 'text-status-in-progress' },
+    resolved: { dot: 'bg-status-resolved', label: 'Resolved', text: 'text-status-resolved' },
+  };
+  const s = map[status] || map.open;
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${s.text}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+      {s.label}
+    </span>
+  );
+}
+
+const STEPS = [
+  {
+    title: 'Spot it',
+    desc: 'A pothole, broken streetlight, illegal dumping — anything affecting your neighbourhood.',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Snap it',
+    desc: 'Take a photo. Our AI identifies the issue, classifies severity, and writes a formal report.',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+        <circle cx="12" cy="13" r="4" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Send it',
+    desc: 'Routed to HRM 311 and CC’d to your district councillor. You get a tracking number.',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 2L11 13" />
+        <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+      </svg>
+    ),
+  },
+];
+
+const ROUTING = [
+  {
+    name: 'HRM 311',
+    desc: 'Potholes, sidewalks, graffiti, parks, streetlights, water, property standards.',
+    email: 'contactus@311.halifax.ca',
+    dot: 'bg-blue-400',
+  },
+  {
+    name: 'NS Public Works',
+    desc: 'Potholes and road damage on 100-series highways and provincial roads.',
+    email: 'TPWPAFF@novascotia.ca',
+    dot: 'bg-amber-300',
+  },
+  {
+    name: 'Halifax Transit',
+    desc: 'Bus stop damage, transit service complaints, shelter issues.',
+    email: 'halifax.transit@halifax.ca',
+    dot: 'bg-emerald-400',
+  },
+];
+
+const WHY = [
+  {
+    title: 'No account needed',
+    desc: 'Submit anonymously in 60 seconds. No login, no signup, no friction. Optional email if you want updates.',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 13l4 4L19 7" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Councillor CC’d',
+    desc: 'Every report goes to 311 and your district councillor. Built-in accountability across all 16 districts.',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'AI does the paperwork',
+    desc: 'Photo analysis identifies the issue, classifies it, and drafts a professional report for you to review.',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Community-verified',
+    desc: 'Neighbours confirm issues still exist or mark them fixed. Crowdsourced accountability you can audit.',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 00-3-3.87" />
+        <path d="M16 3.13a4 4 0 010 7.75" />
+      </svg>
+    ),
+  },
+];

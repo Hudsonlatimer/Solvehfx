@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
-import type { Metadata } from 'next';
+import Reveal from '@/components/ui/Reveal';
 
 export default function TrackPage() {
   const [ref, setRef] = useState('');
@@ -14,59 +15,107 @@ export default function TrackPage() {
     e.preventDefault();
     const trimmed = ref.trim().toUpperCase();
     if (!trimmed) {
-      setError('Please enter a reference number');
+      setError('Please enter a reference number.');
       return;
     }
     router.push(`/track/${trimmed}`);
   };
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-16 text-center">
-      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-        <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <path d="M21 21l-4.35-4.35" />
-        </svg>
-      </div>
+    <div>
+      <section className="border-b border-rule bg-bg-elev">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 pt-14 pb-10 sm:pt-20 sm:pb-14 text-center">
+          <Reveal>
+            <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+              Track a report
+            </p>
+            <h1 className="mt-3 text-[clamp(2rem,5vw,3.25rem)] leading-[1.05] tracking-tight text-balance">
+              Where&apos;s your report?
+            </h1>
+            <p className="mt-4 text-[15.5px] text-text-secondary max-w-md mx-auto leading-relaxed">
+              Enter the reference number from your submission email. No account
+              required.
+            </p>
+          </Reveal>
 
-      <h1 className="text-2xl font-bold text-text-primary mb-2">Track Your Report</h1>
-      <p className="text-text-secondary mb-8">
-        Enter the reference number you received when you submitted your report.
-        No account needed.
-      </p>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <input
-            type="text"
-            value={ref}
-            onChange={(e) => { setRef(e.target.value); setError(''); }}
-            placeholder="e.g. SHX-A1B2CDEF"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-center text-lg font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          />
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+          <Reveal delay={80}>
+            <form
+              onSubmit={handleSubmit}
+              className="mt-9 max-w-md mx-auto text-left"
+            >
+              <label htmlFor="track-ref" className="sr-only">
+                Reference number
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  id="track-ref"
+                  type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={ref}
+                  onChange={(e) => {
+                    setRef(e.target.value);
+                    setError('');
+                  }}
+                  placeholder="SHX-A1B2CDEF"
+                  className="flex-1 h-12 px-4 rounded-lg border border-rule bg-bg-elev text-center sm:text-left text-[17px] font-mono tracking-[0.06em] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary placeholder:text-text-muted/70"
+                />
+                <Button type="submit" variant="primary" size="lg" className="sm:w-auto">
+                  Look up
+                </Button>
+              </div>
+              {error && (
+                <p role="alert" className="mt-2 text-[13px] text-danger">
+                  {error}
+                </p>
+              )}
+              <p className="mt-3 text-[12px] text-text-muted text-center sm:text-left">
+                Reference numbers look like <code className="px-1 py-0.5 rounded bg-bg text-text-secondary font-mono">SHX-XXXXXXXX</code>.
+              </p>
+            </form>
+          </Reveal>
         </div>
-        <Button type="submit" variant="primary" size="lg" className="w-full">
-          Look Up Report
-        </Button>
-      </form>
+      </section>
 
-      <div className="mt-12 pt-8 border-t border-gray-100">
-        <h3 className="font-semibold text-text-primary mb-3">How tracking works</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
-          {[
-            { icon: '1️⃣', title: 'Submit', desc: 'File a report and get a reference number instantly' },
-            { icon: '2️⃣', title: 'Track', desc: 'Check status anytime — no login needed' },
-            { icon: '3️⃣', title: 'Updates', desc: 'See when your issue is acknowledged or resolved' },
-          ].map((item) => (
-            <div key={item.title} className="p-3 rounded-lg bg-gray-50">
-              <span className="text-lg">{item.icon}</span>
-              <p className="font-medium text-sm text-text-primary mt-1">{item.title}</p>
-              <p className="text-xs text-text-secondary">{item.desc}</p>
-            </div>
-          ))}
+      <section className="py-14 sm:py-20 px-4 sm:px-6">
+        <div className="mx-auto max-w-4xl">
+          <Reveal>
+            <h2 className="text-2xl sm:text-[28px] leading-[1.1] tracking-tight text-center mb-10">
+              How tracking works.
+            </h2>
+          </Reveal>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {[
+              { num: '01', title: 'Submit a report', desc: 'You get a reference number instantly — also emailed to you if you provided contact info.' },
+              { num: '02', title: 'Authority responds', desc: 'HRM 311, NS Public Works, or Halifax Transit acknowledges and assigns the case.' },
+              { num: '03', title: 'Track to resolution', desc: 'See status changes, response time, and resolution notes — public and auditable.' },
+            ].map((s, i) => (
+              <Reveal key={s.num} delay={i * 60}>
+                <article className="rounded-xl border border-rule bg-bg-elev p-5 h-full">
+                  <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/60">
+                    Step {s.num}
+                  </p>
+                  <h3 className="mt-2 text-[17px] tracking-tight">{s.title}</h3>
+                  <p className="mt-2 text-[13.5px] text-text-secondary leading-relaxed">
+                    {s.desc}
+                  </p>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-text-secondary text-[14.5px]">
+              Lost your reference number?{' '}
+              <Link href="/report" className="text-primary hover:underline underline-offset-4">
+                File a new report
+              </Link>{' '}
+              — your existing one still counts.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

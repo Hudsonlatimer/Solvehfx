@@ -3,12 +3,15 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import PhotoUploader from '@/components/report/PhotoUploader';
 
 const LocationPicker = dynamic(() => import('@/components/report/LocationPicker'), {
   ssr: false,
-  loading: () => <div className="h-72 bg-gray-100 rounded-xl animate-pulse" />,
+  loading: () => (
+    <div className="h-72 rounded-xl border border-rule bg-bg-elev animate-pulse" />
+  ),
 });
 import AIReviewCard from '@/components/report/AIReviewCard';
 import SubmitConfirmation from '@/components/report/SubmitConfirmation';
@@ -16,7 +19,13 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import type { AnalyzePhotoResponse, District, RoadAuthority } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
 
-const STEPS = ['Location', 'Photo', 'Review', 'Contact', 'Submit'];
+const STEPS: { key: string; label: string; help: string }[] = [
+  { key: 'location', label: 'Location', help: 'Where is the issue?' },
+  { key: 'photo', label: 'Photo', help: 'Snap or skip — AI will draft the report.' },
+  { key: 'review', label: 'Review', help: 'Edit the AI draft so it reads exactly right.' },
+  { key: 'contact', label: 'Contact', help: 'Optional. Lets HRM follow up with you.' },
+  { key: 'submit', label: 'Submit', help: 'Final check before it goes to 311.' },
+];
 
 export default function ReportPage() {
   return (
@@ -52,17 +61,19 @@ function ReportFlow() {
 
   // Email for follow-up (optional)
   const [email, setEmail] = useState('');
-  const [emailOptional, setEmailOptional] = useState(true);
 
-  // Councillor notification (optional)
-  const [notifyCouncillor, setNotifyCouncillor] = useState(false);
+  // Councillor notification (optional, currently unused state — kept for future use)
+  const [notifyCouncillor] = useState(false);
 
   // Submit
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
   const [referenceNumber, setReferenceNumber] = useState<string | null>(null);
-  const [duplicateWarning, setDuplicateWarning] = useState<{ message: string; existingReport: any } | null>(null);
+  const [duplicateWarning, setDuplicateWarning] = useState<{
+    message: string;
+    existingReport: { title: string; distance: string };
+  } | null>(null);
   const [forceDuplicate, setForceDuplicate] = useState(false);
 
   const handleLocationSelect = async (loc: { lat: number; lng: number; address: string }) => {
@@ -70,7 +81,6 @@ function ReportFlow() {
     setLng(loc.lng);
     setAddress(loc.address);
 
-    // Lookup district
     try {
       const res = await fetch('/api/districts/lookup', {
         method: 'POST',
@@ -99,7 +109,6 @@ function ReportFlow() {
     try {
       let photoUrl: string | null = null;
 
-      // Upload photo to Supabase Storage
       if (photoFile) {
         const supabase = createClient();
         const ext = photoFile.name.split('.').pop() || 'jpg';
@@ -138,7 +147,6 @@ function ReportFlow() {
       const data = await res.json();
 
       if (res.status === 409) {
-        // Duplicate detected - show warning and allow force submit
         setDuplicateWarning(data.duplicate);
         setForceDuplicate(false);
         setSubmitting(false);
@@ -163,157 +171,275 @@ function ReportFlow() {
       case 0:
         return lat !== 0 && lng !== 0;
       case 1:
-        return true; // Photo is optional
+        return true;
       case 2:
         return title.trim() !== '' && description.trim() !== '';
       case 3:
-        return true; // Email is optional
+        return true;
       default:
         return true;
     }
   };
 
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-text-primary mb-6">Report an Issue</h1>
+  const totalSteps = STEPS.length;
+  const progress = ((step + (submitted ? 1 : 0)) / totalSteps) * 100;
 
-      {/* Progress indicator */}
+  return (
+    <div className="min-h-[calc(100vh-4rem)] pb-28 sm:pb-12">
+      {/* Header band */}
       {!submitted && (
-        <div className="flex items-center gap-2 mb-8">
-          {STEPS.map((s, i) => (
-            <div key={s} className="flex items-center gap-2 flex-1">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 ${
-                  i < step
-                    ? 'bg-success text-white'
-                    : i === step
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-text-secondary'
-                }`}
+        <div className="border-b border-rule bg-bg-elev">
+          <div className="mx-auto max-w-2xl px-4 sm:px-6 pt-8 sm:pt-12 pb-6">
+            <div className="flex items-center justify-between gap-4 mb-5">
+              <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+                Report an issue
+              </p>
+              <Link
+                href="/"
+                className="text-[12.5px] text-text-secondary hover:text-text-primary transition-colors"
               >
-                {i < step ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : (
-                  i + 1
-                )}
-              </div>
-              <span className={`text-[10px] sm:text-xs ${i === step ? 'text-primary font-medium' : 'text-text-secondary'}`}>
-                {s}
-              </span>
-              {i < STEPS.length - 1 && (
-                <div className={`h-0.5 flex-1 ${i < step ? 'bg-success' : 'bg-gray-200'}`} />
-              )}
+                ← Home
+              </Link>
             </div>
-          ))}
+            <h1 className="text-[clamp(1.75rem,4.5vw,2.5rem)] leading-[1.05] tracking-tight text-balance">
+              {STEPS[step].help}
+            </h1>
+            <p className="mt-2 text-[14.5px] text-text-secondary">
+              Step {step + 1} of {totalSteps} ·{' '}
+              <span className="text-text-primary font-medium">
+                {STEPS[step].label}
+              </span>
+            </p>
+
+            {/* Segmented progress */}
+            <div className="mt-6">
+              <div className="flex items-center gap-1.5">
+                {STEPS.map((s, i) => (
+                  <div
+                    key={s.key}
+                    className="relative h-1.5 flex-1 rounded-full overflow-hidden bg-rule"
+                    aria-hidden
+                  >
+                    <div
+                      className={`absolute inset-y-0 left-0 rounded-full transition-[width,background-color] duration-500 ease-out ${
+                        i < step
+                          ? 'w-full bg-success'
+                          : i === step
+                            ? 'w-full bg-primary'
+                            : 'w-0 bg-primary'
+                      }`}
+                    />
+                  </div>
+                ))}
+              </div>
+              {/* Compact labels under the progress on larger screens */}
+              <div className="mt-2.5 hidden sm:grid grid-cols-5 gap-1.5 text-[11px]">
+                {STEPS.map((s, i) => (
+                  <span
+                    key={s.key}
+                    className={`text-center tracking-tight ${
+                      i === step
+                        ? 'text-primary font-medium'
+                        : i < step
+                          ? 'text-success'
+                          : 'text-text-muted'
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                ))}
+              </div>
+              <p className="sr-only">
+                Overall progress: {Math.round(progress)}%
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Step content */}
-      <div className="mb-8">
-        {step === 0 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Where is the issue?</h2>
-            <LocationPicker onLocationSelect={handleLocationSelect} />
-            {district && (
-              <div className="mt-4 rounded-lg bg-green-50 border border-green-100 p-3 text-sm">
-                You&apos;re in <strong>District {district.id} — {district.name}</strong>
-                {district.councillor_name && (
-                  <span> (Councillor: {district.councillor_name})</span>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {step === 1 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Add a photo</h2>
-            <PhotoUploader
-              onPhotoSelected={(file, preview) => {
-                setPhotoFile(file);
-                setPhotoPreview(preview);
-              }}
-              onAnalysisComplete={handleAnalysisComplete}
-              onSkip={() => setStep(2)}
-            />
-          </div>
-        )}
-
-        {step === 2 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Review your report</h2>
-            <AIReviewCard
-              title={title}
-              description={description}
-              category={category}
-              confidence={confidence}
-              isAnonymous={isAnonymous}
-              isSnowIce={category === 'snow_ice'}
-              onTitleChange={setTitle}
-              onDescriptionChange={setDescription}
-              onCategoryChange={setCategory}
-              onAnonymousChange={setIsAnonymous}
-            />
-          </div>
-        )}
-
-        {step === 3 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Optional: Contact Info</h2>
-            <p className="text-text-secondary mb-6 text-sm">
-              Provide your email so HRM can follow up if they need more details. This is completely optional.
-            </p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Email Address (Optional)
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <div className="rounded-lg bg-blue-50 border border-blue-100 p-4 text-sm text-blue-900">
-                <p className="font-medium mb-1">Why provide your email?</p>
-                <ul className="space-y-1 text-xs list-disc list-inside">
-                  <li>HRM can contact you if they need clarification</li>
-                  <li>You'll get follow-up from your councillor</li>
-                  <li>You can use your reference number {referenceNumber ? `(${referenceNumber})` : '(shown after submit)'} to check status anytime</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 4 && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Confirm & Submit</h2>
-
-            {/* Duplicate warning */}
-            {duplicateWarning && (
-              <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 p-4">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <p className="font-semibold text-amber-900">{duplicateWarning.message}</p>
-                    <p className="text-sm text-amber-800 mt-1">
-                      <strong>{duplicateWarning.existingReport.title}</strong> was reported {duplicateWarning.existingReport.distance}
-                    </p>
-                    <p className="text-xs text-amber-700 mt-2">
-                      Multiple reports on the same issue help prioritize repairs. You can submit again if this is still a problem.
-                    </p>
+      <div className="mx-auto max-w-2xl px-4 sm:px-6 pt-8">
+        {!submitted && (
+          <div key={step} className="reveal in-view">
+            {step === 0 && (
+              <section aria-labelledby="step-location">
+                <h2 id="step-location" className="sr-only">
+                  Pick a location
+                </h2>
+                <LocationPicker onLocationSelect={handleLocationSelect} />
+                {district && (
+                  <div className="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-success/30 bg-success/[0.06] px-4 py-3.5">
+                    <div className="flex items-start gap-3">
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                      <div>
+                        <p className="text-[14px] font-medium text-text-primary leading-tight">
+                          District {district.id} — {district.name}
+                        </p>
+                        {district.councillor_name && (
+                          <p className="text-[12.5px] text-text-secondary mt-1">
+                            Will CC councillor{' '}
+                            <span className="text-text-primary font-medium">
+                              {district.councillor_name}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center self-start sm:self-auto gap-1.5 rounded-full bg-bg-elev border border-rule px-2.5 py-1 text-[11px] font-medium text-text-secondary">
+                      Routes to {authority === 'hrm' ? 'HRM 311' : authority === 'province' ? 'NS Public Works' : 'Halifax Transit'}
+                    </span>
                   </div>
-                </div>
-              </div>
+                )}
+              </section>
             )}
 
+            {step === 1 && (
+              <section aria-labelledby="step-photo">
+                <h2 id="step-photo" className="sr-only">
+                  Add a photo
+                </h2>
+                <PhotoUploader
+                  onPhotoSelected={(file, preview) => {
+                    setPhotoFile(file);
+                    setPhotoPreview(preview);
+                  }}
+                  onAnalysisComplete={handleAnalysisComplete}
+                  onSkip={() => setStep(2)}
+                />
+              </section>
+            )}
+
+            {step === 2 && (
+              <section aria-labelledby="step-review">
+                <h2 id="step-review" className="sr-only">
+                  Review your report
+                </h2>
+                <AIReviewCard
+                  title={title}
+                  description={description}
+                  category={category}
+                  confidence={confidence}
+                  isAnonymous={isAnonymous}
+                  isSnowIce={category === 'snow_ice'}
+                  onTitleChange={setTitle}
+                  onDescriptionChange={setDescription}
+                  onCategoryChange={setCategory}
+                  onAnonymousChange={setIsAnonymous}
+                />
+              </section>
+            )}
+
+            {step === 3 && (
+              <section aria-labelledby="step-contact" className="space-y-5">
+                <h2 id="step-contact" className="sr-only">
+                  Optional contact information
+                </h2>
+                <div>
+                  <label
+                    htmlFor="contact-email"
+                    className="block text-[13.5px] font-medium text-text-primary mb-2"
+                  >
+                    Email address{' '}
+                    <span className="text-text-muted font-normal">(optional)</span>
+                  </label>
+                  <input
+                    id="contact-email"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full h-11 px-3.5 rounded-lg border border-rule bg-bg-elev text-[15px] placeholder:text-text-muted focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  />
+                  <p className="mt-2 text-[12.5px] text-text-secondary">
+                    Skip this and your report goes through anonymously — you&apos;ll
+                    still get a reference number on the next screen to track it.
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-4">
+                  <p className="text-[12.5px] font-semibold text-primary tracking-tight mb-2">
+                    Why share your email
+                  </p>
+                  <ul className="space-y-1.5 text-[13px] text-text-secondary leading-relaxed">
+                    <li className="flex gap-2">
+                      <Dot /> HRM can reach out if they need clarification.
+                    </li>
+                    <li className="flex gap-2">
+                      <Dot /> Your councillor can follow up directly.
+                    </li>
+                    <li className="flex gap-2">
+                      <Dot /> Status updates when the issue is resolved.
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            )}
+
+            {step === 4 && (
+              <section aria-labelledby="step-submit">
+                <h2 id="step-submit" className="sr-only">
+                  Confirm and submit
+                </h2>
+
+                {duplicateWarning && (
+                  <div className="mb-6 rounded-xl border border-warning/30 bg-warning/[0.06] p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning">
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </span>
+                      <div>
+                        <p className="text-[14px] font-semibold text-text-primary">
+                          {duplicateWarning.message}
+                        </p>
+                        <p className="text-[13px] text-text-secondary mt-1">
+                          <strong className="text-text-primary">
+                            {duplicateWarning.existingReport.title}
+                          </strong>{' '}
+                          was reported {duplicateWarning.existingReport.distance}.
+                        </p>
+                        <p className="text-[12px] text-text-muted mt-2 leading-relaxed">
+                          Multiple reports on the same issue help prioritize
+                          repairs. Submit anyway if it&apos;s still happening.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <SubmitConfirmation
+                  reportId={reportId}
+                  referenceNumber={referenceNumber}
+                  title={title}
+                  category={category}
+                  address={address}
+                  photoPreview={photoPreview}
+                  district={district}
+                  authority={authority}
+                  submitted={submitted}
+                  submitting={submitting}
+                  onSubmit={handleSubmit}
+                  isDuplicate={!!duplicateWarning}
+                  onForceDuplicate={() => setForceDuplicate(true)}
+                />
+              </section>
+            )}
+          </div>
+        )}
+
+        {submitted && (
+          <div className="reveal in-view">
             <SubmitConfirmation
               reportId={reportId}
               referenceNumber={referenceNumber}
@@ -326,34 +452,54 @@ function ReportFlow() {
               submitted={submitted}
               submitting={submitting}
               onSubmit={handleSubmit}
-              isDuplicate={!!duplicateWarning}
-              onForceDuplicate={() => setForceDuplicate(true)}
+              isDuplicate={false}
+              onForceDuplicate={() => {}}
             />
           </div>
         )}
       </div>
 
-      {/* Navigation */}
+      {/* Sticky nav (mobile + desktop) */}
       {!submitted && (
-        <div className="flex justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0}
-          >
-            Back
-          </Button>
-          {step < STEPS.length - 1 && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-bg-elev/95 backdrop-blur supports-[backdrop-filter]:bg-bg-elev/85">
+          <div className="mx-auto max-w-2xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
             <Button
-              variant="primary"
-              onClick={() => setStep((s) => s + 1)}
-              disabled={!canProceed()}
+              variant="ghost"
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              disabled={step === 0}
             >
-              Next
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+                <path d="M15 6l-6 6 6 6" />
+              </svg>
+              Back
             </Button>
-          )}
+            <span className="text-[11.5px] text-text-muted hidden sm:block">
+              {STEPS[step].label} · {step + 1}/{totalSteps}
+            </span>
+            {step < STEPS.length - 1 && (
+              <Button
+                variant="primary"
+                onClick={() => setStep((s) => s + 1)}
+                disabled={!canProceed()}
+              >
+                Next
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+                  <path d="M9 6l6 6-6 6" />
+                </svg>
+              </Button>
+            )}
+          </div>
         </div>
       )}
     </div>
+  );
+}
+
+function Dot() {
+  return (
+    <span
+      aria-hidden
+      className="mt-1.5 inline-block h-1 w-1 shrink-0 rounded-full bg-primary/40"
+    />
   );
 }

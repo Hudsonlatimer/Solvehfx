@@ -1,23 +1,112 @@
 @import "tailwindcss";
 
 @theme {
+  /* Civic palette — Halifax navy with restrained gold accent */
   --color-primary: #003865;
   --color-primary-light: #0057A8;
+  --color-primary-dark: #00203D;
   --color-accent: #E8B84B;
   --color-accent-hover: #D4A43D;
-  --color-success: #22C55E;
+
+  --color-success: #16A34A;
   --color-warning: #F59E0B;
-  --color-danger: #EF4444;
-  --color-bg: #F8FAFC;
+  --color-danger: #DC2626;
+
+  --color-bg: #F7F6F2;          /* warm paper — civic, calmer than cold gray */
+  --color-bg-elev: #FFFFFF;
   --color-surface: #FFFFFF;
-  --color-text-primary: #1A1A2E;
-  --color-text-secondary: #6B7280;
-  --color-status-open: #3B82F6;
+
+  --color-text-primary: #0F1419;
+  --color-text-secondary: #5A6470;
+  --color-text-muted: #8A93A0;
+
+  --color-status-open: #2563EB;
   --color-status-in-progress: #F59E0B;
-  --color-status-resolved: #22C55E;
+  --color-status-resolved: #16A34A;
+
+  --color-rule: #E7E3D9;          /* tinted divider that matches paper bg */
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+
+  --shadow-civic: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --shadow-civic-md: 0 4px 8px -2px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-civic-lg: 0 12px 24px -8px rgb(0 0 0 / 0.10), 0 6px 12px -6px rgb(0 0 0 / 0.06);
 }
 
-body {
-  background-color: var(--color-bg);
-  color: var(--color-text-primary);
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), Georgia, "Times New Roman", serif;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    color: var(--color-text-primary);
+  }
+
+  /* tabular numerals for stats and dates */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* tighter body line-height on small UI text only */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Visible focus ring (a11y) */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Hide focus ring for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@layer components {
+  /* Subtle, fast section fade-in. JS class .in-view toggles. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.in-view {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* Civic stat number */
+  .stat {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
 }

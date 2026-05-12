@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
+import Reveal from '@/components/ui/Reveal';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'FAQ — SolveHFX Civic Reporting for Halifax',
@@ -9,12 +11,13 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://solvehfx.ca/faq' },
   openGraph: {
     title: 'FAQ — SolveHFX Halifax Civic Reporting',
-    description: 'How to report potholes, graffiti, and civic issues in Halifax. Privacy, AI analysis, district routing, and more.',
+    description:
+      'How to report potholes, graffiti, and civic issues in Halifax. Privacy, AI analysis, district routing, and more.',
     url: 'https://solvehfx.ca/faq',
   },
 };
 
-const faqs = [
+const FAQS = [
   {
     question: 'What is SolveHFX?',
     answer:
@@ -38,7 +41,7 @@ const faqs = [
   {
     question: 'What kinds of issues can I report?',
     answer:
-      'You can report potholes, road damage, sidewalk damage, snow and ice, graffiti, illegal dumping, garbage overflow, broken streetlights, traffic sign issues, abandoned vehicles, parking violations, tree issues, park problems, flooding, sewer issues, bus stop damage, transit complaints, bike lane issues, debris, noise complaints, and more.',
+      'Potholes, road damage, sidewalk damage, snow and ice, graffiti, illegal dumping, garbage overflow, broken streetlights, traffic sign issues, abandoned vehicles, parking violations, tree issues, park problems, flooding, sewer issues, bus stop damage, transit complaints, bike lane issues, debris, noise complaints, and more.',
   },
   {
     question: 'How does the AI photo analysis work?',
@@ -68,46 +71,42 @@ const faqs = [
   {
     question: 'Why do you CC my district councillor?',
     answer:
-      'We CC your councillor for escalation, not routine service. If your issue doesn\'t get addressed through the normal 311 queue, your councillor can apply political pressure and request status updates. Councillors are elected to advocate for constituent concerns. Use this for recurring, ignored, or systemic issues—not for every single report.',
+      "We CC your councillor for escalation, not routine service. If your issue doesn't get addressed through the normal 311 queue, your councillor can apply political pressure and request status updates. Councillors are elected to advocate for constituent concerns. Use this for recurring, ignored, or systemic issues — not for every single report.",
   },
   {
     question: 'Should I report to 311 or tell my councillor?',
     answer:
-      'Report to 311 first (via SolveHFX). That\'s the official process. Only contact your councillor directly if: (1) you\'ve reported to 311 and nothing happened after 4+ weeks, or (2) it\'s a systemic issue affecting your whole block. Councillors appreciate constituent feedback, but they\'re not service delivery agents.',
+      "Report to 311 first (via SolveHFX). That's the official process. Only contact your councillor directly if: (1) you've reported to 311 and nothing happened after 4+ weeks, or (2) it's a systemic issue affecting your whole block. Councillors appreciate constituent feedback, but they're not service delivery agents.",
   },
   {
-    question: 'What\'s the difference between HRM and provincial roads?',
+    question: "What's the difference between HRM and provincial roads?",
     answer:
-      'HRM (Halifax Regional Municipality) manages most streets inside the urban core. The province manages 100-series highways (102, 103, 104, 118), some rural roads, and certain arterial routes. SolveHFX automatically detects which authority manages your road and routes accordingly. You can see which authority on the map.',
+      'HRM manages most streets inside the urban core. The province manages 100-series highways (102, 103, 104, 118), some rural roads, and certain arterial routes. SolveHFX detects which authority manages your road and routes accordingly.',
   },
   {
     question: 'How do I avoid frivolous or spam reports?',
     answer:
-      'Report only legitimate civic issues: potholes, broken lights, flooding, graffiti, etc. Don\'t report things like "long grass" (property standards has its own process) or minor aesthetic preferences. Multiple frivolous reports waste tax dollars and train HRM to ignore reporting tools. Be responsible.',
+      'Report only legitimate civic issues: potholes, broken lights, flooding, graffiti, etc. Don\'t report things like "long grass" or minor aesthetic preferences. Multiple frivolous reports waste tax dollars and train HRM to ignore reporting tools.',
   },
   {
     question: 'Can I see which councillors respond to reports?',
     answer:
-      'Yes. SolveHFX tracks councillor response rates on our public scorecards (coming soon). You can see which districts and councillors consistently address resident concerns. Transparency drives accountability.',
+      'Yes. SolveHFX tracks councillor response rates on our public scorecards. You can see which districts and councillors consistently address resident concerns.',
   },
   {
     question: 'What if I report the same issue twice?',
     answer:
-      'SolveHFX prevents duplicate reports on the same location within 48 hours. If an issue persists after a month with no action, you can report again—but include that context ("I reported this 4 weeks ago, still not fixed").',
+      'SolveHFX prevents duplicate reports on the same location within 48 hours. If an issue persists after a month with no action, you can report again — but include context (e.g. "I reported this 4 weeks ago, still not fixed").',
   },
 ];
 
-// FAQ structured data for Google rich results
 const faqJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: faqs.map((faq) => ({
+  mainEntity: FAQS.map((faq) => ({
     '@type': 'Question',
     name: faq.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: faq.answer,
-    },
+    acceptedAnswer: { '@type': 'Answer', text: faq.answer },
   })),
 };
 
@@ -118,43 +117,67 @@ export default function FAQPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-text-primary mb-3">
-            Frequently Asked Questions
-          </h1>
-          <p className="text-text-secondary">
-            Everything you need to know about reporting civic issues in Halifax with SolveHFX.
-          </p>
-        </div>
 
-        <div className="space-y-6">
-          {faqs.map((faq, i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-gray-100 bg-white p-5"
-            >
-              <h2 className="font-semibold text-text-primary mb-2">
-                {faq.question}
-              </h2>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                {faq.answer}
+      <section className="border-b border-rule bg-bg-elev">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 pt-10 sm:pt-14 pb-10">
+          <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'FAQ' }]} />
+          <Reveal className="mt-5">
+            <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+              Frequently asked
+            </p>
+            <h1 className="mt-3 text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-tight text-balance">
+              Questions, answered.
+            </h1>
+            <p className="mt-4 text-[15.5px] text-text-secondary max-w-xl leading-relaxed">
+              Everything you need to know about reporting civic issues in
+              Halifax with SolveHFX.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="py-12 sm:py-16 px-4 sm:px-6">
+        <div className="mx-auto max-w-3xl">
+          <Reveal>
+            <ul className="divide-y divide-rule border-y border-rule">
+              {FAQS.map((faq, i) => (
+                <li key={i}>
+                  <details className="group py-5 [&_summary::-webkit-details-marker]:hidden">
+                    <summary className="cursor-pointer list-none flex items-start justify-between gap-4">
+                      <h2 className="text-[15.5px] sm:text-[16px] font-medium text-text-primary leading-snug">
+                        {faq.question}
+                      </h2>
+                      <span
+                        aria-hidden
+                        className="mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bg-elev text-text-secondary text-[18px] leading-none transition-transform group-open:rotate-45"
+                      >
+                        +
+                      </span>
+                    </summary>
+                    <p className="mt-3 pr-10 text-[14.5px] text-text-secondary leading-[1.7]">
+                      {faq.answer}
+                    </p>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+          <Reveal>
+            <div className="mt-14 text-center">
+              <p className="text-text-secondary text-[14.5px] mb-5">
+                Still curious? Just file a report — it&apos;ll make sense once
+                you see it.
               </p>
+              <Link href="/report">
+                <Button variant="primary" size="lg">
+                  Report an issue
+                </Button>
+              </Link>
             </div>
-          ))}
+          </Reveal>
         </div>
-
-        <div className="mt-10 text-center">
-          <p className="text-text-secondary mb-4">
-            Still have questions? Ready to report an issue?
-          </p>
-          <Link href="/report">
-            <Button variant="primary" size="lg">
-              Report an Issue
-            </Button>
-          </Link>
-        </div>
-      </div>
+      </section>
     </>
   );
 }
