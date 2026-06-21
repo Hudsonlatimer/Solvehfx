@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /dashboard
-Disallow: /api/
-Disallow: /login
-
-Sitemap: https://solvehfx.ca/sitemap.xml
