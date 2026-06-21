@@ -5,8 +5,9 @@ export async function proxy(request: NextRequest) {
   return await updateSession(request);
 }
 
+// Only run the Supabase session refresh on routes that actually need an
+// authenticated user. Public pages (home, map, reports, blog, …) no longer pay
+// a blocking auth round-trip on every request, which was inflating TTFB.
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
-  ],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/login'],
 };

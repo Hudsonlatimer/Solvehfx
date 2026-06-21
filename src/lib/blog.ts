@@ -10,6 +10,56 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'solvehfx-updates-nearing-50-reports',
+    title: 'SolveHFX Update: Closing In on 50 Reports for Halifax',
+    description:
+      'SolveHFX is approaching 50 civic issue reports across HRM. Here\'s what just shipped — smarter AI photo analysis, a live issue map, councillor scorecards, and a new system that retires resolved issues automatically.',
+    date: '2026-06-21',
+    readTime: '3 min read',
+    category: 'Update',
+    content: `
+SolveHFX is closing in on **50 reports** filed by Halifax residents — 50 real problems on real streets that are now in front of the people who can actually fix them.
+
+That's a small number on paper. But every one of those is a pothole, a dead streetlight, a tagged wall, or a pile of illegal dumping that someone in HRM cared enough to flag — and that's now sitting in front of HRM 311 *and* the right district councillor. That's the whole point.
+
+Here's what's new.
+
+## Smarter AI photo analysis
+
+The thing that makes SolveHFX fast is that you don't write the report — the AI does. Snap a photo, and it figures out what the issue is, drafts a clear title and description, and picks the right category.
+
+We've upgraded the vision model it runs on, so it's noticeably better at reading messy real-world photos — bad lighting, weird angles, multiple issues in one shot. It also fails gracefully now: if it can't read a photo, you get a clear heads-up and can write the details yourself instead of being stuck.
+
+## Your councillor gets CC'd — every time
+
+Reports now always go to your **district councillor** alongside HRM 311. Not optional, not buried in a setting.
+
+Why does that matter? Because 311 has a queue, and councillors can escalate. They also use constituent reports as data — to push for road budgets, track patterns, and hold departments accountable. Getting your issue in front of your elected rep is half the value.
+
+## A live map of every issue
+
+There's now a live [issue map](/map) covering all of HRM, broken down by district. You can see what's been reported near you, what's still open, and what's already been fixed — without filing anything yourself.
+
+## Councillor scorecards
+
+The [scorecards page](/scorecards) tracks how each district's councillor is responding: response rates, resolution rates, and average time to respond. It's public, it updates as reports come in, and it's independent — not an HRM product.
+
+Transparency is a feature. If your councillor is fast, you'll see it. If they're not, you'll see that too.
+
+## Resolved issues now "dissolve"
+
+This one's subtle but I'm proud of it. When an issue gets marked resolved, it doesn't just vanish or clutter the map forever. It **gradually fades** based on how long ago it was fixed, then quietly archives itself after a couple of weeks.
+
+So the map and the [reports feed](/reports) always show you what still needs attention — fresh problems stay loud, fixed ones fade into the background. Nothing's ever deleted; there's a toggle to bring the archived ones back. It keeps the whole thing feeling alive instead of turning into a graveyard of old tickets.
+
+## What's next
+
+More reports, more districts lighting up, and tighter routing so the right authority gets the right issue every time. If you live in Halifax, Dartmouth, Bedford, Sackville — anywhere in HRM — and something near you is busted:
+
+[Report it now](/report). Takes about 60 seconds, no account needed. Help us get past 50.
+    `,
+  },
+  {
     slug: 'how-to-report-pothole-halifax',
     title: 'How to Report a Pothole in Halifax (2026 Guide)',
     description:
