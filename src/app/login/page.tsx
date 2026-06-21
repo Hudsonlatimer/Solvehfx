@@ -106,12 +106,12 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
+      <div className="bg-bg-elev rounded-xl border border-rule shadow-sm p-6 space-y-5">
         {/* Mode toggle */}
-        <div className="flex rounded-lg bg-gray-100 p-1">
+        <div className="flex rounded-lg bg-black/[0.05] p-1">
           <button
             className={`flex-1 py-2 text-xs font-medium rounded-md transition-colors ${
-              mode === 'email-password' ? 'bg-white shadow-sm text-primary' : 'text-text-secondary'
+              mode === 'email-password' ? 'bg-bg-elev shadow-sm text-primary' : 'text-text-secondary'
             }`}
             onClick={() => switchMode('email-password')}
           >
@@ -119,7 +119,7 @@ export default function LoginPage() {
           </button>
           <button
             className={`flex-1 py-2 text-xs font-medium rounded-md transition-colors ${
-              mode === 'phone' ? 'bg-white shadow-sm text-primary' : 'text-text-secondary'
+              mode === 'phone' ? 'bg-bg-elev shadow-sm text-primary' : 'text-text-secondary'
             }`}
             onClick={() => switchMode('phone')}
           >
@@ -127,7 +127,7 @@ export default function LoginPage() {
           </button>
           <button
             className={`flex-1 py-2 text-xs font-medium rounded-md transition-colors ${
-              mode === 'magic-link' ? 'bg-white shadow-sm text-primary' : 'text-text-secondary'
+              mode === 'magic-link' ? 'bg-bg-elev shadow-sm text-primary' : 'text-text-secondary'
             }`}
             onClick={() => switchMode('magic-link')}
           >
@@ -240,7 +240,7 @@ export default function LoginPage() {
 
         {error && <p className="text-sm text-danger text-center">{error}</p>}
 
-        <div className="border-t border-gray-100 pt-4">
+        <div className="border-t border-rule pt-4">
           <button
             onClick={() => router.push('/report')}
             className="w-full text-center text-sm text-text-secondary hover:text-primary"

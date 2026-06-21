@@ -103,6 +103,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate optional contact email so malformed addresses never reach the DB
+    // or the email dispatcher.
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email address.' },
+        { status: 400 }
+      );
+    }
+
     // Rate limiting: max 5 reports per IP per day
     const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
     const today = new Date().toISOString().split('T')[0];

@@ -7,15 +7,19 @@ interface IssuePinProps {
   status?: string;
   hasPhoto?: boolean;
   verificationCount?: number;
+  /** 0–1 opacity for dissolving resolved pins. */
+  opacity?: number;
+  /** 0–1 grayscale amount as a resolved pin ages toward archive. */
+  fade?: number;
   onClick?: () => void;
 }
 
-export default function IssuePin({ category, status, hasPhoto, verificationCount = 0, onClick }: IssuePinProps) {
+export default function IssuePin({ category, status, hasPhoto, verificationCount = 0, opacity = 1, fade = 0, onClick }: IssuePinProps) {
   const cat = getCategoryById(category);
 
   const borderColor =
     status === 'resolved'
-      ? 'border-green-500'
+      ? 'border-success'
       : verificationCount > 0
         ? 'border-amber-500'
         : 'border-primary';
@@ -23,7 +27,8 @@ export default function IssuePin({ category, status, hasPhoto, verificationCount
   return (
     <button
       onClick={onClick}
-      className={`relative flex items-center justify-center w-10 h-10 rounded-full bg-white border-2 ${borderColor} shadow-md text-sm cursor-pointer hover:scale-110 transition-transform`}
+      style={{ opacity, filter: fade ? `grayscale(${fade})` : undefined }}
+      className={`relative flex items-center justify-center w-10 h-10 rounded-full bg-bg-elev border-2 ${borderColor} shadow-md text-sm cursor-pointer transition-[transform,opacity,filter] duration-300 hover:scale-110 hover:!opacity-100 hover:!grayscale-0`}
       aria-label={`Issue: ${cat?.label || category}`}
     >
       {cat?.icon || '📍'}

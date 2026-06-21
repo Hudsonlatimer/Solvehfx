@@ -6,8 +6,12 @@ node_modules/
 out/
 
 # env
+.env
 .env*.local
 
 # misc
 *.tsbuildinfo
 next-env.d.ts
+
+# large local binaries (not part of the app)
+public/*.exe

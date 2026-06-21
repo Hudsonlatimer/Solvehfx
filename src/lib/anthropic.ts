@@ -1,4 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { ISSUE_CATEGORIES, type AnalyzePhotoResponse } from './types';
+
+// Current-generation vision model. Keep in sync with CLAUDE.md.
+const MODEL = 'claude-sonnet-4-6';
+
+const VALID_CATEGORY_IDS = new Set<string>(ISSUE_CATEGORIES.map((c) => c.id));
 
 function getClient() {
   return new Anthropic({
@@ -6,13 +12,36 @@ function getClient() {
   });
 }
 
+/**
+ * Pull a JSON object out of a model response that may be wrapped in markdown
+ * fences or surrounded by prose. Returns null if nothing parseable is found.
+ */
+function extractJson(text: string): Record<string, unknown> | null {
+  if (!text) return null;
+
+  // Strip ```json ... ``` or ``` ... ``` fences if present.
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = (fenced ? fenced[1] : text).trim();
+
+  // Fall back to the first {...last } span so trailing prose can't break parsing.
+  const start = candidate.indexOf('{');
+  const end = candidate.lastIndexOf('}');
+  const slice = start !== -1 && end !== -1 && end > start ? candidate.slice(start, end + 1) : candidate;
+
+  try {
+    return JSON.parse(slice);
+  } catch {
+    return null;
+  }
+}
+
 export async function analyzePhoto(
   imageBase64: string,
   mimeType: string
-): Promise<{ category: string; title: string; description: string; confidence: number }> {
+): Promise<AnalyzePhotoResponse> {
   const response = await getClient().messages.create({
-    model: 'claude-3-5-sonnet-20240620',
-    max_tokens: 500,
+    model: MODEL,
+    max_tokens: 1024,
     messages: [
       {
         role: 'user',
@@ -46,6 +75,23 @@ Return ONLY the JSON object. No markdown, no explanation.`,
     ],
   });
 
-  const text = response.content[0].type === 'text' ? response.content[0].text : '';
-  return JSON.parse(text);
+  const text = response.content[0]?.type === 'text' ? response.content[0].text : '';
+  const parsed = extractJson(text);
+
+  if (!parsed) {
+    throw new Error('AI returned an unparseable response.');
+  }
+
+  // Coerce/validate the fields so a malformed model response can't poison the UI.
+  const rawCategory = typeof parsed.category === 'string' ? parsed.category : 'other';
+  const category = VALID_CATEGORY_IDS.has(rawCategory) ? rawCategory : 'other';
+
+  const title = typeof parsed.title === 'string' ? parsed.title.trim() : '';
+  const description = typeof parsed.description === 'string' ? parsed.description.trim() : '';
+
+  let confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0;
+  if (!Number.isFinite(confidence)) confidence = 0;
+  confidence = Math.min(1, Math.max(0, confidence));
+
+  return { category, title, description, confidence };
 }

@@ -43,7 +43,6 @@ export default function Reveal({
     return () => io.disconnect();
   }, [delay]);
 
-  // @ts-expect-error — dynamic JSX tag
   return (
     <Tag ref={ref} className={`reveal ${className}`} {...rest}>
       {children}

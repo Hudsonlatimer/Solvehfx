@@ -130,12 +130,37 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[12px] text-white/50">
+        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-[12px] text-white/50">
           <p>
             Independent. Not affiliated with Halifax Regional Municipality.
           </p>
-          <p>&copy; {year} SolveHFX</p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1">
+            <p>
+              Designed &amp; built by{' '}
+              <span className="text-white/75 font-medium">Hudson Latimer</span>
+            </p>
+            <p>&copy; {year} SolveHFX</p>
+          </div>
         </div>
+
+        {/* Studio credit */}
+        <a
+          href="https://huddydigital.ca"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 group flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center transition-colors hover:border-accent/40 hover:bg-white/[0.06]"
+        >
+          <span className="text-[12.5px] text-white/55 group-hover:text-white/75 transition-colors">
+            A{' '}
+            <span className="text-accent font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
+              Huddy Digital
+            </span>{' '}
+            build — web &amp; product studio
+          </span>
+          <span className="text-[12px] font-medium text-white/45 group-hover:text-accent transition-colors">
+            huddydigital.ca →
+          </span>
+        </a>
       </div>
     </footer>
   );

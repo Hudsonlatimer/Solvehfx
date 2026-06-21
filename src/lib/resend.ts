@@ -54,8 +54,11 @@ SolveHFX — Civic reporting for Halifax
 solvehfx.ca`,
   });
 
+  // Per product spec: always CC the district councillor when we have their
+  // address. The councillor is the resident's elected representative and should
+  // see every report from their district alongside HRM 311.
   const councillorEmail =
-    report.notify_councillor && district?.councillor_email
+    district?.councillor_email
       ? getResend().emails.send({
           from: 'SolveHFX Reports <reports@solvehfx.ca>',
           to: [district.councillor_email],

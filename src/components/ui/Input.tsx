@@ -13,7 +13,7 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 }
 
 const baseStyles =
-  'w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-text-primary placeholder:text-text-secondary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-colors';
+  'w-full rounded-lg border border-rule bg-bg-elev px-4 py-3 text-text-primary placeholder:text-text-secondary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-colors';
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className = '', id, ...props }, ref) => {

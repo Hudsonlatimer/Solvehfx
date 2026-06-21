@@ -6,6 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import IssuePin from './IssuePin';
 import StatusBadge from '@/components/reports/StatusBadge';
 import { getCategoryById } from '@/lib/districts';
+import { getDissolveState } from '@/lib/dissolve';
 import type { Report, ReportStatus } from '@/lib/types';
 import type { MapRef } from 'react-map-gl/mapbox';
 import Link from 'next/link';
@@ -34,6 +35,7 @@ const DISTRICT_VIEWS: Record<number, { lng: number; lat: number; zoom: number }>
 interface IssueMapProps {
   reports: Report[];
   focusDistrict?: number | null;
+  showArchived?: boolean;
 }
 
 const INITIAL_VIEW = {
@@ -42,7 +44,7 @@ const INITIAL_VIEW = {
   zoom: 11,
 };
 
-export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
+export default function IssueMap({ reports, focusDistrict, showArchived = false }: IssueMapProps) {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapRef = useRef<MapRef>(null);
@@ -116,22 +118,28 @@ export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
     >
       <NavigationControl position="top-right" />
 
-      {reports.map((report) => (
-        <Marker
-          key={report.id}
-          longitude={report.lng}
-          latitude={report.lat}
-          anchor="bottom"
-        >
-          <IssuePin
-            category={report.category}
-            status={report.status}
-            hasPhoto={!!report.photo_url}
-            verificationCount={report.verifications?.length || 0}
-            onClick={() => handleMarkerClick(report)}
-          />
-        </Marker>
-      ))}
+      {reports.map((report) => {
+        const dissolve = getDissolveState(report);
+        if (dissolve.archived && !showArchived) return null;
+        return (
+          <Marker
+            key={report.id}
+            longitude={report.lng}
+            latitude={report.lat}
+            anchor="bottom"
+          >
+            <IssuePin
+              category={report.category}
+              status={report.status}
+              hasPhoto={!!report.photo_url}
+              verificationCount={report.verifications?.length || 0}
+              opacity={dissolve.opacity}
+              fade={dissolve.progress * 0.7}
+              onClick={() => handleMarkerClick(report)}
+            />
+          </Marker>
+        );
+      })}
 
       {selectedReport && (
         <Popup
@@ -261,7 +269,7 @@ function MapPopup({ report, onVerified }: { report: Report; onVerified: () => vo
       </p>
 
       {/* Verification stats */}
-      <div className="flex items-center gap-3 text-xs mb-2 py-1.5 px-2 bg-gray-50 rounded-lg">
+      <div className="flex items-center gap-3 text-xs mb-2 py-1.5 px-2 bg-bg rounded-lg">
         <span title="People who confirmed this issue still exists">
           👁 {existsCount} confirmed
         </span>

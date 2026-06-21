@@ -76,7 +76,7 @@ export default function AIReviewCard({
           type="checkbox"
           checked={isAnonymous}
           onChange={(e) => onAnonymousChange(e.target.checked)}
-          className="rounded border-gray-300 text-primary focus:ring-primary h-5 w-5"
+          className="rounded border-rule text-primary focus:ring-primary h-5 w-5"
         />
         <div>
           <span className="text-sm font-medium text-text-primary">Submit anonymously</span>

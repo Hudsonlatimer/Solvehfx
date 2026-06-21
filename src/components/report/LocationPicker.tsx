@@ -93,7 +93,11 @@ export default function LocationPicker({
         {located ? 'Update My Location' : 'Use My Location'}
       </Button>
 
-      <div className="w-full h-60 sm:h-72 rounded-xl overflow-hidden border border-gray-200">
+      <div
+        className="w-full h-60 sm:h-72 rounded-xl overflow-hidden border border-rule"
+        role="application"
+        aria-label="Interactive map — click or drag the pin to set the issue location"
+      >
         <Map
           ref={mapRef}
           initialViewState={{
@@ -133,7 +137,7 @@ export default function LocationPicker({
       </p>
 
       {address && (
-        <div className="rounded-lg bg-blue-50 border border-blue-100 p-3">
+        <div className="rounded-lg bg-primary/5 border border-primary/15 p-3">
           <p className="text-sm font-medium text-primary">{address}</p>
           <p className="text-xs text-text-secondary mt-1">
             {lat.toFixed(5)}, {lng.toFixed(5)}

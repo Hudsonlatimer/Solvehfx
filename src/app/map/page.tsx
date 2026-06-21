@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import MapFilters from '@/components/map/MapFilters';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { partitionByDissolve } from '@/lib/dissolve';
 import type { Report } from '@/lib/types';
 
 const IssueMap = dynamic(() => import('@/components/map/IssueMap'), {
@@ -28,6 +29,7 @@ function MapPageContent() {
   const [district, setDistrict] = useState(searchParams.get('district') || '');
   const [status, setStatus] = useState(searchParams.get('status') || '');
   const [showFilters, setShowFilters] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -54,6 +56,7 @@ function MapPageContent() {
   }, [category, district, status]);
 
   const activeFilters = [category, district, status].filter(Boolean).length;
+  const archivedCount = partitionByDissolve(reports).archived.length;
 
   return (
     <div className="h-[calc(100dvh-4rem)] flex flex-col md:flex-row bg-bg-elev">
@@ -110,6 +113,23 @@ function MapPageContent() {
             onDistrictChange={setDistrict}
             onStatusChange={setStatus}
           />
+
+          {archivedCount > 0 && (
+            <label className="mt-5 flex items-center gap-2.5 rounded-lg border border-rule bg-bg px-3 py-2.5 text-[13px] text-text-secondary cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showArchived}
+                onChange={(e) => setShowArchived(e.target.checked)}
+                className="rounded border-rule text-primary focus:ring-primary h-4 w-4"
+              />
+              <span className="flex-1">
+                Show archived
+                <span className="block text-[11px] text-text-muted">
+                  🍃 {archivedCount} resolved {archivedCount === 1 ? 'issue' : 'issues'} dissolved
+                </span>
+              </span>
+            </label>
+          )}
         </div>
       </aside>
 
@@ -118,6 +138,7 @@ function MapPageContent() {
         <IssueMap
           reports={reports}
           focusDistrict={district ? parseInt(district, 10) : null}
+          showArchived={showArchived}
         />
         {loading && reports.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-bg-elev/80 backdrop-blur-sm">

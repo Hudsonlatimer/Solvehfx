@@ -19,7 +19,7 @@ export default function ReportDetail({ report }: ReportDetailProps) {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {report.photo_url && (
-        <div className="rounded-xl overflow-hidden border border-gray-200">
+        <div className="rounded-xl overflow-hidden border border-rule">
           <Image
             src={report.photo_url}
             alt={report.title}
@@ -47,7 +47,7 @@ export default function ReportDetail({ report }: ReportDetailProps) {
         <p className="text-text-secondary">{report.description}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <div className="rounded-lg bg-gray-50 p-3">
+          <div className="rounded-lg bg-bg p-3">
             <p className="font-medium text-text-primary mb-1">Location</p>
             <p className="text-text-secondary">
               {report.address || `${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}`}
@@ -55,7 +55,7 @@ export default function ReportDetail({ report }: ReportDetailProps) {
           </div>
 
           {report.districts && (
-            <div className="rounded-lg bg-gray-50 p-3">
+            <div className="rounded-lg bg-bg p-3">
               <p className="font-medium text-text-primary mb-1">District</p>
               <p className="text-text-secondary">
                 District {report.districts.id}: {report.districts.name}
@@ -69,7 +69,7 @@ export default function ReportDetail({ report }: ReportDetailProps) {
           )}
         </div>
 
-        <div className="rounded-lg border border-gray-200 p-4 text-sm">
+        <div className="rounded-lg border border-rule p-4 text-sm">
           <p className="font-medium text-text-primary mb-2">Sent to:</p>
           <ul className="space-y-1 text-text-secondary">
             <li>{authority.name} ({authority.email})</li>
@@ -134,7 +134,7 @@ export default function ReportDetail({ report }: ReportDetailProps) {
         )}
 
         {/* Verify */}
-        <div className="pt-4 border-t border-gray-100">
+        <div className="pt-4 border-t border-rule">
           <VerifyButton
             reportId={report.id}
             currentVerifications={report.verifications?.length || 0}

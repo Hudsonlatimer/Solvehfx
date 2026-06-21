@@ -101,7 +101,7 @@ export default function DashboardPage() {
             return (
               <div
                 key={report.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border border-gray-100 shadow-sm bg-white"
+                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border border-rule shadow-sm bg-bg-elev"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <span className="text-2xl flex-shrink-0">{cat?.icon || '📍'}</span>

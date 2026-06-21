@@ -128,15 +128,15 @@ export default function AdminPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+        <div className="bg-bg-elev rounded-xl border border-rule shadow-sm p-4 text-center">
           <p className="text-2xl font-bold text-primary">{stats.total}</p>
           <p className="text-xs text-text-secondary">Total Reports</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+        <div className="bg-bg-elev rounded-xl border border-rule shadow-sm p-4 text-center">
           <p className="text-2xl font-bold text-status-open">{stats.open}</p>
           <p className="text-xs text-text-secondary">Open</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
+        <div className="bg-bg-elev rounded-xl border border-rule shadow-sm p-4 text-center">
           <p className="text-2xl font-bold text-success">{stats.resolved}</p>
           <p className="text-xs text-text-secondary">Resolved</p>
         </div>
@@ -147,7 +147,7 @@ export default function AdminPage() {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="rounded-lg border border-gray-200 py-2 px-3 text-sm bg-white"
+          className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev"
         >
           <option value="">All Statuses</option>
           <option value="open">Open</option>
@@ -157,7 +157,7 @@ export default function AdminPage() {
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
-          className="rounded-lg border border-gray-200 py-2 px-3 text-sm bg-white"
+          className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev"
         >
           <option value="">All Categories</option>
           <option value="pothole">Pothole</option>
@@ -168,10 +168,10 @@ export default function AdminPage() {
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden md:block bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="hidden md:block bg-bg-elev rounded-xl border border-rule overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-bg border-b border-rule">
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">Issue</th>
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">Category</th>
@@ -185,7 +185,7 @@ export default function AdminPage() {
               {filteredReports.map((report) => {
                 const cat = getCategoryById(report.category);
                 return (
-                  <tr key={report.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={report.id} className="border-b border-rule hover:bg-bg">
                     <td className="px-4 py-3 max-w-[200px] truncate font-medium">
                       {report.title}
                     </td>
@@ -243,7 +243,7 @@ export default function AdminPage() {
         {filteredReports.map((report) => {
           const cat = getCategoryById(report.category);
           return (
-            <div key={report.id} className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
+            <div key={report.id} className="bg-bg-elev rounded-xl border border-rule p-4 space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-sm text-text-primary truncate">{report.title}</p>

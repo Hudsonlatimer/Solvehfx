@@ -19,6 +19,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import type { AnalyzePhotoResponse, District, RoadAuthority } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const STEPS: { key: string; label: string; help: string }[] = [
   { key: 'location', label: 'Location', help: 'Where is the issue?' },
   { key: 'photo', label: 'Photo', help: 'Snap or skip — AI will draft the report.' },
@@ -61,9 +63,7 @@ function ReportFlow() {
 
   // Email for follow-up (optional)
   const [email, setEmail] = useState('');
-
-  // Councillor notification (optional, currently unused state — kept for future use)
-  const [notifyCouncillor] = useState(false);
+  const emailValid = email.trim() === '' || EMAIL_RE.test(email.trim());
 
   // Submit
   const [submitting, setSubmitting] = useState(false);
@@ -104,7 +104,10 @@ function ReportFlow() {
     setConfidence(result.confidence);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (forceOverride?: boolean) => {
+    // Reading `force` from a param avoids the stale-closure bug where clicking
+    // "Submit Anyway" submitted before the forceDuplicate state had updated.
+    const useForce = forceOverride ?? forceDuplicate;
     setSubmitting(true);
     try {
       let photoUrl: string | null = null;
@@ -138,9 +141,9 @@ function ReportFlow() {
           address,
           photo_url: photoUrl,
           is_anonymous: isAnonymous,
-          email: email || null,
-          force: forceDuplicate,
-          notify_councillor: notifyCouncillor,
+          email: email.trim() || null,
+          force: useForce,
+          notify_councillor: true,
         }),
       });
 
@@ -175,7 +178,7 @@ function ReportFlow() {
       case 2:
         return title.trim() !== '' && description.trim() !== '';
       case 3:
-        return true;
+        return emailValid;
       default:
         return true;
     }
@@ -354,8 +357,18 @@ function ReportFlow() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full h-11 px-3.5 rounded-lg border border-rule bg-bg-elev text-[15px] placeholder:text-text-muted focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    aria-invalid={!emailValid}
+                    className={`w-full h-11 px-3.5 rounded-lg border bg-bg-elev text-[15px] placeholder:text-text-muted focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                      emailValid
+                        ? 'border-rule focus-visible:outline-primary'
+                        : 'border-danger/60 focus-visible:outline-danger'
+                    }`}
                   />
+                  {!emailValid && (
+                    <p className="mt-2 text-[12.5px] text-danger">
+                      Enter a valid email address, or leave it blank to stay anonymous.
+                    </p>
+                  )}
                   <p className="mt-2 text-[12.5px] text-text-secondary">
                     Skip this and your report goes through anonymously — you&apos;ll
                     still get a reference number on the next screen to track it.
@@ -431,7 +444,6 @@ function ReportFlow() {
                   submitting={submitting}
                   onSubmit={handleSubmit}
                   isDuplicate={!!duplicateWarning}
-                  onForceDuplicate={() => setForceDuplicate(true)}
                 />
               </section>
             )}
@@ -453,7 +465,6 @@ function ReportFlow() {
               submitting={submitting}
               onSubmit={handleSubmit}
               isDuplicate={false}
-              onForceDuplicate={() => {}}
             />
           </div>
         )}

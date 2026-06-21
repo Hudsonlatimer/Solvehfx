@@ -23,21 +23,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 const STATUS_CONFIG = {
   open: {
     label: 'Open',
-    color: 'bg-blue-100 text-blue-800',
+    color: 'bg-status-open/10 text-status-open',
     icon: '📋',
     description: 'Your report has been submitted and is awaiting review.',
     step: 1,
   },
   in_progress: {
     label: 'In Progress',
-    color: 'bg-amber-100 text-amber-800',
+    color: 'bg-status-in-progress/15 text-[#9a6a00]',
     icon: '🔧',
     description: 'Your issue has been acknowledged and is being addressed.',
     step: 2,
   },
   resolved: {
     label: 'Resolved',
-    color: 'bg-green-100 text-green-800',
+    color: 'bg-status-resolved/10 text-status-resolved',
     icon: '✅',
     description: 'This issue has been resolved. Thank you for reporting!',
     step: 3,
@@ -102,7 +102,7 @@ export default async function TrackRefPage({ params }: Props) {
           &larr; Track another report
         </Link>
         <div className="flex items-center gap-3 mb-2">
-          <span className="font-mono text-sm text-text-secondary bg-gray-100 px-2 py-1 rounded">{ref}</span>
+          <span className="font-mono text-sm text-text-secondary bg-black/[0.05] px-2 py-1 rounded">{ref}</span>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${status.color}`}>
             {status.icon} {status.label}
           </span>
@@ -111,7 +111,7 @@ export default async function TrackRefPage({ params }: Props) {
       </div>
 
       {/* Status timeline */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 mb-6">
+      <div className="rounded-xl border border-rule bg-bg-elev p-5 mb-6">
         <h2 className="font-semibold text-text-primary mb-4">Status Timeline</h2>
         <div className="space-y-4">
           {[
@@ -122,7 +122,7 @@ export default async function TrackRefPage({ params }: Props) {
             <div key={item.label} className="flex gap-3">
               <div className="flex flex-col items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  item.active ? 'bg-primary text-white' : 'bg-gray-100 text-text-secondary'
+                  item.active ? 'bg-primary text-white' : 'bg-black/[0.05] text-text-secondary'
                 }`}>
                   {item.active ? (
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -133,7 +133,7 @@ export default async function TrackRefPage({ params }: Props) {
                   )}
                 </div>
                 {i < 2 && (
-                  <div className={`w-0.5 h-6 ${item.active ? 'bg-primary' : 'bg-gray-200'}`} />
+                  <div className={`w-0.5 h-6 ${item.active ? 'bg-primary' : 'bg-rule'}`} />
                 )}
               </div>
               <div>
@@ -148,7 +148,7 @@ export default async function TrackRefPage({ params }: Props) {
       </div>
 
       {/* Report details */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 mb-6">
+      <div className="rounded-xl border border-rule bg-bg-elev p-5 mb-6">
         <h2 className="font-semibold text-text-primary mb-3">Report Details</h2>
         <div className="space-y-3 text-sm">
           <div className="flex items-center gap-2">
@@ -183,7 +183,7 @@ export default async function TrackRefPage({ params }: Props) {
       </div>
 
       {/* Community verification */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 mb-6">
+      <div className="rounded-xl border border-rule bg-bg-elev p-5 mb-6">
         <h2 className="font-semibold text-text-primary mb-2">Community Activity</h2>
         <div className="flex items-center gap-4">
           <div className="text-center">

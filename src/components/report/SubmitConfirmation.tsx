@@ -18,9 +18,8 @@ interface SubmitConfirmationProps {
   authority: RoadAuthority;
   submitted: boolean;
   submitting: boolean;
-  onSubmit: () => void;
+  onSubmit: (force?: boolean) => void;
   isDuplicate?: boolean;
-  onForceDuplicate?: () => void;
 }
 
 export default function SubmitConfirmation({
@@ -36,7 +35,6 @@ export default function SubmitConfirmation({
   submitting,
   onSubmit,
   isDuplicate,
-  onForceDuplicate,
 }: SubmitConfirmationProps) {
   const cat = getCategoryById(category);
   const authorityInfo = AUTHORITY_EMAILS[authority];
@@ -51,22 +49,27 @@ export default function SubmitConfirmation({
         </div>
 
         <div>
-          <h2 className="text-2xl font-bold text-text-primary">Report Submitted!</h2>
-          <p className="mt-2 text-text-secondary">
-            Your report has been sent to <strong>{authorityInfo.name}</strong>
+          <h2 className="text-[clamp(1.5rem,4vw,2rem)] tracking-tight text-text-primary">
+            Report submitted
+          </h2>
+          <p className="mt-2 text-[14.5px] text-text-secondary max-w-md mx-auto leading-relaxed">
+            Sent to <strong className="text-text-primary">{authorityInfo.name}</strong>
             {district?.councillor_name && (
-              <> and <strong>Councillor {district.councillor_name}</strong></>
+              <> and <strong className="text-text-primary">Councillor {district.councillor_name}</strong></>
             )}
+            .
           </p>
         </div>
 
         {/* Reference number card */}
         {referenceNumber && (
-          <div className="mx-auto max-w-sm rounded-xl border border-primary/20 bg-primary/5 p-4">
-            <p className="text-xs text-text-secondary mb-1">Your tracking reference</p>
-            <p className="text-2xl font-bold text-primary font-mono tracking-wider">{referenceNumber}</p>
-            <p className="text-xs text-text-secondary mt-2">
-              Save this number to check your report status anytime
+          <div className="mx-auto max-w-sm rounded-xl border border-primary/20 bg-primary/[0.04] p-5">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-text-muted mb-1.5">
+              Your tracking reference
+            </p>
+            <p className="stat text-[26px] text-primary font-mono tracking-wider num">{referenceNumber}</p>
+            <p className="text-[12.5px] text-text-secondary mt-2">
+              Save this to check your report status anytime.
             </p>
           </div>
         )}
@@ -74,14 +77,14 @@ export default function SubmitConfirmation({
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           {referenceNumber && (
             <Link href={`/track/${referenceNumber}`}>
-              <Button variant="primary">Track Your Report</Button>
+              <Button variant="primary">Track your report</Button>
             </Link>
           )}
           <Link href={`/reports/${reportId}`}>
-            <Button variant="outline">View Report Details</Button>
+            <Button variant="outline">View report details</Button>
           </Link>
           <Link href="/report">
-            <Button variant="outline">Report Another Issue</Button>
+            <Button variant="ghost">Report another issue</Button>
           </Link>
         </div>
       </div>
@@ -90,7 +93,7 @@ export default function SubmitConfirmation({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-gray-200 shadow-sm overflow-hidden bg-white">
+      <div className="rounded-xl border border-rule shadow-civic overflow-hidden bg-bg-elev">
         {photoPreview && (
           <Image
             src={photoPreview}
@@ -100,16 +103,16 @@ export default function SubmitConfirmation({
             className="w-full h-40 sm:h-48 object-cover"
           />
         )}
-        <div className="p-4 space-y-3">
+        <div className="p-4 sm:p-5 space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">{cat?.icon}</span>
             <Badge variant="info">{cat?.label || category}</Badge>
           </div>
-          <h3 className="font-semibold text-text-primary">{title}</h3>
-          <p className="text-sm text-text-secondary">{address || 'Location not specified'}</p>
+          <h3 className="text-[17px] tracking-tight text-text-primary">{title}</h3>
+          <p className="text-[13.5px] text-text-secondary">{address || 'Location not specified'}</p>
 
           {district && (
-            <div className="text-sm text-text-secondary">
+            <div className="text-[13.5px] text-text-secondary">
               <p>
                 District {district.id}: {district.name}
               </p>
@@ -119,15 +122,17 @@ export default function SubmitConfirmation({
             </div>
           )}
 
-          <div className="pt-3 border-t border-gray-100 text-sm text-text-secondary">
-            <p className="font-medium text-text-primary mb-1">Your report will be sent to:</p>
+          <div className="pt-3.5 border-t border-rule text-[13.5px] text-text-secondary">
+            <p className="font-medium text-text-primary mb-1.5">Your report will be sent to:</p>
             <ul className="space-y-1">
-              <li>
-                {authorityInfo.name} ({authorityInfo.email})
+              <li className="flex items-center gap-2">
+                <Dot /> {authorityInfo.name}{' '}
+                <span className="text-text-muted">({authorityInfo.email})</span>
               </li>
               {district?.councillor_name && (
-                <li>
-                  Councillor {district.councillor_name} ({district.councillor_email})
+                <li className="flex items-center gap-2">
+                  <Dot /> Councillor {district.councillor_name}{' '}
+                  <span className="text-text-muted">({district.councillor_email})</span>
                 </li>
               )}
             </ul>
@@ -141,21 +146,25 @@ export default function SubmitConfirmation({
         size="lg"
         className="w-full"
         loading={submitting}
-        onClick={() => {
-          if (isDuplicate && onForceDuplicate) {
-            onForceDuplicate();
-          }
-          onSubmit();
-        }}
+        onClick={() => onSubmit(!!isDuplicate)}
       >
-        {isDuplicate ? 'Submit Anyway (Help Verify)' : 'Submit Report'}
+        {isDuplicate ? 'Submit anyway — help verify' : 'Submit report'}
       </Button>
 
       {isDuplicate && (
-        <p className="text-xs text-text-secondary text-center">
-          Multiple reports help prioritize repairs. Click to add your verification.
+        <p className="text-[12.5px] text-text-secondary text-center">
+          Multiple reports help prioritize repairs. Submitting adds your verification.
         </p>
       )}
     </div>
+  );
+}
+
+function Dot() {
+  return (
+    <span
+      aria-hidden
+      className="inline-block h-1 w-1 shrink-0 rounded-full bg-primary/40"
+    />
   );
 }

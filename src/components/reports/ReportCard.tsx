@@ -3,6 +3,7 @@ import Image from 'next/image';
 import StatusBadge from './StatusBadge';
 import Badge from '@/components/ui/Badge';
 import { getCategoryById } from '@/lib/districts';
+import { getDissolveState } from '@/lib/dissolve';
 import type { Report, ReportStatus } from '@/lib/types';
 
 interface ReportCardProps {
@@ -12,10 +13,18 @@ interface ReportCardProps {
 export default function ReportCard({ report }: ReportCardProps) {
   const category = getCategoryById(report.category);
   const verificationCount = report.verifications?.length || 0;
+  const dissolve = getDissolveState(report);
 
   return (
     <Link href={`/reports/${report.id}`}>
-      <div className="rounded-xl border border-gray-100 shadow-sm bg-white overflow-hidden hover:shadow-md transition-shadow">
+      <div
+        className="group rounded-xl border border-rule shadow-sm bg-bg-elev overflow-hidden transition-[opacity,box-shadow,filter] duration-500 hover:shadow-md hover:!opacity-100 hover:!grayscale-0"
+        style={
+          dissolve.isResolved
+            ? { opacity: dissolve.opacity, filter: `grayscale(${dissolve.progress * 0.6})` }
+            : undefined
+        }
+      >
         {report.photo_url ? (
           <Image
             src={report.photo_url}
@@ -25,7 +34,7 @@ export default function ReportCard({ report }: ReportCardProps) {
             className="w-full h-32 sm:h-40 object-cover"
           />
         ) : (
-          <div className="w-full h-32 sm:h-40 bg-gray-100 flex items-center justify-center">
+          <div className="w-full h-32 sm:h-40 bg-black/[0.05] flex items-center justify-center">
             <span className="text-4xl">{category?.icon || '📍'}</span>
           </div>
         )}
@@ -48,6 +57,15 @@ export default function ReportCard({ report }: ReportCardProps) {
               <span>{verificationCount} verification{verificationCount !== 1 ? 's' : ''}</span>
             )}
           </div>
+
+          {dissolve.isResolved && (
+            <p className="text-[11px] text-success/80">
+              {dissolve.daysSinceResolved === 0
+                ? 'Resolved today'
+                : `Resolved ${dissolve.daysSinceResolved}d ago`}
+              {dissolve.progress > 0.15 && ' · fading'}
+            </p>
+          )}
         </div>
       </div>
     </Link>

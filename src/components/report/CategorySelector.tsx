@@ -18,7 +18,7 @@ export default function CategorySelector({
   return (
     <div className="space-y-3">
       {suggestedCategory && confidence !== undefined && confidence > 0 && (
-        <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-sm">
+        <div className="rounded-lg bg-primary/5 border border-primary/15 p-3 text-sm">
           <span className="font-medium text-primary">AI suggested: </span>
           <span className="text-text-primary">
             {ISSUE_CATEGORIES.find((c) => c.id === suggestedCategory)?.label || suggestedCategory}
@@ -38,7 +38,7 @@ export default function CategorySelector({
             className={`flex items-center gap-2 rounded-lg border p-2.5 sm:p-3 text-left text-xs sm:text-sm transition-colors ${
               selected === cat.id
                 ? 'border-primary bg-primary/5 text-primary font-medium'
-                : 'border-gray-200 hover:border-primary/40 text-text-primary'
+                : 'border-rule hover:border-primary/40 text-text-primary'
             }`}
           >
             <span className="text-base sm:text-lg flex-shrink-0">{cat.icon}</span>

@@ -29,7 +29,7 @@ export default function MapFilters({
   ];
 
   return (
-    <div className="space-y-3 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+    <div className="space-y-3 p-4 bg-bg-elev rounded-xl border border-rule shadow-sm">
       <h3 className="font-semibold text-sm text-text-primary">Filters</h3>
 
       <div>
@@ -40,7 +40,7 @@ export default function MapFilters({
           id="filter-category"
           value={selectedCategory}
           onChange={(e) => onCategoryChange(e.target.value)}
-          className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm bg-white"
+          className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev"
         >
           <option value="">All Categories</option>
           {ISSUE_CATEGORIES.map((cat) => (
@@ -59,7 +59,7 @@ export default function MapFilters({
           id="filter-district"
           value={selectedDistrict}
           onChange={(e) => onDistrictChange(e.target.value)}
-          className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm bg-white"
+          className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev"
         >
           <option value="">All Districts</option>
           {HRM_DISTRICTS.map((d) => (
@@ -78,7 +78,7 @@ export default function MapFilters({
           id="filter-status"
           value={selectedStatus}
           onChange={(e) => onStatusChange(e.target.value)}
-          className="w-full rounded-lg border border-gray-200 py-2 px-3 text-sm bg-white"
+          className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev"
         >
           {statuses.map((s) => (
             <option key={s.value} value={s.value}>

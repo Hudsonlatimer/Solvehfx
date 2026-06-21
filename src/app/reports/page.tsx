@@ -5,6 +5,7 @@ import ReportCard from '@/components/reports/ReportCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { ISSUE_CATEGORIES } from '@/lib/types';
 import { HRM_DISTRICTS } from '@/lib/districts';
+import { partitionByDissolve, DISSOLVE_FADE_DAYS } from '@/lib/dissolve';
 import type { Report } from '@/lib/types';
 
 export default function ReportsPage() {
@@ -16,6 +17,7 @@ export default function ReportsPage() {
   const [district, setDistrict] = useState('');
   const [status, setStatus] = useState('');
   const [sort, setSort] = useState('newest');
+  const [showArchived, setShowArchived] = useState(false);
   const limit = 12;
 
   useEffect(() => {
@@ -46,17 +48,33 @@ export default function ReportsPage() {
   }, [category, district, status, sort, page]);
 
   const totalPages = Math.ceil(total / limit);
+  const { visible, archived } = partitionByDissolve(reports);
+  const shown = showArchived ? reports : visible;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-text-primary mb-6">All Reports</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3 mb-6">
+        <h1 className="text-2xl font-bold text-text-primary">All Reports</h1>
+        {archived.length > 0 && (
+          <label className="inline-flex items-center gap-2 text-[13px] text-text-secondary cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showArchived}
+              onChange={(e) => setShowArchived(e.target.checked)}
+              className="rounded border-rule text-primary focus:ring-primary h-4 w-4"
+            />
+            Show archived
+            <span className="num text-text-muted">({archived.length})</span>
+          </label>
+        )}
+      </div>
 
       {/* Filters */}
       <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3 mb-6">
         <select
           value={category}
           onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-          className="rounded-lg border border-gray-200 py-2 px-3 text-sm bg-white w-full sm:w-auto"
+          className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev w-full sm:w-auto"
         >
           <option value="">All Categories</option>
           {ISSUE_CATEGORIES.map((c) => (
@@ -67,7 +85,7 @@ export default function ReportsPage() {
         <select
           value={district}
           onChange={(e) => { setDistrict(e.target.value); setPage(1); }}
-          className="rounded-lg border border-gray-200 py-2 px-3 text-sm bg-white w-full sm:w-auto"
+          className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev w-full sm:w-auto"
         >
           <option value="">All Districts</option>
           {HRM_DISTRICTS.map((d) => (
@@ -78,7 +96,7 @@ export default function ReportsPage() {
         <select
           value={status}
           onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="rounded-lg border border-gray-200 py-2 px-3 text-sm bg-white w-full sm:w-auto"
+          className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev w-full sm:w-auto"
         >
           <option value="">All Statuses</option>
           <option value="open">Open</option>
@@ -89,7 +107,7 @@ export default function ReportsPage() {
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="rounded-lg border border-gray-200 py-2 px-3 text-sm bg-white w-full sm:w-auto"
+          className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev w-full sm:w-auto"
         >
           <option value="newest">Newest First</option>
           <option value="oldest">Oldest First</option>
@@ -99,19 +117,32 @@ export default function ReportsPage() {
       {/* Reports grid */}
       {loading ? (
         <LoadingSpinner size="lg" className="py-20" />
-      ) : reports.length === 0 ? (
+      ) : shown.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-4xl mb-3">📋</p>
-          <p className="text-lg font-medium text-text-primary">No reports found</p>
-          <p className="text-sm text-text-secondary mt-1">Try adjusting your filters or be the first to report an issue.</p>
+          <p className="text-4xl mb-3">{archived.length > 0 ? '🍃' : '📋'}</p>
+          <p className="text-lg font-medium text-text-primary">
+            {archived.length > 0 ? 'Everything here has been resolved' : 'No reports found'}
+          </p>
+          <p className="text-sm text-text-secondary mt-1">
+            {archived.length > 0
+              ? `${archived.length} resolved issue${archived.length === 1 ? '' : 's'} archived after fading. Toggle “Show archived” to view them.`
+              : 'Try adjusting your filters or be the first to report an issue.'}
+          </p>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {reports.map((report) => (
+            {shown.map((report) => (
               <ReportCard key={report.id} report={report} />
             ))}
           </div>
+
+          {!showArchived && archived.length > 0 && (
+            <p className="mt-6 text-center text-[12.5px] text-text-muted">
+              🍃 {archived.length} resolved issue{archived.length === 1 ? '' : 's'} dissolved into the archive
+              (resolved {DISSOLVE_FADE_DAYS}+ days ago).
+            </p>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -119,7 +150,7 @@ export default function ReportsPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm disabled:opacity-50"
+                className="px-3 py-2 rounded-lg border border-rule text-sm disabled:opacity-50"
               >
                 Previous
               </button>
@@ -129,7 +160,7 @@ export default function ReportsPage() {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-2 rounded-lg border border-gray-200 text-sm disabled:opacity-50"
+                className="px-3 py-2 rounded-lg border border-rule text-sm disabled:opacity-50"
               >
                 Next
               </button>
