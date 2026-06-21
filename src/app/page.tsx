@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import Reveal from '@/components/ui/Reveal';
 import { ISSUE_CATEGORIES } from '@/lib/types';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'SolveHFX — Fix Halifax. Together.',
@@ -13,10 +14,11 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://solvehfx.ca' },
 };
 
-// Cache the homepage HTML and refresh stats at most once a minute. This keeps
-// the page off the request-time critical path: visitors get instant cached
-// HTML instead of waiting on (a possibly cold) Supabase on every load.
-export const revalidate = 60;
+// Render per request so the live stats are always real (not baked in at build
+// time). Cold-start latency is handled elsewhere: the queries run in parallel
+// with a timeout, the keep-alive workflow keeps Supabase warm, and the auth
+// middleware no longer runs on public pages.
+export const dynamic = 'force-dynamic';
 
 // The redesign uses a bold sans display style for headings (overriding the
 // site-wide serif) to match the civic-app reference layout.
@@ -40,7 +42,7 @@ export default async function HomePage() {
   let avgResolutionDays = 0;
 
   try {
-    const supabase = await createServiceClient();
+    const supabase = await createClient();
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
     const withTimeout = <T,>(p: PromiseLike<T>, ms = 2500): Promise<T> =>
@@ -146,9 +148,24 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right — Halifax waterfront illustration (our palette) */}
+            {/* Right — Halifax waterfront */}
             <div className="relative">
-              <HalifaxSkyline />
+              <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-rule shadow-civic-lg">
+                <Image
+                  src="/halifax-hero.jpg"
+                  alt="Halifax waterfront and downtown skyline"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 560px"
+                  className="object-cover"
+                />
+                {/* subtle navy wash to tie into the palette */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{ background: 'linear-gradient(180deg, transparent 55%, rgba(0,32,61,0.18) 100%)' }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -583,85 +600,6 @@ function PinIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
       <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1112 6.5a2.5 2.5 0 010 5z" />
     </svg>
-  );
-}
-
-/* ── Stylized Halifax waterfront — our palette, no stock photo ── */
-function HalifaxSkyline() {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-rule shadow-civic-lg">
-      <svg viewBox="0 0 640 460" className="h-auto w-full" role="img" aria-label="Stylized Halifax waterfront skyline">
-        <defs>
-          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#dcebf8" />
-            <stop offset="55%" stopColor="#eef5fb" />
-            <stop offset="100%" stopColor="#ffffff" />
-          </linearGradient>
-          <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#0057A8" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#003865" stopOpacity="0.55" />
-          </linearGradient>
-        </defs>
-
-        {/* sky + sun */}
-        <rect width="640" height="460" fill="url(#sky)" />
-        <circle cx="528" cy="96" r="34" fill="#E8B84B" opacity="0.9" />
-        <circle cx="528" cy="96" r="50" fill="#E8B84B" opacity="0.18" />
-
-        {/* clouds */}
-        <g fill="#ffffff" opacity="0.85">
-          <ellipse cx="150" cy="78" rx="48" ry="16" />
-          <ellipse cx="190" cy="70" rx="34" ry="13" />
-          <ellipse cx="392" cy="120" rx="40" ry="13" />
-        </g>
-
-        {/* skyline */}
-        <g>
-          <rect x="60" y="206" width="40" height="124" fill="#0057A8" />
-          <rect x="104" y="170" width="34" height="160" fill="#003865" />
-          <rect x="142" y="220" width="28" height="110" fill="#0057A8" opacity="0.85" />
-          <rect x="196" y="150" width="46" height="180" fill="#003865" />
-          <rect x="246" y="192" width="30" height="138" fill="#0057A8" />
-          <rect x="288" y="128" width="40" height="202" fill="#00203D" />
-          <rect x="332" y="176" width="34" height="154" fill="#003865" />
-          <rect x="372" y="210" width="30" height="120" fill="#0057A8" opacity="0.85" />
-          <rect x="424" y="158" width="44" height="172" fill="#003865" />
-          <rect x="472" y="198" width="30" height="132" fill="#0057A8" />
-          <rect x="512" y="176" width="40" height="154" fill="#00203D" />
-          <rect x="558" y="216" width="30" height="114" fill="#003865" />
-          {/* window dots */}
-          <g fill="#E8B84B" opacity="0.55">
-            <rect x="208" y="166" width="6" height="6" />
-            <rect x="222" y="166" width="6" height="6" />
-            <rect x="208" y="184" width="6" height="6" />
-            <rect x="222" y="184" width="6" height="6" />
-            <rect x="300" y="146" width="6" height="6" />
-            <rect x="314" y="146" width="6" height="6" />
-            <rect x="300" y="166" width="6" height="6" />
-            <rect x="436" y="176" width="6" height="6" />
-            <rect x="450" y="176" width="6" height="6" />
-            <rect x="436" y="196" width="6" height="6" />
-          </g>
-        </g>
-
-        {/* water */}
-        <rect x="0" y="330" width="640" height="130" fill="url(#water)" />
-        <g stroke="#ffffff" strokeOpacity="0.35" strokeWidth="2">
-          <line x1="40" y1="360" x2="120" y2="360" />
-          <line x1="200" y1="378" x2="300" y2="378" />
-          <line x1="420" y1="368" x2="520" y2="368" />
-          <line x1="120" y1="400" x2="240" y2="400" />
-        </g>
-
-        {/* sailboat */}
-        <g transform="translate(470 352)">
-          <path d="M0 40 L52 40 L44 56 L8 56 Z" fill="#003865" />
-          <path d="M26 -28 L26 38 L4 38 Z" fill="#ffffff" stroke="#003865" strokeWidth="2" />
-          <path d="M30 -22 L30 38 L52 38 Z" fill="#E8B84B" />
-          <line x1="26" y1="-30" x2="26" y2="40" stroke="#003865" strokeWidth="2.5" />
-        </g>
-      </svg>
-    </div>
   );
 }
 
