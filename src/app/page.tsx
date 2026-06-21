@@ -122,15 +122,7 @@ export default async function HomePage() {
 
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-20 pb-16 sm:pt-28 sm:pb-24 lg:pt-32 lg:pb-28">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-[12.5px] text-white/80 backdrop-blur-sm">
-              <span className="relative inline-flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
-              </span>
-              Independent civic reporting · Halifax Regional Municipality
-            </div>
-
-            <h1 className="mt-7 text-[clamp(2.5rem,6.5vw,5rem)] leading-[1.02] tracking-tight text-balance">
+            <h1 className="text-[clamp(2.5rem,6.5vw,5rem)] leading-[1.02] tracking-tight text-balance">
               Fix Halifax.
               <br />
               <span className="text-accent italic" style={{ fontWeight: 400 }}>
