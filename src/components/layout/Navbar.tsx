@@ -32,29 +32,32 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`sticky top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-200 ${
-        scrolled
-          ? 'bg-primary/95 backdrop-blur shadow-[0_1px_0_0_rgb(255_255_255/0.06),0_8px_24px_-12px_rgb(0_0_0/0.35)]'
-          : 'bg-primary'
-      } text-white`}
+      className={`sticky top-0 z-50 bg-bg-elev/95 text-text-primary backdrop-blur transition-shadow duration-200 ${
+        scrolled ? 'shadow-civic border-b border-rule' : 'border-b border-rule'
+      }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-baseline gap-0.5 text-[19px] font-semibold tracking-tight"
-            aria-label="SolveHFX home"
-          >
-            <span className="text-accent" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>
-              Solve
-            </span>
-            <span className="text-white" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>
-              HFX
+          <Link href="/" className="flex items-center gap-2" aria-label="SolveHFX home">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-primary-light" aria-hidden>
+              <path
+                d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z"
+                fill="currentColor"
+              />
+              <circle cx="12" cy="9" r="2.6" fill="white" />
+            </svg>
+            <span className="flex items-baseline gap-0.5 text-[19px] tracking-tight">
+              <span className="text-primary" style={{ fontFamily: 'var(--font-display)', fontWeight: 600 }}>
+                Solve
+              </span>
+              <span className="text-primary-light" style={{ fontFamily: 'var(--font-display)', fontWeight: 500 }}>
+                HFX
+              </span>
             </span>
           </Link>
 
           {/* Desktop */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden items-center gap-1 md:flex">
             {LINKS.map((link) => {
               const active =
                 pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
@@ -62,27 +65,31 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative px-3 py-2 text-[13.5px] font-medium tracking-tight rounded-md transition-colors ${
-                    active ? 'text-white' : 'text-white/70 hover:text-white'
+                  className={`relative rounded-md px-3 py-2 text-[13.5px] font-medium tracking-tight transition-colors ${
+                    active ? 'text-primary' : 'text-text-secondary hover:text-text-primary'
                   }`}
                 >
                   {link.label}
                   {active && (
-                    <span className="absolute inset-x-3 -bottom-0.5 h-px bg-accent" aria-hidden />
+                    <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-primary-light" aria-hidden />
                   )}
                 </Link>
               );
             })}
             <Link href="/report" className="ml-3">
-              <Button variant="secondary" size="sm">
-                Report an issue
+              <Button variant="primary" size="sm">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+                Submit an Issue
               </Button>
             </Link>
           </div>
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden -mr-2 inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-white/10 transition-colors"
+            className="-mr-2 inline-flex h-10 w-10 items-center justify-center rounded-md text-text-primary transition-colors hover:bg-black/[0.04] md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileOpen}
@@ -102,8 +109,8 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-white/10 bg-primary">
-          <div className="px-4 py-3 space-y-0.5">
+        <div className="border-t border-rule bg-bg-elev md:hidden">
+          <div className="space-y-0.5 px-4 py-3">
             {LINKS.map((link) => {
               const active =
                 pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
@@ -113,8 +120,8 @@ export default function Navbar() {
                   href={link.href}
                   className={`block rounded-md px-3 py-2.5 text-[15px] font-medium transition-colors ${
                     active
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/75 hover:bg-white/5 hover:text-white'
+                      ? 'bg-primary/[0.06] text-primary'
+                      : 'text-text-secondary hover:bg-black/[0.03] hover:text-text-primary'
                   }`}
                 >
                   {link.label}
@@ -122,8 +129,8 @@ export default function Navbar() {
               );
             })}
             <Link href="/report" className="block pt-3">
-              <Button variant="secondary" size="md" className="w-full">
-                Report an issue
+              <Button variant="primary" size="md" className="w-full">
+                Submit an Issue
               </Button>
             </Link>
           </div>

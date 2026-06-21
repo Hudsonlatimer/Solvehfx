@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Reveal from '@/components/ui/Reveal';
 import { ISSUE_CATEGORIES } from '@/lib/types';
 import { createServiceClient } from '@/lib/supabase/server';
-import HeroDemo from '@/components/home/HeroDemo';
 
 export const metadata: Metadata = {
   title: 'SolveHFX — Fix Halifax. Together.',
@@ -17,6 +17,10 @@ export const metadata: Metadata = {
 // the page off the request-time critical path: visitors get instant cached
 // HTML instead of waiting on (a possibly cold) Supabase on every load.
 export const revalidate = 60;
+
+// The redesign uses a bold sans display style for headings (overriding the
+// site-wide serif) to match the civic-app reference layout.
+const SANS = { fontFamily: 'var(--font-body)' } as const;
 
 type ReportRow = {
   id: string;
@@ -39,8 +43,6 @@ export default async function HomePage() {
     const supabase = await createServiceClient();
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Fail fast: if Supabase is cold/unreachable, fall back to defaults rather
-    // than blocking the render. The build cache means most visitors never wait.
     const withTimeout = <T,>(p: PromiseLike<T>, ms = 2500): Promise<T> =>
       Promise.race([
         p as Promise<T>,
@@ -49,7 +51,6 @@ export default async function HomePage() {
         ),
       ]);
 
-    // Run every stat query in parallel — one round-trip of latency, not six.
     const [totalRes, resolvedMonthRes, allResolvedRes, resolvedReportsRes, recentRes, districtsRes] =
       await withTimeout(
         Promise.all([
@@ -106,301 +107,219 @@ export default async function HomePage() {
   return (
     <div>
       {/* ───────────────────── Hero ───────────────────── */}
-      <section className="relative isolate overflow-hidden bg-primary text-white">
-        {/* layered gradient + dot grid */}
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10"
-          style={{
-            background:
-              'radial-gradient(80% 60% at 20% 0%, #0057A8 0%, transparent 60%), linear-gradient(180deg, #003865 0%, #00203D 100%)',
-          }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 opacity-[0.06]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-            backgroundSize: '28px 28px',
-          }}
-        />
-        {/* subtle bottom seam */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-24"
-          style={{
-            background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.18))',
-          }}
-        />
-
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-16 pb-16 sm:pt-20 lg:pt-24 lg:pb-24">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-12">
+      <section className="border-b border-rule bg-bg-elev">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-12 pb-12 sm:pt-16 lg:pt-20 lg:pb-16">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
             {/* Left — message */}
             <div>
-              <h1 className="text-[clamp(2.5rem,6vw,4.75rem)] leading-[1.02] tracking-tight text-balance">
-                Solve Halifax
+              <h1
+                style={SANS}
+                className="text-[clamp(2.75rem,7vw,5rem)] font-bold leading-[0.97] tracking-tight"
+              >
+                <span className="text-text-primary">Fix Halifax.</span>
                 <br />
-                <span className="text-accent italic" style={{ fontWeight: 400 }}>
-                  with a snap.
-                </span>
+                <span className="text-primary-light">Together.</span>
               </h1>
 
-              <p className="mt-6 max-w-md text-[16.5px] leading-[1.55] text-white/72">
+              <p className="mt-6 max-w-md text-[16.5px] leading-[1.55] text-text-secondary">
                 Snap a photo of a pothole, broken light, or anything else. Our AI
-                writes the report and sends it straight to{' '}
-                <span className="text-white">HRM 311</span> and your{' '}
-                <span className="text-white">councillor</span> — 60 seconds, no
-                account.
+                drafts the report. We send it straight to{' '}
+                <span className="font-medium text-text-primary">HRM 311</span> and
+                your{' '}
+                <span className="font-medium text-text-primary">district councillor</span>.
+                Sixty seconds, no account.
               </p>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link href="/report">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                    Report an issue
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
-                      <path d="M5 12h14M13 5l7 7-7 7" />
-                    </svg>
+                  <Button variant="primary" size="lg">
+                    <CameraIcon /> Report an Issue
                   </Button>
                 </Link>
-                <Link href="/map">
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    className="w-full sm:w-auto text-white/80 hover:text-white hover:bg-white/10 border border-white/15"
-                  >
-                    Explore the 3D map
-                  </Button>
+                <Link href="/track" className="group text-[13.5px] leading-tight">
+                  <span className="text-text-secondary">Already submitted a report?</span>
+                  <br />
+                  <span className="font-medium text-primary-light underline-offset-4 group-hover:underline">
+                    Track it.
+                  </span>
                 </Link>
               </div>
-
-              <dl className="mt-10 grid grid-cols-3 gap-x-5 gap-y-2 max-w-sm border-t border-white/10 pt-6">
-                <div>
-                  <dt className="text-[10.5px] uppercase tracking-[0.12em] text-white/55">Reports filed</dt>
-                  <dd className="stat text-[28px] sm:text-[32px] leading-none mt-1.5 text-white">
-                    {totalReports.toLocaleString('en-CA')}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10.5px] uppercase tracking-[0.12em] text-white/55">Resolved · 30d</dt>
-                  <dd className="stat text-[28px] sm:text-[32px] leading-none mt-1.5 text-accent">
-                    {resolvedThisMonth.toLocaleString('en-CA')}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10.5px] uppercase tracking-[0.12em] text-white/55">Districts</dt>
-                  <dd className="stat text-[28px] sm:text-[32px] leading-none mt-1.5 text-white">
-                    <span className="text-white">{uniqueDistrictCount}</span>
-                    <span className="text-white/40">/16</span>
-                  </dd>
-                </div>
-              </dl>
             </div>
 
-            {/* Right — live onboarding demo */}
-            <div className="lg:pl-6">
-              <HeroDemo />
+            {/* Right — Halifax waterfront illustration (our palette) */}
+            <div className="relative">
+              <HalifaxSkyline />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─────────── Track / quick-action band ─────────── */}
-      <section className="border-b border-rule bg-bg-elev">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-5">
-          <Link
-            href="/track"
-            className="group flex items-center gap-4 rounded-xl border border-rule bg-bg/40 px-4 py-3.5 hover:border-primary/30 hover:bg-primary/[0.03] transition-colors"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
-              <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-[14.5px] text-text-primary leading-tight">
-                Already submitted a report? Track it.
-              </p>
-              <p className="text-[12.5px] text-text-secondary mt-0.5 leading-snug">
-                Use your reference number to check status — no account needed.
-              </p>
-            </div>
-            <span className="text-text-secondary group-hover:text-primary transition-colors" aria-hidden>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </span>
-          </Link>
+      {/* ───────────────── Stat band ───────────────── */}
+      <section className="bg-bg">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              iconBg="bg-primary"
+              label="Reports filed"
+              value={totalReports.toLocaleString('en-CA')}
+              icon={<PlaneIcon />}
+            />
+            <StatCard
+              iconBg="bg-success"
+              label="Resolved · 30d"
+              value={resolvedThisMonth.toLocaleString('en-CA')}
+              icon={<CheckIcon />}
+            />
+            <StatCard
+              iconBg="bg-primary"
+              label="HRM districts"
+              value={`${uniqueDistrictCount}/16`}
+              icon={<BuildingIcon />}
+            />
+            <Link
+              href="/track"
+              className="group flex items-center gap-3.5 rounded-xl border border-rule bg-bg-elev p-4 shadow-civic transition-colors hover:border-primary/30 hover:bg-primary/[0.02]"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/30 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </span>
+              <div className="min-w-0">
+                <p className="text-[13px] font-medium leading-tight text-text-primary">
+                  Already submitted a report?
+                </p>
+                <p className="mt-0.5 text-[11.5px] leading-snug text-text-secondary">
+                  Use your reference number to check status — no account needed.
+                </p>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ───────────────── Impact dashboard ───────────────── */}
-      {totalReports > 0 && (
-        <section className="border-b border-rule bg-bg-elev">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      {/* ─────── Community impact + How it works ─────── */}
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-14 lg:px-8">
+          {/* LEFT — impact + routing */}
+          <div>
             <Reveal>
-              <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
+              <div className="flex items-end justify-between gap-4">
                 <div>
-                  <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+                  <h2 style={SANS} className="text-[26px] font-bold tracking-tight text-text-primary">
                     Community impact
-                  </p>
-                  <h2 className="mt-2 text-3xl sm:text-[34px] leading-[1.05] tracking-tight">
-                    What we&apos;ve done together.
                   </h2>
+                  <p className="mt-1 text-[14px] text-text-secondary">What we&apos;ve done together.</p>
                 </div>
-                <Link
-                  href="/districts"
-                  className="text-sm text-primary hover:underline underline-offset-4"
-                >
+                <Link href="/districts" className="shrink-0 text-[13px] font-medium text-primary-light hover:underline underline-offset-4">
                   District scorecards →
                 </Link>
               </div>
             </Reveal>
-            <Reveal delay={80}>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <ImpactCard label="Resolution rate" value={`${resolutionRate}%`} tone="primary" />
-                <ImpactCard label="Issues resolved" value={totalResolved} tone="accent" />
-                <ImpactCard
-                  label="Avg days to fix"
-                  value={avgResolutionDays || '—'}
-                  tone="primary"
-                />
-                <ImpactCard
-                  label="Districts active"
-                  value={`${uniqueDistrictCount}/16`}
-                  tone="primary"
-                />
+
+            <Reveal delay={60}>
+              <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <ImpactCard label="Resolution rate" value={`${resolutionRate}%`} icon={<DonutIcon />} />
+                <ImpactCard label="Issues resolved" value={totalResolved} icon={<CheckIcon className="text-success" />} />
+                <ImpactCard label="Avg days to fix" value={avgResolutionDays || '—'} icon={<CalendarIcon />} />
+                <ImpactCard label="Districts active" value={`${uniqueDistrictCount}/16`} icon={<PeopleIcon />} />
+              </div>
+            </Reveal>
+
+            <Reveal delay={100}>
+              <div className="mt-10">
+                <h2 style={SANS} className="text-[26px] font-bold tracking-tight text-text-primary">
+                  Smart routing
+                </h2>
+                <p className="mt-1 text-[14px] text-text-secondary">
+                  We figure out who&apos;s actually responsible. HRM, Province, or
+                  Halifax Transit — your issue lands with the right authority and gets
+                  CC&apos;d to your district councillor automatically.
+                </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  {ROUTING.map((r) => (
+                    <div key={r.name} className="rounded-xl border border-rule bg-bg-elev p-4">
+                      <div className="mb-2.5 flex items-center gap-2.5">
+                        <span className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-primary px-1.5 text-[11px] font-bold text-white">
+                          {r.badge}
+                        </span>
+                        <h3 style={SANS} className="text-[13.5px] font-semibold tracking-tight text-text-primary">
+                          {r.name}
+                        </h3>
+                      </div>
+                      <p className="mb-2.5 text-[12.5px] leading-relaxed text-text-secondary">{r.desc}</p>
+                      <p className="break-all font-mono text-[11px] text-primary-light">{r.email}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </Reveal>
           </div>
-        </section>
-      )}
 
-      {/* ───────────────── How it works ───────────────── */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <Reveal className="text-center">
-            <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
-              How it works
-            </p>
-            <h2 className="mt-2 text-3xl sm:text-[40px] leading-[1.05] tracking-tight">
-              Three steps. Sixty seconds.
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-text-secondary text-[15.5px] leading-relaxed">
-              Reporting a civic issue in Halifax shouldn&apos;t take an
-              afternoon of forms and phone trees.
-            </p>
-          </Reveal>
+          {/* RIGHT — how it works */}
+          <Reveal delay={40}>
+            <div className="lg:pl-4">
+              <h2 style={SANS} className="text-[26px] font-bold tracking-tight text-text-primary">
+                How it works
+              </h2>
+              <p className="mt-1 text-[14px] text-text-secondary">
+                Three steps. Sixty seconds. Reporting a civic issue in Halifax
+                shouldn&apos;t take an afternoon of forms and phone trees.
+              </p>
 
-          <div className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-12 relative">
-            {/* connecting line on desktop */}
-            <div aria-hidden className="hidden sm:block absolute left-[16.66%] right-[16.66%] top-6 h-px bg-rule" />
-
-            {STEPS.map((s, i) => (
-              <Reveal key={s.title} delay={i * 80}>
-                <div className="relative">
-                  <div className="relative z-10 mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full border border-rule bg-bg-elev text-primary shadow-civic">
-                    {s.icon}
-                  </div>
-                  <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/60 text-center">
-                    Step {String(i + 1).padStart(2, '0')}
-                  </p>
-                  <h3 className="mt-1.5 text-[20px] tracking-tight text-center">
-                    {s.title}
-                  </h3>
-                  <p className="mt-2 text-[14.5px] leading-relaxed text-text-secondary text-center max-w-xs mx-auto">
-                    {s.desc}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ───────────── Smart routing — the trust section ───────────── */}
-      <section className="bg-primary text-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-            backgroundSize: '32px 32px',
-          }}
-        />
-        <div className="relative mx-auto max-w-6xl">
-          <Reveal>
-            <div className="grid lg:grid-cols-[1fr_2fr] gap-10 lg:gap-16 items-start">
-              <div>
-                <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-accent">
-                  Smart routing
-                </p>
-                <h2 className="mt-2 text-3xl sm:text-[36px] leading-[1.08] tracking-tight text-balance">
-                  We figure out who&apos;s actually responsible.
-                </h2>
-                <p className="mt-5 text-white/70 text-[15.5px] leading-relaxed max-w-md">
-                  HRM, Province, or Halifax Transit — your issue lands with
-                  the right authority and gets CC&apos;d to your district
-                  councillor automatically. All sixteen districts covered.
-                </p>
-              </div>
-
-              <div className="grid sm:grid-cols-3 gap-3">
-                {ROUTING.map((auth) => (
-                  <div
-                    key={auth.name}
-                    className="rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`h-2 w-2 rounded-full ${auth.dot}`} />
-                      <h3 className="font-medium text-[14.5px] tracking-tight">{auth.name}</h3>
+              <ol className="mt-7 space-y-6">
+                {STEPS.map((s, i) => (
+                  <li key={s.title} className="flex gap-4">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                      {s.icon}
+                    </span>
+                    <div>
+                      <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary-light">
+                        Step {String(i + 1).padStart(2, '0')}
+                      </p>
+                      <h3 style={SANS} className="mt-0.5 text-[17px] font-semibold tracking-tight text-text-primary">
+                        {s.title}
+                      </h3>
+                      <p className="mt-1 text-[14px] leading-relaxed text-text-secondary">{s.desc}</p>
                     </div>
-                    <p className="text-[13px] leading-relaxed text-white/65 mb-4">
-                      {auth.desc}
-                    </p>
-                    <p className="text-[11.5px] text-white/40 font-mono break-all">
-                      {auth.email}
-                    </p>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ol>
             </div>
           </Reveal>
         </div>
       </section>
 
       {/* ───────────────── Categories ───────────────── */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-bg-elev border-y border-rule">
-        <div className="mx-auto max-w-6xl">
+      <section className="border-y border-rule bg-bg-elev py-12 sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <Reveal>
-            <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
+            <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+                <h2 style={SANS} className="text-[26px] font-bold tracking-tight text-text-primary">
                   What can I report?
-                </p>
-                <h2 className="mt-2 text-3xl sm:text-[34px] leading-[1.05] tracking-tight">
-                  Anything that affects your neighbourhood.
                 </h2>
+                <p className="mt-1 text-[14px] text-text-secondary">
+                  Anything that affects your neighbourhood. 28 categories, automatically
+                  routed to the right authority.
+                </p>
               </div>
-              <p className="text-sm text-text-secondary max-w-xs">
-                28 categories, automatically routed to the right authority.
-              </p>
+              <Link href="/report" className="text-[13px] font-medium text-primary-light hover:underline underline-offset-4">
+                View all categories →
+              </Link>
             </div>
           </Reveal>
+
           <Reveal delay={60}>
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2.5">
+            <div className="grid grid-cols-3 overflow-hidden rounded-xl border-l border-t border-rule sm:grid-cols-5 lg:grid-cols-10">
               {ISSUE_CATEGORIES.map((cat) => (
                 <Link
                   key={cat.id}
                   href={`/report?category=${cat.id}`}
-                  className="group flex flex-col items-start gap-2.5 rounded-xl border border-rule bg-bg-elev p-3.5 hover:border-primary/25 hover:bg-primary/[0.02] hover:shadow-civic transition-all"
+                  className="flex flex-col items-center gap-2 border-b border-r border-rule p-3.5 text-center transition-colors hover:bg-primary/[0.04]"
                 >
-                  <span className="text-[20px] leading-none group-hover:scale-110 transition-transform">
-                    {cat.icon}
-                  </span>
-                  <span className="text-[12.5px] font-medium leading-tight text-text-primary">
+                  <span className="text-[20px] leading-none">{cat.icon}</span>
+                  <span className="text-[11px] font-medium leading-tight text-text-secondary">
                     {cat.label}
                   </span>
                 </Link>
@@ -410,134 +329,135 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ───────────────── Recent reports ───────────────── */}
-      {recentReports && recentReports.length > 0 && (
-        <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl">
+      {/* ─────── Latest activity + Why SolveHFX ─────── */}
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-3 lg:gap-10 lg:px-8">
+          {/* Latest activity */}
+          <div className="lg:col-span-2">
             <Reveal>
-              <div className="flex items-end justify-between gap-6 mb-8">
+              <div className="mb-5 flex items-end justify-between gap-4">
                 <div>
-                  <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
+                  <h2 style={SANS} className="text-[26px] font-bold tracking-tight text-text-primary">
                     Latest activity
-                  </p>
-                  <h2 className="mt-2 text-3xl sm:text-[34px] leading-[1.05] tracking-tight">
-                    What Halifax is reporting.
                   </h2>
+                  <p className="mt-1 text-[14px] text-text-secondary">What Halifax is reporting.</p>
                 </div>
-                <Link
-                  href="/reports"
-                  className="text-sm text-primary hover:underline underline-offset-4"
-                >
+                <Link href="/reports" className="shrink-0 text-[13px] font-medium text-primary-light hover:underline underline-offset-4">
                   View all →
                 </Link>
               </div>
             </Reveal>
 
-            <Reveal delay={60}>
-              <ul className="divide-y divide-rule border-y border-rule">
-                {recentReports.map((r) => {
-                  const cat = ISSUE_CATEGORIES.find((c) => c.id === r.category);
-                  return (
-                    <li key={r.id}>
-                      <Link
-                        href={`/reports/${r.id}`}
-                        className="group flex items-center gap-4 py-4 hover:bg-bg/60 -mx-2 px-2 rounded-lg transition-colors"
-                      >
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-bg-elev border border-rule text-[20px]">
-                          {cat?.icon || '📍'}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-[14.5px] text-text-primary truncate group-hover:text-primary transition-colors">
-                            {r.title}
-                          </p>
-                          <p className="text-[12.5px] text-text-secondary truncate mt-0.5">
-                            {r.address || 'Halifax, NS'}
-                          </p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1.5 shrink-0">
-                          <StatusBadge status={r.status} />
-                          <time className="text-[11.5px] text-text-muted num">
-                            {new Date(r.created_at).toLocaleDateString('en-CA', {
-                              month: 'short',
-                              day: 'numeric',
-                            })}
-                          </time>
-                        </div>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </Reveal>
-          </div>
-        </section>
-      )}
-
-      {/* ───────────── Why SolveHFX ───────────── */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-bg-elev border-t border-rule">
-        <div className="mx-auto max-w-6xl">
-          <Reveal className="text-center">
-            <p className="text-[11.5px] font-semibold tracking-[0.16em] uppercase text-primary/70">
-              Why SolveHFX
-            </p>
-            <h2 className="mt-2 text-3xl sm:text-[40px] leading-[1.05] tracking-tight">
-              Not another forgotten form.
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-text-secondary text-[15.5px] leading-relaxed">
-              Built by Halifax residents who got tired of issues disappearing
-              into a 311 queue.
-            </p>
-          </Reveal>
-
-          <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            {WHY.map((item, i) => (
-              <Reveal key={item.title} delay={i * 60}>
-                <article className="h-full rounded-2xl border border-rule bg-bg-elev p-6 hover:border-primary/20 hover:shadow-civic-md transition-all">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/8 text-primary mb-5">
-                    {item.icon}
-                  </div>
-                  <h3 className="text-[16.5px] tracking-tight mb-2">{item.title}</h3>
-                  <p className="text-[13.5px] text-text-secondary leading-relaxed">
-                    {item.desc}
-                  </p>
-                </article>
+            {recentReports && recentReports.length > 0 ? (
+              <Reveal delay={60}>
+                <ul className="divide-y divide-rule rounded-xl border border-rule bg-bg-elev">
+                  {recentReports.map((r) => {
+                    const cat = ISSUE_CATEGORIES.find((c) => c.id === r.category);
+                    return (
+                      <li key={r.id}>
+                        <Link
+                          href={`/reports/${r.id}`}
+                          className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-primary/[0.02]"
+                        >
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-rule bg-bg text-[18px]">
+                            {cat?.icon || '📍'}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[14px] font-medium text-text-primary group-hover:text-primary-light">
+                              {r.title}
+                            </p>
+                            <p className="mt-0.5 truncate text-[12px] text-text-secondary">
+                              {r.address || 'Halifax, NS'}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-3">
+                            <StatusBadge status={r.status} />
+                            <time className="num text-[11.5px] text-text-muted">
+                              {new Date(r.created_at).toLocaleDateString('en-CA', {
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </time>
+                          </div>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
               </Reveal>
-            ))}
+            ) : (
+              <div className="rounded-xl border border-rule bg-bg-elev px-4 py-12 text-center">
+                <p className="text-[14px] text-text-secondary">
+                  No reports yet — be the first to put Halifax on the map.
+                </p>
+              </div>
+            )}
           </div>
+
+          {/* Why SolveHFX */}
+          <Reveal delay={80}>
+            <aside className="relative overflow-hidden rounded-2xl bg-primary p-6 text-white">
+              <div
+                aria-hidden
+                className="absolute inset-0 opacity-[0.06]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+                  backgroundSize: '26px 26px',
+                }}
+              />
+              <div className="relative">
+                <h2 style={SANS} className="text-[20px] font-bold tracking-tight">
+                  Why SolveHFX
+                </h2>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-white/70">
+                  Not another forgotten form. Built by Halifax residents who got tired
+                  of issues disappearing into a 311 queue.
+                </p>
+
+                <ul className="mt-6 space-y-5">
+                  {WHY.map((item) => (
+                    <li key={item.title} className="flex gap-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-accent">
+                        {item.icon}
+                      </span>
+                      <div>
+                        <h3 style={SANS} className="text-[13.5px] font-semibold tracking-tight">
+                          {item.title}
+                        </h3>
+                        <p className="mt-0.5 text-[12px] leading-relaxed text-white/65">{item.desc}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </aside>
+          </Reveal>
         </div>
       </section>
 
       {/* ───────────────── Closing CTA ───────────────── */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <Reveal>
-            <h2 className="text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-tight text-balance">
-              See something?
-              <br />
-              <span className="italic text-primary" style={{ fontWeight: 400 }}>
-                Say something.
-              </span>
-            </h2>
-            <p className="mt-6 text-[16px] text-text-secondary leading-relaxed max-w-md mx-auto">
-              Sixty seconds. No account. Your report goes straight to the
-              people who can fix it.
-            </p>
-            <div className="mt-9 flex items-center justify-center gap-3">
-              <Link href="/report">
-                <Button variant="primary" size="lg">
-                  Report an issue
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
-                    <path d="M5 12h14M13 5l7 7-7 7" />
-                  </svg>
-                </Button>
-              </Link>
-              <Link href="/how-it-works">
-                <Button variant="ghost" size="lg">
-                  How it works
-                </Button>
-              </Link>
+      <section className="border-t border-rule bg-bg-elev">
+        <div className="mx-auto flex max-w-6xl flex-col items-start gap-5 px-4 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <PinIcon />
+            </span>
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-5">
+              <p style={SANS} className="text-[22px] font-bold tracking-tight text-text-primary">
+                See something? <span className="text-primary-light">Say something.</span>
+              </p>
+              <span aria-hidden className="hidden h-8 w-px bg-rule sm:block" />
+              <p className="max-w-xs text-[13px] leading-snug text-text-secondary">
+                Sixty seconds. No account. Your report goes straight to the people who
+                can fix it.
+              </p>
             </div>
-          </Reveal>
+          </div>
+          <Link href="/report" className="shrink-0">
+            <Button variant="primary" size="lg">
+              <CameraIcon /> Report an Issue
+            </Button>
+          </Link>
         </div>
       </section>
     </div>
@@ -546,41 +466,202 @@ export default async function HomePage() {
 
 /* ──────────────────────── helpers ──────────────────────── */
 
+function StatCard({
+  icon,
+  iconBg,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  iconBg: string;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="flex items-center gap-3.5 rounded-xl border border-rule bg-bg-elev p-4 shadow-civic">
+      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white ${iconBg}`}>
+        {icon}
+      </span>
+      <div>
+        <p className="text-[11.5px] font-medium tracking-tight text-text-secondary">{label}</p>
+        <p className="stat mt-0.5 text-[26px] leading-none text-text-primary">{value}</p>
+      </div>
+    </div>
+  );
+}
+
 function ImpactCard({
   label,
   value,
-  tone,
+  icon,
 }: {
   label: string;
   value: string | number;
-  tone: 'primary' | 'accent';
+  icon: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-rule bg-bg-elev p-5 sm:p-6">
-      <p className="stat text-[34px] sm:text-[38px] leading-none">
-        <span className={tone === 'accent' ? 'text-accent-hover' : 'text-primary'}>
-          {value}
-        </span>
-      </p>
-      <p className="mt-3 text-[12.5px] text-text-secondary tracking-tight">
-        {label}
-      </p>
+    <div className="rounded-xl border border-rule bg-bg-elev p-4">
+      <span className="flex h-7 w-7 items-center justify-center text-primary-light">{icon}</span>
+      <p className="stat mt-3 text-[28px] leading-none text-text-primary">{value}</p>
+      <p className="mt-1.5 text-[12px] tracking-tight text-text-secondary">{label}</p>
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { dot: string; label: string; text: string }> = {
-    open: { dot: 'bg-status-open', label: 'Open', text: 'text-status-open' },
-    in_progress: { dot: 'bg-status-in-progress', label: 'In progress', text: 'text-status-in-progress' },
-    resolved: { dot: 'bg-status-resolved', label: 'Resolved', text: 'text-status-resolved' },
+  const map: Record<string, { bg: string; label: string; text: string }> = {
+    open: { bg: 'bg-status-open/10', label: 'Open', text: 'text-status-open' },
+    in_progress: { bg: 'bg-status-in-progress/15', label: 'In progress', text: 'text-[#9a6a00]' },
+    resolved: { bg: 'bg-status-resolved/10', label: 'Resolved', text: 'text-status-resolved' },
   };
   const s = map[status] || map.open;
   return (
-    <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${s.text}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${s.bg} ${s.text}`}>
       {s.label}
     </span>
+  );
+}
+
+/* ── inline icons ── */
+function CameraIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  );
+}
+function PlaneIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M22 2L11 13" />
+      <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+    </svg>
+  );
+}
+function CheckIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+function BuildingIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 13v.01M9 17v.01" />
+    </svg>
+  );
+}
+function DonutIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+      <circle cx="12" cy="12" r="9" className="opacity-30" />
+      <path d="M12 3a9 9 0 016.4 15.3" />
+    </svg>
+  );
+}
+function CalendarIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M16 2v4M8 2v4M3 10h18" />
+    </svg>
+  );
+}
+function PeopleIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+    </svg>
+  );
+}
+function PinIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1112 6.5a2.5 2.5 0 010 5z" />
+    </svg>
+  );
+}
+
+/* ── Stylized Halifax waterfront — our palette, no stock photo ── */
+function HalifaxSkyline() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-rule shadow-civic-lg">
+      <svg viewBox="0 0 640 460" className="h-auto w-full" role="img" aria-label="Stylized Halifax waterfront skyline">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#dcebf8" />
+            <stop offset="55%" stopColor="#eef5fb" />
+            <stop offset="100%" stopColor="#ffffff" />
+          </linearGradient>
+          <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#0057A8" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#003865" stopOpacity="0.55" />
+          </linearGradient>
+        </defs>
+
+        {/* sky + sun */}
+        <rect width="640" height="460" fill="url(#sky)" />
+        <circle cx="528" cy="96" r="34" fill="#E8B84B" opacity="0.9" />
+        <circle cx="528" cy="96" r="50" fill="#E8B84B" opacity="0.18" />
+
+        {/* clouds */}
+        <g fill="#ffffff" opacity="0.85">
+          <ellipse cx="150" cy="78" rx="48" ry="16" />
+          <ellipse cx="190" cy="70" rx="34" ry="13" />
+          <ellipse cx="392" cy="120" rx="40" ry="13" />
+        </g>
+
+        {/* skyline */}
+        <g>
+          <rect x="60" y="206" width="40" height="124" fill="#0057A8" />
+          <rect x="104" y="170" width="34" height="160" fill="#003865" />
+          <rect x="142" y="220" width="28" height="110" fill="#0057A8" opacity="0.85" />
+          <rect x="196" y="150" width="46" height="180" fill="#003865" />
+          <rect x="246" y="192" width="30" height="138" fill="#0057A8" />
+          <rect x="288" y="128" width="40" height="202" fill="#00203D" />
+          <rect x="332" y="176" width="34" height="154" fill="#003865" />
+          <rect x="372" y="210" width="30" height="120" fill="#0057A8" opacity="0.85" />
+          <rect x="424" y="158" width="44" height="172" fill="#003865" />
+          <rect x="472" y="198" width="30" height="132" fill="#0057A8" />
+          <rect x="512" y="176" width="40" height="154" fill="#00203D" />
+          <rect x="558" y="216" width="30" height="114" fill="#003865" />
+          {/* window dots */}
+          <g fill="#E8B84B" opacity="0.55">
+            <rect x="208" y="166" width="6" height="6" />
+            <rect x="222" y="166" width="6" height="6" />
+            <rect x="208" y="184" width="6" height="6" />
+            <rect x="222" y="184" width="6" height="6" />
+            <rect x="300" y="146" width="6" height="6" />
+            <rect x="314" y="146" width="6" height="6" />
+            <rect x="300" y="166" width="6" height="6" />
+            <rect x="436" y="176" width="6" height="6" />
+            <rect x="450" y="176" width="6" height="6" />
+            <rect x="436" y="196" width="6" height="6" />
+          </g>
+        </g>
+
+        {/* water */}
+        <rect x="0" y="330" width="640" height="130" fill="url(#water)" />
+        <g stroke="#ffffff" strokeOpacity="0.35" strokeWidth="2">
+          <line x1="40" y1="360" x2="120" y2="360" />
+          <line x1="200" y1="378" x2="300" y2="378" />
+          <line x1="420" y1="368" x2="520" y2="368" />
+          <line x1="120" y1="400" x2="240" y2="400" />
+        </g>
+
+        {/* sailboat */}
+        <g transform="translate(470 352)">
+          <path d="M0 40 L52 40 L44 56 L8 56 Z" fill="#003865" />
+          <path d="M26 -28 L26 38 L4 38 Z" fill="#ffffff" stroke="#003865" strokeWidth="2" />
+          <path d="M30 -22 L30 38 L52 38 Z" fill="#E8B84B" />
+          <line x1="26" y1="-30" x2="26" y2="40" stroke="#003865" strokeWidth="2.5" />
+        </g>
+      </svg>
+    </div>
   );
 }
 
@@ -621,48 +702,48 @@ const STEPS = [
 const ROUTING = [
   {
     name: 'HRM 311',
+    badge: '311',
     desc: 'Potholes, sidewalks, graffiti, parks, streetlights, water, property standards.',
     email: 'contactus@311.halifax.ca',
-    dot: 'bg-blue-400',
   },
   {
     name: 'NS Public Works',
+    badge: 'NS',
     desc: 'Potholes and road damage on 100-series highways and provincial roads.',
     email: 'TPWPAFF@novascotia.ca',
-    dot: 'bg-amber-300',
   },
   {
     name: 'Halifax Transit',
+    badge: 'HT',
     desc: 'Bus stop damage, transit service complaints, shelter issues.',
     email: 'halifax.transit@halifax.ca',
-    dot: 'bg-emerald-400',
   },
 ];
 
 const WHY = [
   {
     title: 'No account needed',
-    desc: 'Submit anonymously in 60 seconds. No login, no signup, no friction. Optional email if you want updates.',
+    desc: 'Submit anonymously in 60 seconds. No login, no signup. Optional email if you want updates.',
     icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M5 13l4 4L19 7" />
       </svg>
     ),
   },
   {
     title: 'Councillor CC’d',
-    desc: 'Every report goes to 311 and your district councillor. Built-in accountability across all 16 districts.',
+    desc: 'Every report goes to 311 and your district councillor. Accountability across all 16 districts.',
     icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
       </svg>
     ),
   },
   {
     title: 'AI does the paperwork',
-    desc: 'Photo analysis identifies the issue, classifies it, and drafts a professional report for you to review.',
+    desc: 'Photo analysis identifies the issue, classifies it, and drafts a professional report to review.',
     icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
       </svg>
     ),
@@ -671,11 +752,10 @@ const WHY = [
     title: 'Community-verified',
     desc: 'Neighbours confirm issues still exist or mark them fixed. Crowdsourced accountability you can audit.',
     icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
         <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 00-3-3.87" />
-        <path d="M16 3.13a4 4 0 010 7.75" />
+        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
       </svg>
     ),
   },
