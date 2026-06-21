@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button';
 import Reveal from '@/components/ui/Reveal';
 import { ISSUE_CATEGORIES } from '@/lib/types';
 import { createServiceClient } from '@/lib/supabase/server';
+import HeroDemo from '@/components/home/HeroDemo';
 
 export const metadata: Metadata = {
   title: 'SolveHFX — Fix Halifax. Together.',
@@ -133,66 +134,73 @@ export default async function HomePage() {
           }}
         />
 
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-20 pb-16 sm:pt-28 sm:pb-24 lg:pt-32 lg:pb-28">
-          <div className="max-w-3xl">
-            <h1 className="text-[clamp(2.5rem,6.5vw,5rem)] leading-[1.02] tracking-tight text-balance">
-              Fix Halifax.
-              <br />
-              <span className="text-accent italic" style={{ fontWeight: 400 }}>
-                Together.
-              </span>
-            </h1>
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-16 pb-16 sm:pt-20 lg:pt-24 lg:pb-24">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-12">
+            {/* Left — message */}
+            <div>
+              <h1 className="text-[clamp(2.5rem,6vw,4.75rem)] leading-[1.02] tracking-tight text-balance">
+                Solve Halifax
+                <br />
+                <span className="text-accent italic" style={{ fontWeight: 400 }}>
+                  with a snap.
+                </span>
+              </h1>
 
-            <p className="mt-7 max-w-xl text-[17px] leading-[1.55] text-white/72">
-              Snap a photo of a pothole, broken light, or anything else.
-              Our AI drafts the report. We send it straight to{' '}
-              <span className="text-white">HRM 311</span> and your{' '}
-              <span className="text-white">district councillor</span>. Sixty
-              seconds, no account.
-            </p>
+              <p className="mt-6 max-w-md text-[16.5px] leading-[1.55] text-white/72">
+                Snap a photo of a pothole, broken light, or anything else. Our AI
+                writes the report and sends it straight to{' '}
+                <span className="text-white">HRM 311</span> and your{' '}
+                <span className="text-white">councillor</span> — 60 seconds, no
+                account.
+              </p>
 
-            <div className="mt-9 flex flex-col sm:flex-row gap-3">
-              <Link href="/report">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                  Report an issue
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
-                    <path d="M5 12h14M13 5l7 7-7 7" />
-                  </svg>
-                </Button>
-              </Link>
-              <Link href="/map">
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="w-full sm:w-auto text-white/80 hover:text-white hover:bg-white/10 border border-white/15"
-                >
-                  See the issue map
-                </Button>
-              </Link>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <Link href="/report">
+                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                    Report an issue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+                      <path d="M5 12h14M13 5l7 7-7 7" />
+                    </svg>
+                  </Button>
+                </Link>
+                <Link href="/map">
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    className="w-full sm:w-auto text-white/80 hover:text-white hover:bg-white/10 border border-white/15"
+                  >
+                    Explore the 3D map
+                  </Button>
+                </Link>
+              </div>
+
+              <dl className="mt-10 grid grid-cols-3 gap-x-5 gap-y-2 max-w-sm border-t border-white/10 pt-6">
+                <div>
+                  <dt className="text-[10.5px] uppercase tracking-[0.12em] text-white/55">Reports filed</dt>
+                  <dd className="stat text-[28px] sm:text-[32px] leading-none mt-1.5 text-white">
+                    {totalReports.toLocaleString('en-CA')}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10.5px] uppercase tracking-[0.12em] text-white/55">Resolved · 30d</dt>
+                  <dd className="stat text-[28px] sm:text-[32px] leading-none mt-1.5 text-accent">
+                    {resolvedThisMonth.toLocaleString('en-CA')}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10.5px] uppercase tracking-[0.12em] text-white/55">Districts</dt>
+                  <dd className="stat text-[28px] sm:text-[32px] leading-none mt-1.5 text-white">
+                    <span className="text-white">{uniqueDistrictCount}</span>
+                    <span className="text-white/40">/16</span>
+                  </dd>
+                </div>
+              </dl>
             </div>
 
-            {/* Inline proof — replaces the orphan stat strip */}
-            <dl className="mt-14 grid grid-cols-3 gap-x-6 gap-y-2 max-w-2xl border-t border-white/10 pt-8">
-              <div>
-                <dt className="text-[11.5px] uppercase tracking-[0.12em] text-white/55">Reports filed</dt>
-                <dd className="stat text-[34px] sm:text-[40px] leading-none mt-2 text-white">
-                  {totalReports.toLocaleString('en-CA')}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[11.5px] uppercase tracking-[0.12em] text-white/55">Resolved · 30d</dt>
-                <dd className="stat text-[34px] sm:text-[40px] leading-none mt-2 text-accent">
-                  {resolvedThisMonth.toLocaleString('en-CA')}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[11.5px] uppercase tracking-[0.12em] text-white/55">HRM districts</dt>
-                <dd className="stat text-[34px] sm:text-[40px] leading-none mt-2 text-white">
-                  <span className="text-white">{uniqueDistrictCount}</span>
-                  <span className="text-white/40">/16</span>
-                </dd>
-              </div>
-            </dl>
+            {/* Right — live onboarding demo */}
+            <div className="lg:pl-6">
+              <HeroDemo />
+            </div>
           </div>
         </div>
       </section>

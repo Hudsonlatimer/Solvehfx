@@ -44,11 +44,108 @@ const INITIAL_VIEW = {
   zoom: 11,
 };
 
+type MapStyleId = 'streets' | 'satellite' | 'dark';
+
+const MAP_STYLES: { id: MapStyleId; label: string; url: string }[] = [
+  { id: 'streets', label: 'Map', url: 'mapbox://styles/mapbox/streets-v12' },
+  { id: 'satellite', label: 'Satellite', url: 'mapbox://styles/mapbox/satellite-streets-v12' },
+  { id: 'dark', label: 'Dark', url: 'mapbox://styles/mapbox/dark-v11' },
+];
+
 export default function IssueMap({ reports, focusDistrict, showArchived = false }: IssueMapProps) {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [styleId, setStyleId] = useState<MapStyleId>('streets');
+  const [is3D, setIs3D] = useState(false);
   const mapRef = useRef<MapRef>(null);
   const pendingFlyRef = useRef<number | null | undefined>(undefined);
+  const is3DRef = useRef(is3D);
+  const styleIdRef = useRef<MapStyleId>(styleId);
+
+  useEffect(() => {
+    is3DRef.current = is3D;
+  }, [is3D]);
+  useEffect(() => {
+    styleIdRef.current = styleId;
+  }, [styleId]);
+
+  const activeStyleUrl = MAP_STYLES.find((s) => s.id === styleId)!.url;
+
+  // 3D is added against the raw mapbox instance (terrain + sky + extruded
+  // buildings) so it survives base-style swaps. Typed loosely on purpose —
+  // the GL style-spec expressions don't map cleanly to react-map-gl's types.
+  const apply3D = useCallback(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = mapRef.current?.getMap() as any;
+    if (!map || !map.isStyleLoaded?.()) return;
+    try {
+      if (!map.getSource('mapbox-dem')) {
+        map.addSource('mapbox-dem', {
+          type: 'raster-dem',
+          url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+          tileSize: 512,
+          maxzoom: 14,
+        });
+      }
+      map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.3 });
+      if (!map.getLayer('sky')) {
+        map.addLayer({
+          id: 'sky',
+          type: 'sky',
+          paint: {
+            'sky-type': 'atmosphere',
+            'sky-atmosphere-sun': [0.0, 90.0],
+            'sky-atmosphere-sun-intensity': 12,
+          },
+        });
+      }
+      if (styleIdRef.current !== 'satellite' && !map.getLayer('3d-buildings')) {
+        map.addLayer({
+          id: '3d-buildings',
+          source: 'composite',
+          'source-layer': 'building',
+          filter: ['==', 'extrude', 'true'],
+          type: 'fill-extrusion',
+          minzoom: 14,
+          paint: {
+            'fill-extrusion-color': styleIdRef.current === 'dark' ? '#2b3a52' : '#c7d0db',
+            'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 16, ['get', 'height']],
+            'fill-extrusion-base': ['interpolate', ['linear'], ['zoom'], 14, 0, 16, ['get', 'min_height']],
+            'fill-extrusion-opacity': 0.65,
+          },
+        });
+      }
+    } catch {
+      // Style still settling or lacks a building layer — terrain/sky degrade gracefully.
+    }
+  }, []);
+
+  const remove3D = useCallback(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = mapRef.current?.getMap() as any;
+    if (!map) return;
+    if (map.getLayer('3d-buildings')) map.removeLayer('3d-buildings');
+    if (map.getLayer('sky')) map.removeLayer('sky');
+    try {
+      map.setTerrain(null);
+    } catch {
+      /* no-op */
+    }
+  }, []);
+
+  // Re-apply 3D whenever 3D is on and the base style finishes (re)loading.
+  useEffect(() => {
+    if (!mapLoaded) return;
+    const map = mapRef.current;
+    if (!map) return;
+    if (is3D) {
+      apply3D();
+      map.easeTo({ pitch: 58, duration: 800 });
+    } else {
+      remove3D();
+      map.easeTo({ pitch: 0, bearing: 0, duration: 800 });
+    }
+  }, [is3D, styleId, mapLoaded, apply3D, remove3D]);
 
   const flyToDistrict = useCallback((districtId: number | null | undefined) => {
     const map = mapRef.current;
@@ -73,12 +170,22 @@ export default function IssueMap({ reports, focusDistrict, showArchived = false 
   // When map loads, fly to pending district if any
   const handleMapLoad = useCallback(() => {
     setMapLoaded(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = mapRef.current?.getMap() as any;
+    if (map) {
+      // Re-add terrain/sky/buildings every time the base style finishes
+      // (re)loading — switching styles wipes custom layers.
+      map.on('style.load', () => {
+        if (is3DRef.current) apply3D();
+      });
+    }
+    if (is3DRef.current) apply3D();
     if (pendingFlyRef.current !== undefined) {
       // Small delay to ensure map is fully interactive
       setTimeout(() => flyToDistrict(pendingFlyRef.current), 300);
       pendingFlyRef.current = undefined;
     }
-  }, [flyToDistrict]);
+  }, [flyToDistrict, apply3D]);
 
   // React to focusDistrict changes
   useEffect(() => {
@@ -108,15 +215,53 @@ export default function IssueMap({ reports, focusDistrict, showArchived = false 
   }, [selectedReport]);
 
   return (
-    <Map
-      ref={mapRef}
-      initialViewState={INITIAL_VIEW}
-      style={{ width: '100%', height: '100%' }}
-      mapStyle="mapbox://styles/mapbox/streets-v12"
-      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-      onLoad={handleMapLoad}
-    >
-      <NavigationControl position="top-right" />
+    <div className="relative h-full w-full">
+      {/* Style + 3D controls */}
+      <div className="absolute left-3 top-3 z-10 flex flex-col items-start gap-2">
+        <div className="flex rounded-lg border border-rule bg-bg-elev/95 p-0.5 shadow-civic backdrop-blur">
+          {MAP_STYLES.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setStyleId(s.id)}
+              className={`rounded-md px-2.5 py-1.5 text-[12px] font-medium tracking-tight transition-colors ${
+                styleId === s.id
+                  ? 'bg-primary text-white'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setIs3D((v) => !v)}
+          aria-pressed={is3D}
+          className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold tracking-tight shadow-civic backdrop-blur transition-colors ${
+            is3D
+              ? 'border-primary bg-primary text-white'
+              : 'border-rule bg-bg-elev/95 text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" />
+            <path d="M12 22V12M21 7l-9 5-9-5" />
+          </svg>
+          3D
+        </button>
+      </div>
+
+      <Map
+        ref={mapRef}
+        initialViewState={INITIAL_VIEW}
+        style={{ width: '100%', height: '100%' }}
+        mapStyle={activeStyleUrl}
+        maxPitch={80}
+        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+        onLoad={handleMapLoad}
+      >
+        <NavigationControl position="top-right" />
 
       {reports.map((report) => {
         const dissolve = getDissolveState(report);
@@ -155,7 +300,8 @@ export default function IssueMap({ reports, focusDistrict, showArchived = false 
           <MapPopup report={selectedReport} onVerified={handleVerified} />
         </Popup>
       )}
-    </Map>
+      </Map>
+    </div>
   );
 }
 
