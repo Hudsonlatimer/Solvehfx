@@ -23,7 +23,9 @@ jobs:
         run: |
           URL="${{ secrets.HEALTH_URL || 'https://solvehfx.ca/api/health' }}"
           echo "Pinging $URL"
-          code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 25 "$URL" || echo "000")
+          # 45s headroom: a ping that wakes a paused DB can take 20-30s, and
+          # that's exactly the ping we don't want to cut short.
+          code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 45 "$URL" || echo "000")
           echo "HTTP $code"
           if [ "$code" = "200" ]; then
             echo "✅ Supabase pinged — project kept warm."
