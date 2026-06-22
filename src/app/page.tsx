@@ -109,63 +109,58 @@ export default async function HomePage() {
   return (
     <div>
       {/* ───────────────────── Hero ───────────────────── */}
-      <section className="border-b border-rule bg-bg-elev">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-12 pb-12 sm:pt-16 lg:pt-20 lg:pb-16">
-          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-            {/* Left — message */}
-            <div>
-              <h1
-                style={SANS}
-                className="text-[clamp(2.75rem,7vw,5rem)] font-bold leading-[0.97] tracking-tight"
-              >
-                <span className="text-text-primary">Fix Halifax.</span>
+      <section className="relative isolate overflow-hidden border-b border-rule text-white">
+        {/* Full-bleed Halifax backdrop */}
+        <Image
+          src="/halifax-hero.jpg"
+          alt="Halifax waterfront and downtown skyline"
+          fill
+          priority
+          sizes="100vw"
+          className="-z-20 object-cover object-center"
+        />
+        {/* Navy readability scrim (heaviest on the left, behind the copy) */}
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              'linear-gradient(90deg, rgba(0,32,61,0.92) 0%, rgba(0,32,61,0.72) 42%, rgba(0,56,101,0.32) 72%, rgba(0,56,101,0.10) 100%)',
+          }}
+        />
+
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
+          <div className="max-w-xl">
+            <h1
+              style={SANS}
+              className="text-[clamp(2.75rem,7vw,5rem)] font-bold leading-[0.97] tracking-tight drop-shadow-sm"
+            >
+              <span className="text-white">Fix Halifax.</span>
+              <br />
+              <span className="text-accent">Together.</span>
+            </h1>
+
+            <p className="mt-6 max-w-md text-[16.5px] leading-[1.55] text-white/85">
+              Snap a photo of a pothole, broken light, or anything else. Our AI
+              drafts the report. We send it straight to{' '}
+              <span className="font-medium text-white">HRM 311</span> and your{' '}
+              <span className="font-medium text-white">district councillor</span>.
+              Sixty seconds, no account.
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
+              <Link href="/report">
+                <Button variant="secondary" size="lg">
+                  <CameraIcon /> Report an Issue
+                </Button>
+              </Link>
+              <Link href="/track" className="group text-[13.5px] leading-tight">
+                <span className="text-white/70">Already submitted a report?</span>
                 <br />
-                <span className="text-primary-light">Together.</span>
-              </h1>
-
-              <p className="mt-6 max-w-md text-[16.5px] leading-[1.55] text-text-secondary">
-                Snap a photo of a pothole, broken light, or anything else. Our AI
-                drafts the report. We send it straight to{' '}
-                <span className="font-medium text-text-primary">HRM 311</span> and
-                your{' '}
-                <span className="font-medium text-text-primary">district councillor</span>.
-                Sixty seconds, no account.
-              </p>
-
-              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
-                <Link href="/report">
-                  <Button variant="primary" size="lg">
-                    <CameraIcon /> Report an Issue
-                  </Button>
-                </Link>
-                <Link href="/track" className="group text-[13.5px] leading-tight">
-                  <span className="text-text-secondary">Already submitted a report?</span>
-                  <br />
-                  <span className="font-medium text-primary-light underline-offset-4 group-hover:underline">
-                    Track it.
-                  </span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Right — Halifax waterfront */}
-            <div className="relative">
-              <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-rule shadow-civic-lg">
-                <Image
-                  src="/halifax-hero.jpg"
-                  alt="Halifax waterfront and downtown skyline"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 560px"
-                  className="object-cover"
-                />
-                {/* subtle navy wash to tie into the palette */}
-                <div
-                  aria-hidden
-                  className="absolute inset-0"
-                  style={{ background: 'linear-gradient(180deg, transparent 55%, rgba(0,32,61,0.18) 100%)' }}
-                />
-              </div>
+                <span className="font-medium text-white underline-offset-4 group-hover:underline">
+                  Track it.
+                </span>
+              </Link>
             </div>
           </div>
         </div>
