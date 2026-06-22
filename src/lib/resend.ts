@@ -20,6 +20,16 @@ function getPriority(category: string): string {
   return 'P2 — Standard';
 }
 
+// Reports are anonymous unless the resident chose to share a name and/or email.
+function contactLine(report: Report): string {
+  const name = report.contact_name?.trim();
+  const email = report.contact_email?.trim();
+  if (name && email) return `Submitted by: ${name} <${email}>`;
+  if (email) return `Contact email: ${email}`;
+  if (name) return `Submitted by: ${name} (no email provided)`;
+  return '(Submitted anonymously — no contact details provided)';
+}
+
 export async function dispatchEmails({ report, district, authority }: DispatchParams) {
   const authorityInfo = AUTHORITY_EMAILS[authority];
   const category = getCategoryById(report.category);
@@ -33,7 +43,7 @@ export async function dispatchEmails({ report, district, authority }: DispatchPa
     text: `A resident has reported a civic issue via SolveHFX.
 
 Reference Number: ${report.reference_number}
-${report.contact_email ? `Contact Email: ${report.contact_email}` : '(No contact email provided)'}
+${contactLine(report)}
 
 Issue Type: ${categoryLabel}
 Location: ${report.address || 'Not specified'}
@@ -66,7 +76,7 @@ solvehfx.ca`,
           text: `A constituent in your district has submitted a civic issue report.
 
 Reference Number: ${report.reference_number}
-${report.contact_email ? `Constituent Email: ${report.contact_email}` : '(No contact email provided — constituent chose to remain anonymous)'}
+${contactLine(report)}
 
 Issue Type: ${categoryLabel}
 Location: ${report.address || 'Not specified'}

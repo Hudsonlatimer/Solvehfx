@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS reports (
 -- Ensure all columns exist (in case table was created previously)
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS client_ip TEXT;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS is_anonymous BOOLEAN DEFAULT false;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS contact_name TEXT;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS contact_email TEXT;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS notify_councillor BOOLEAN DEFAULT false;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS hrm_responded BOOLEAN DEFAULT false;

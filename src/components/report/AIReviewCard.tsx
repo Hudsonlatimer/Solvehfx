@@ -9,12 +9,10 @@ interface AIReviewCardProps {
   description: string;
   category: string;
   confidence: number;
-  isAnonymous: boolean;
   isSnowIce: boolean;
   onTitleChange: (val: string) => void;
   onDescriptionChange: (val: string) => void;
   onCategoryChange: (val: string) => void;
-  onAnonymousChange: (val: boolean) => void;
 }
 
 export default function AIReviewCard({
@@ -22,12 +20,10 @@ export default function AIReviewCard({
   description,
   category,
   confidence,
-  isAnonymous,
   isSnowIce,
   onTitleChange,
   onDescriptionChange,
   onCategoryChange,
-  onAnonymousChange,
 }: AIReviewCardProps) {
   return (
     <div className="space-y-5">
@@ -71,18 +67,10 @@ export default function AIReviewCard({
         />
       </div>
 
-      <label className="flex items-center gap-3 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={isAnonymous}
-          onChange={(e) => onAnonymousChange(e.target.checked)}
-          className="rounded border-rule text-primary focus:ring-primary h-5 w-5"
-        />
-        <div>
-          <span className="text-sm font-medium text-text-primary">Submit anonymously</span>
-          <p className="text-xs text-text-secondary">No account needed. Your identity won&apos;t be shared.</p>
-        </div>
-      </label>
+      <p className="text-xs text-text-secondary">
+        Your report is anonymous by default. You can add your name or email on the
+        next step if you&apos;d like the city or your councillor to follow up.
+      </p>
     </div>
   );
 }

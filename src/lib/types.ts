@@ -16,6 +16,7 @@ export interface Report {
   photo_url: string | null;
   status: ReportStatus;
   is_anonymous: boolean;
+  contact_name: string | null;
   contact_email: string | null;
   notify_councillor: boolean;
 

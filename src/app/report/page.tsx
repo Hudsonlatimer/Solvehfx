@@ -59,11 +59,13 @@ function ReportFlow() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState(preselectedCategory || 'other');
   const [confidence, setConfidence] = useState(0);
-  const [isAnonymous, setIsAnonymous] = useState(false);
 
-  // Email for follow-up (optional)
+  // Contact — all optional. Reports are anonymous unless you choose to share
+  // your name and/or email so HRM or your councillor can follow up.
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const emailValid = email.trim() === '' || EMAIL_RE.test(email.trim());
+  const isAnonymous = !(name.trim() || email.trim());
 
   // Submit
   const [submitting, setSubmitting] = useState(false);
@@ -141,6 +143,7 @@ function ReportFlow() {
           address,
           photo_url: photoUrl,
           is_anonymous: isAnonymous,
+          name: name.trim() || null,
           email: email.trim() || null,
           force: useForce,
           notify_councillor: true,
@@ -326,12 +329,10 @@ function ReportFlow() {
                   description={description}
                   category={category}
                   confidence={confidence}
-                  isAnonymous={isAnonymous}
                   isSnowIce={category === 'snow_ice'}
                   onTitleChange={setTitle}
                   onDescriptionChange={setDescription}
                   onCategoryChange={setCategory}
-                  onAnonymousChange={setIsAnonymous}
                 />
               </section>
             )}
@@ -341,6 +342,45 @@ function ReportFlow() {
                 <h2 id="step-contact" className="sr-only">
                   Optional contact information
                 </h2>
+
+                {/* Anonymity is the default — make that unmistakable */}
+                <div className="flex items-start gap-3 rounded-xl border border-success/30 bg-success/[0.06] px-4 py-3.5">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  </span>
+                  <div>
+                    <p className="text-[14px] font-medium text-text-primary leading-tight">
+                      This report is anonymous by default.
+                    </p>
+                    <p className="text-[12.5px] text-text-secondary mt-1 leading-snug">
+                      You can leave everything below blank. Sharing your name or
+                      email is optional — only do it if you&apos;d like the city or
+                      your councillor to be able to follow up with you.
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="contact-name"
+                    className="block text-[13.5px] font-medium text-text-primary mb-2"
+                  >
+                    Your name{' '}
+                    <span className="text-text-muted font-normal">(optional)</span>
+                  </label>
+                  <input
+                    id="contact-name"
+                    type="text"
+                    autoComplete="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="First and last name"
+                    className="w-full h-11 px-3.5 rounded-lg border border-rule bg-bg-elev text-[15px] placeholder:text-text-muted focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  />
+                </div>
+
                 <div>
                   <label
                     htmlFor="contact-email"
@@ -369,22 +409,18 @@ function ReportFlow() {
                       Enter a valid email address, or leave it blank to stay anonymous.
                     </p>
                   )}
-                  <p className="mt-2 text-[12.5px] text-text-secondary">
-                    Skip this and your report goes through anonymously — you&apos;ll
-                    still get a reference number on the next screen to track it.
-                  </p>
                 </div>
 
                 <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-4">
                   <p className="text-[12.5px] font-semibold text-primary tracking-tight mb-2">
-                    Why share your email
+                    Why share your details
                   </p>
                   <ul className="space-y-1.5 text-[13px] text-text-secondary leading-relaxed">
                     <li className="flex gap-2">
                       <Dot /> HRM can reach out if they need clarification.
                     </li>
                     <li className="flex gap-2">
-                      <Dot /> Your councillor can follow up directly.
+                      <Dot /> Your councillor can follow up with you directly.
                     </li>
                     <li className="flex gap-2">
                       <Dot /> Status updates when the issue is resolved.

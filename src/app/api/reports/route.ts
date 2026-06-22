@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
       is_anonymous,
       isHighway,
       force,
+      name,
       email,
       notify_councillor,
     } = body as {
@@ -92,6 +93,7 @@ export async function POST(request: NextRequest) {
       is_anonymous?: boolean;
       isHighway?: boolean;
       force?: boolean;
+      name?: string | null;
       email?: string | null;
       notify_councillor?: boolean;
     };
@@ -189,28 +191,42 @@ export async function POST(request: NextRequest) {
     const reference_number = generateReferenceNumber();
 
     // Insert report
-    const { data: report, error } = await serviceClient
+    const row: Record<string, unknown> = {
+      title,
+      description,
+      category,
+      lat,
+      lng,
+      address: address || null,
+      district_id: districtData?.id || null,
+      road_authority: authority,
+      photo_url: photo_url || null,
+      status: 'open',
+      is_anonymous: is_anonymous ?? true,
+      user_id: is_anonymous ? null : user?.id || null,
+      reference_number,
+      client_ip: clientIp,
+      contact_name: name || null,
+      contact_email: email || null,
+      notify_councillor: notify_councillor || false,
+    };
+
+    let { data: report, error } = await serviceClient
       .from('reports')
-      .insert({
-        title,
-        description,
-        category,
-        lat,
-        lng,
-        address: address || null,
-        district_id: districtData?.id || null,
-        road_authority: authority,
-        photo_url: photo_url || null,
-        status: 'open',
-        is_anonymous: is_anonymous || false,
-        user_id: is_anonymous ? null : user?.id || null,
-        reference_number,
-        client_ip: clientIp,
-        contact_email: email || null,
-        notify_councillor: notify_councillor || false,
-      })
+      .insert(row)
       .select('*')
       .single();
+
+    // Backwards-compat: if the contact_name column hasn't been migrated yet,
+    // retry without it rather than failing the whole submission.
+    if (error && /contact_name/.test(error.message)) {
+      delete row.contact_name;
+      ({ data: report, error } = await serviceClient
+        .from('reports')
+        .insert(row)
+        .select('*')
+        .single());
+    }
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
