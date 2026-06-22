@@ -29,15 +29,20 @@ export default function LocationPicker({
   const mapRef = useRef<MapRef>(null);
 
   const reverseGeocode = useCallback(async (latitude: number, longitude: number) => {
+    const fallback = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
     try {
       const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+      // Geocoding v6 (v5 / mapbox.places is deprecated and unavailable on newer
+      // Mapbox accounts).
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${token}`
+        `https://api.mapbox.com/search/geocode/v6/reverse?longitude=${longitude}&latitude=${latitude}&access_token=${token}`
       );
+      if (!res.ok) return fallback;
       const data = await res.json();
-      return data.features?.[0]?.place_name || `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+      const props = data.features?.[0]?.properties;
+      return props?.full_address || props?.place_formatted || props?.name || fallback;
     } catch {
-      return `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+      return fallback;
     }
   }, []);
 

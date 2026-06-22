@@ -4,6 +4,7 @@ import { useState, useRef, type ChangeEvent, type DragEvent } from 'react';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { downscaleImage } from '@/lib/image';
 import type { AnalyzePhotoResponse } from '@/lib/types';
 
 interface PhotoUploaderProps {
@@ -64,17 +65,22 @@ export default function PhotoUploader({
     }
 
     setError(null);
-    lastFileRef.current = file;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setPreview(dataUrl);
-      onPhotoSelected(file, dataUrl);
-      analyze(file, dataUrl);
-    };
-    reader.onerror = () => setError('Could not read that file. Please try another photo.');
-    reader.readAsDataURL(file);
+    // Downscale + re-encode before doing anything else. This keeps the upload
+    // and the AI request well under serverless body limits, and strips EXIF/GPS
+    // metadata from the stored/emailed photo.
+    let processed: { file: File; dataUrl: string };
+    try {
+      processed = await downscaleImage(file);
+    } catch {
+      setError('Could not read that file. Please try another photo.');
+      return;
+    }
+
+    lastFileRef.current = processed.file;
+    setPreview(processed.dataUrl);
+    onPhotoSelected(processed.file, processed.dataUrl);
+    analyze(processed.file, processed.dataUrl);
   };
 
   const handleRetry = () => {
