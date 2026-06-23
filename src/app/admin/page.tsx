@@ -179,7 +179,7 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between gap-3 mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-text-primary">Admin Panel</h1>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onClick={fetchReports} loading={refreshing}>
@@ -202,37 +202,37 @@ export default function AdminPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+      <div className="mb-4 flex flex-wrap items-center gap-2 sm:gap-3">
         <input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search title, address, ref, contact…"
-          className="flex-1 min-w-[200px] rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev placeholder:text-text-muted"
+          className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev placeholder:text-text-muted sm:flex-1 sm:min-w-[200px]"
         />
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev">
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev sm:w-auto">
           <option value="">All statuses</option>
           {STATUS_OPTIONS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
-        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev">
+        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev sm:w-auto">
           <option value="">All categories</option>
           {ISSUE_CATEGORIES.map((c) => (
             <option key={c.id} value={c.id}>{c.icon} {c.label}</option>
           ))}
         </select>
-        <select value={sort} onChange={(e) => setSort(e.target.value)} className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev">
+        <select value={sort} onChange={(e) => setSort(e.target.value)} className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev sm:w-auto">
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
         </select>
-        <span className="text-xs text-text-muted num ml-auto">{filteredReports.length} shown</span>
+        <span className="num ml-auto text-xs text-text-muted">{filteredReports.length} shown</span>
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden md:block bg-bg-elev rounded-xl border border-rule overflow-hidden">
+      <div className="hidden lg:block bg-bg-elev rounded-xl border border-rule overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] text-sm">
+          <table className="w-full min-w-[840px] text-sm">
             <thead className="bg-bg border-b border-rule">
               <tr>
                 <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Issue</th>
@@ -289,10 +289,10 @@ export default function AdminPage() {
                     <td className="px-3 py-2.5">
                       <div className="flex gap-1">
                         {report.status !== 'resolved' && (
-                          <button onClick={() => handleStatusChange(report.id, 'resolved')} className="text-xs px-2 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100">Resolve</button>
+                          <button onClick={() => handleStatusChange(report.id, 'resolved')} className="min-h-10 rounded bg-green-50 px-3 py-2 text-sm text-green-700 hover:bg-green-100">Resolve</button>
                         )}
-                        <button onClick={() => setDetail(report)} className="text-xs px-2 py-1 rounded bg-black/[0.05] text-text-secondary hover:bg-black/[0.08]">View</button>
-                        <button onClick={() => setDeleteCandidate(report)} className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100">Delete</button>
+                        <button onClick={() => setDetail(report)} className="min-h-10 rounded bg-black/[0.05] px-3 py-2 text-sm text-text-secondary hover:bg-black/[0.08]">View</button>
+                        <button onClick={() => setDeleteCandidate(report)} className="min-h-10 rounded bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100">Delete</button>
                       </div>
                     </td>
                   </tr>
@@ -307,7 +307,7 @@ export default function AdminPage() {
       </div>
 
       {/* Mobile Cards */}
-      <div className="md:hidden space-y-3">
+      <div className="space-y-3 lg:hidden">
         {filteredReports.map((report) => {
           const cat = getCategoryById(report.category);
           const seen = report.verifications?.filter((v) => v.type === 'confirmed_exists').length || 0;
@@ -330,17 +330,17 @@ export default function AdminPage() {
                 <select
                   value={report.status}
                   onChange={(e) => handleStatusChange(report.id, e.target.value)}
-                  className="rounded-md border border-rule bg-bg-elev py-1.5 px-2 text-xs flex-1 min-w-[120px]"
+                  className="min-h-10 flex-1 min-w-[120px] rounded-md border border-rule bg-bg-elev px-2 py-2 text-sm"
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s.value} value={s.value}>{s.label}</option>
                   ))}
                 </select>
                 {report.status !== 'resolved' && (
-                  <button onClick={() => handleStatusChange(report.id, 'resolved')} className="text-xs px-3 py-1.5 rounded-lg bg-green-50 text-green-700">Resolve</button>
+                  <button onClick={() => handleStatusChange(report.id, 'resolved')} className="min-h-10 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">Resolve</button>
                 )}
-                <button onClick={() => setDetail(report)} className="text-xs px-3 py-1.5 rounded-lg bg-black/[0.05] text-text-secondary">View</button>
-                <button onClick={() => setDeleteCandidate(report)} className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-700">Delete</button>
+                <button onClick={() => setDetail(report)} className="min-h-10 rounded-lg bg-black/[0.05] px-3 py-2 text-sm text-text-secondary">View</button>
+                <button onClick={() => setDeleteCandidate(report)} className="min-h-10 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">Delete</button>
               </div>
             </div>
           );
@@ -374,11 +374,11 @@ export default function AdminPage() {
               </p>
             </div>
           )}
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setDeleteCandidate(null)}>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="ghost" onClick={() => setDeleteCandidate(null)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button variant="primary" onClick={confirmDelete}>
+            <Button variant="primary" onClick={confirmDelete} className="w-full sm:w-auto">
               Delete Report
             </Button>
           </div>
@@ -416,7 +416,7 @@ function ReportDetailBody({ report }: { report: Report }) {
         <span className="font-mono text-xs text-text-muted">{report.reference_number}</span>
       </div>
       <p className="text-text-secondary leading-relaxed">{report.description}</p>
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+      <dl className="grid grid-cols-1 gap-x-4 gap-y-2 text-xs sm:grid-cols-2">
         <Field label="Location" value={report.address || `${report.lat.toFixed(5)}, ${report.lng.toFixed(5)}`} />
         <Field label="District" value={report.districts?.name || '—'} />
         <Field label="Councillor" value={report.districts?.councillor_name || '—'} />
@@ -426,7 +426,7 @@ function ReportDetailBody({ report }: { report: Report }) {
         <Field label="Submitted" value={new Date(report.created_at).toLocaleString()} />
         <Field label="Resolved" value={report.resolved_at ? new Date(report.resolved_at).toLocaleString() : '—'} />
       </dl>
-      <div className="flex gap-3 pt-2 border-t border-rule">
+      <div className="flex flex-wrap gap-3 border-t border-rule pt-2">
         <Link href={`/reports/${report.id}`} className="text-primary text-xs hover:underline" target="_blank">Public page ↗</Link>
         <Link href={`/track/${report.reference_number}`} className="text-primary text-xs hover:underline" target="_blank">Tracking page ↗</Link>
         {report.photo_url && <a href={report.photo_url} className="text-primary text-xs hover:underline" target="_blank" rel="noreferrer">Full photo ↗</a>}

@@ -37,7 +37,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 z-50 rounded-xl bg-white p-0 shadow-xl backdrop:bg-black/50 max-w-lg w-full"
+      className="fixed inset-0 z-50 mx-auto my-auto w-[calc(100%-2rem)] max-h-[calc(100dvh-2rem)] max-w-lg overflow-y-auto rounded-xl bg-white p-0 shadow-xl backdrop:bg-black/50"
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose();
       }}
@@ -48,7 +48,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
             <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
             <button
               onClick={onClose}
-              className="text-text-secondary hover:text-text-primary p-1"
+              className="flex min-h-11 min-w-11 items-center justify-center p-2 text-text-secondary hover:text-text-primary -mr-2"
               aria-label="Close"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

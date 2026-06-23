@@ -52,7 +52,7 @@ export default function ReportsPage() {
       <h1 className="text-2xl font-bold text-text-primary mb-6">All Reports</h1>
 
       {/* Filters */}
-      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2 sm:gap-3 mb-6">
         <select
           value={category}
           onChange={(e) => { setCategory(e.target.value); setPage(1); }}
@@ -121,7 +121,7 @@ export default function ReportsPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-2 rounded-lg border border-rule text-sm disabled:opacity-50"
+                className="min-h-11 px-4 py-2 rounded-lg border border-rule text-sm disabled:opacity-50"
               >
                 Previous
               </button>
@@ -131,7 +131,7 @@ export default function ReportsPage() {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-2 rounded-lg border border-rule text-sm disabled:opacity-50"
+                className="min-h-11 px-4 py-2 rounded-lg border border-rule text-sm disabled:opacity-50"
               >
                 Next
               </button>

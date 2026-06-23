@@ -68,10 +68,10 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">My Reports</h1>
-          <p className="text-sm text-text-secondary">{userEmail}</p>
+          <p className="max-w-full truncate text-sm text-text-secondary">{userEmail}</p>
         </div>
         <Button variant="ghost" size="sm" onClick={handleSignOut}>
           Sign Out

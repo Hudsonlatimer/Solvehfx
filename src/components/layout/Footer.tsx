@@ -77,7 +77,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/8 hover:bg-white/15 hover:text-white transition-colors"
+                  className="flex h-11 w-11 min-h-11 min-w-11 items-center justify-center rounded-lg bg-white/8 hover:bg-white/15 hover:text-white transition-colors"
                 >
                   <Icon />
                 </a>
@@ -150,7 +150,7 @@ export default function Footer() {
           href="https://huddydigital.ca"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-6 group flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center transition-colors hover:border-accent/40 hover:bg-white/[0.06]"
+          className="mt-6 group flex flex-col items-center justify-center gap-1 sm:flex-row sm:gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center transition-colors hover:border-accent/40 hover:bg-white/[0.06]"
         >
           <span className="text-[12.5px] text-white/55 group-hover:text-white/75 transition-colors">
             A{' '}

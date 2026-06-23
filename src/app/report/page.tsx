@@ -295,6 +295,9 @@ function ReportFlow() {
                   </span>
                 ))}
               </div>
+              <p className="mt-2 text-center text-[11.5px] text-text-muted sm:hidden">
+                {STEPS[step].label} · {step + 1}/{totalSteps}
+              </p>
               <p className="sr-only">
                 Overall progress: {Math.round(progress)}%
               </p>
@@ -485,23 +488,23 @@ function ReportFlow() {
                 </h2>
 
                 <div className="mb-6 rounded-xl border border-rule bg-bg-elev p-4 space-y-3">
-                  <label className="flex items-start gap-2.5 text-[13px] text-text-secondary leading-relaxed">
+                  <label className="flex min-h-11 items-start gap-3 text-[13px] text-text-secondary leading-relaxed">
                     <input
                       type="checkbox"
                       checked={publicVisibilityAccepted}
                       onChange={(e) => setPublicVisibilityAccepted(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-rule text-primary focus:ring-primary"
+                      className="mt-0.5 h-5 w-5 shrink-0 rounded border-rule text-primary focus:ring-primary"
                     />
                     <span>
                       I understand report details may be visible on public SolveHFX pages.
                     </span>
                   </label>
-                  <label className="flex items-start gap-2.5 text-[13px] text-text-secondary leading-relaxed">
+                  <label className="flex min-h-11 items-start gap-3 text-[13px] text-text-secondary leading-relaxed">
                     <input
                       type="checkbox"
                       checked={termsAccepted}
                       onChange={(e) => setTermsAccepted(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-rule text-primary focus:ring-primary"
+                      className="mt-0.5 h-5 w-5 shrink-0 rounded border-rule text-primary focus:ring-primary"
                     />
                     <span>
                       I agree to the <Link href="/terms" className="text-primary hover:underline">Terms of Use</Link>{' '}
@@ -598,8 +601,8 @@ function ReportFlow() {
 
       {/* Sticky nav (mobile + desktop) */}
       {!submitted && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-bg-elev/95 backdrop-blur supports-[backdrop-filter]:bg-bg-elev/85">
-          <div className="mx-auto max-w-2xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-bg-elev/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur supports-[backdrop-filter]:bg-bg-elev/85">
+          <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
             <Button
               variant="ghost"
               onClick={() => setStep((s) => Math.max(0, s - 1))}

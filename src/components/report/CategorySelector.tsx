@@ -29,13 +29,13 @@ export default function CategorySelector({
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {ISSUE_CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             type="button"
             onClick={() => onSelect(cat.id)}
-            className={`flex items-center gap-2 rounded-lg border p-2.5 sm:p-3 text-left text-xs sm:text-sm transition-colors ${
+            className={`flex min-h-11 items-center gap-2 rounded-lg border p-3 text-left text-sm transition-colors ${
               selected === cat.id
                 ? 'border-primary bg-primary/5 text-primary font-medium'
                 : 'border-rule hover:border-primary/40 text-text-primary'

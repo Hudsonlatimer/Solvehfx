@@ -242,7 +242,7 @@ export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
               key={s.id}
               type="button"
               onClick={() => setStyleId(s.id)}
-              className={`rounded-md px-2.5 py-1.5 text-[12px] font-medium tracking-tight transition-colors ${
+              className={`min-h-11 rounded-md px-3 py-2.5 text-sm font-medium tracking-tight transition-colors ${
                 styleId === s.id
                   ? 'bg-primary text-white'
                   : 'text-text-secondary hover:text-text-primary'
@@ -256,7 +256,7 @@ export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
           type="button"
           onClick={() => setIs3D((v) => !v)}
           aria-pressed={is3D}
-          className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold tracking-tight shadow-civic backdrop-blur transition-colors ${
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-semibold tracking-tight shadow-civic backdrop-blur transition-colors ${
             is3D
               ? 'border-primary bg-primary text-white'
               : 'border-rule bg-bg-elev/95 text-text-secondary hover:text-text-primary'
@@ -309,7 +309,7 @@ export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
           onClose={() => setSelectedReport(null)}
           closeButton={true}
           closeOnClick={false}
-          maxWidth="320px"
+          maxWidth="340px"
         >
           <MapPopup report={selectedReport} onVerified={handleVerified} />
         </Popup>
@@ -400,7 +400,7 @@ function MapPopup({ report, onVerified }: { report: Report; onVerified: () => vo
   };
 
   return (
-    <div className="min-w-[290px] max-w-[340px] overflow-hidden rounded-xl border border-rule bg-white shadow-xl">
+    <div className="w-[min(calc(100vw-2rem),340px)] min-w-0 overflow-hidden rounded-xl border border-rule bg-white shadow-xl">
       {report.photo_url && (
         <div className="relative h-40 w-full">
           <Image
@@ -469,14 +469,14 @@ function MapPopup({ report, onVerified }: { report: Report; onVerified: () => vo
           <button
             onClick={handleConfirmExists}
             disabled={verifying}
-            className="flex-1 rounded-lg border border-amber-300 bg-amber-50 px-2 py-2 text-[12px] font-semibold text-amber-800 transition-colors hover:bg-amber-100 disabled:opacity-50"
+            className="min-h-11 flex-1 rounded-lg border border-amber-300 bg-amber-50 px-2 py-2.5 text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-100 disabled:opacity-50"
           >
             Still exists
           </button>
           <button
             onClick={handleMarkFixed}
             disabled={verifying}
-            className="flex-1 rounded-lg border border-green-300 bg-green-50 px-2 py-2 text-[12px] font-semibold text-green-800 transition-colors hover:bg-green-100 disabled:opacity-50"
+            className="min-h-11 flex-1 rounded-lg border border-green-300 bg-green-50 px-2 py-2.5 text-sm font-semibold text-green-800 transition-colors hover:bg-green-100 disabled:opacity-50"
           >
             It&apos;s fixed!
           </button>
@@ -493,7 +493,7 @@ function MapPopup({ report, onVerified }: { report: Report; onVerified: () => vo
 
       <Link
         href={`/reports/${report.id}`}
-        className="mx-3 mb-3 inline-flex items-center justify-center rounded-lg border border-rule px-2 py-1.5 text-[12px] font-semibold text-primary transition-colors hover:bg-primary/5"
+        className="mx-3 mb-3 inline-flex min-h-11 w-[calc(100%-1.5rem)] items-center justify-center rounded-lg border border-rule px-3 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
       >
         View full report
       </Link>

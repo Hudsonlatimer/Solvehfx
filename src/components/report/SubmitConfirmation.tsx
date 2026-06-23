@@ -125,14 +125,14 @@ export default function SubmitConfirmation({
           <div className="pt-3.5 border-t border-rule text-[13.5px] text-text-secondary">
             <p className="font-medium text-text-primary mb-1.5">Your report will be sent to:</p>
             <ul className="space-y-1">
-              <li className="flex items-center gap-2">
+              <li className="flex flex-wrap items-start gap-x-2 gap-y-1">
                 <Dot /> {authorityInfo.name}{' '}
-                <span className="text-text-muted">({authorityInfo.email})</span>
+                <span className="break-all text-text-muted">({authorityInfo.email})</span>
               </li>
               {district?.councillor_name && (
-                <li className="flex items-center gap-2">
+                <li className="flex flex-wrap items-start gap-x-2 gap-y-1">
                   <Dot /> Councillor {district.councillor_name}{' '}
-                  <span className="text-text-muted">({district.councillor_email})</span>
+                  <span className="break-all text-text-muted">({district.councillor_email})</span>
                 </li>
               )}
             </ul>

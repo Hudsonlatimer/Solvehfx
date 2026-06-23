@@ -256,7 +256,7 @@ export default async function HomePage() {
           {/* LEFT — impact + routing */}
           <div>
             <Reveal>
-              <div className="flex items-end justify-between gap-4">
+              <div className="flex flex-wrap items-end justify-between gap-2">
                 <div>
                   <h2 style={SANS} className="text-[26px] font-bold tracking-tight text-text-primary">
                     Community impact
@@ -367,15 +367,15 @@ export default async function HomePage() {
           </Reveal>
 
           <Reveal delay={60}>
-            <div className="grid grid-cols-3 overflow-hidden rounded-xl border-l border-t border-rule sm:grid-cols-5 lg:grid-cols-10">
+            <div className="grid grid-cols-2 overflow-hidden rounded-xl border-l border-t border-rule sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10">
               {ISSUE_CATEGORIES.map((cat, i) => (
                 <Reveal key={cat.id} delay={(i % 10) * 35}>
                   <Link
                     href={`/report?category=${cat.id}`}
-                    className="flex flex-col items-center gap-2 border-b border-r border-rule p-3.5 text-center transition-colors hover:bg-primary/[0.04]"
+                    className="flex flex-col items-center gap-2 border-b border-r border-rule p-3 text-center transition-colors hover:bg-primary/[0.04] sm:p-3.5"
                   >
                     <span className="text-[20px] leading-none">{cat.icon}</span>
-                    <span className="text-[11px] font-medium leading-tight text-text-secondary">
+                    <span className="text-xs font-medium leading-tight text-text-secondary sm:text-[11px]">
                       {cat.label}
                     </span>
                   </Link>
@@ -427,7 +427,7 @@ export default async function HomePage() {
                               {r.address || 'Halifax, NS'}
                             </p>
                           </div>
-                          <div className="flex shrink-0 items-center gap-3">
+                          <div className="flex shrink-0 flex-col items-end gap-0.5 sm:flex-row sm:items-center sm:gap-3">
                             <StatusBadge status={r.status} />
                             <time className="num text-[11.5px] text-text-muted">
                               {new Date(r.created_at).toLocaleDateString('en-CA', {
