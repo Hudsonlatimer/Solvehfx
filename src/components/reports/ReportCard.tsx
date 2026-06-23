@@ -3,7 +3,6 @@ import Image from 'next/image';
 import StatusBadge from './StatusBadge';
 import Badge from '@/components/ui/Badge';
 import { getCategoryById } from '@/lib/districts';
-import { getDissolveState } from '@/lib/dissolve';
 import type { Report, ReportStatus } from '@/lib/types';
 
 interface ReportCardProps {
@@ -13,18 +12,13 @@ interface ReportCardProps {
 export default function ReportCard({ report }: ReportCardProps) {
   const category = getCategoryById(report.category);
   const verificationCount = report.verifications?.length || 0;
-  const dissolve = getDissolveState(report);
+  const resolvedDate = report.status === 'resolved' && report.resolved_at
+    ? new Date(report.resolved_at).toLocaleDateString()
+    : null;
 
   return (
     <Link href={`/reports/${report.id}`}>
-      <div
-        className="group rounded-xl border border-rule shadow-sm bg-bg-elev overflow-hidden transition-[opacity,box-shadow,filter] duration-500 hover:shadow-md hover:!opacity-100 hover:!grayscale-0"
-        style={
-          dissolve.isResolved
-            ? { opacity: dissolve.opacity, filter: `grayscale(${dissolve.progress * 0.6})` }
-            : undefined
-        }
-      >
+      <div className="group rounded-xl border border-rule shadow-sm bg-bg-elev overflow-hidden transition-shadow duration-300 hover:shadow-md">
         {report.photo_url ? (
           <Image
             src={report.photo_url}
@@ -58,13 +52,8 @@ export default function ReportCard({ report }: ReportCardProps) {
             )}
           </div>
 
-          {dissolve.isResolved && (
-            <p className="text-[11px] text-success/80">
-              {dissolve.daysSinceResolved === 0
-                ? 'Resolved today'
-                : `Resolved ${dissolve.daysSinceResolved}d ago`}
-              {dissolve.progress > 0.15 && ' · fading'}
-            </p>
+          {resolvedDate && (
+            <p className="text-[11px] text-success/80">Resolved {resolvedDate}</p>
           )}
         </div>
       </div>

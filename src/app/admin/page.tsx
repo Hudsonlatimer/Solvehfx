@@ -241,6 +241,7 @@ export default function AdminPage() {
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">Status</th>
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">District</th>
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">Contact</th>
+                <th className="px-4 py-3 text-left font-medium text-text-secondary">Votes</th>
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">Date</th>
                 <th className="px-4 py-3 text-left font-medium text-text-secondary">Actions</th>
               </tr>
@@ -248,6 +249,8 @@ export default function AdminPage() {
             <tbody>
               {filteredReports.map((report) => {
                 const cat = getCategoryById(report.category);
+                const seen = report.verifications?.filter((v) => v.type === 'confirmed_exists').length || 0;
+                const fixed = report.verifications?.filter((v) => v.type === 'confirmed_fixed').length || 0;
                 return (
                   <tr key={report.id} className="border-b border-rule hover:bg-bg">
                     <td className="px-4 py-3 max-w-[220px]">
@@ -277,9 +280,18 @@ export default function AdminPage() {
                         <span className="text-text-muted">Anonymous</span>
                       )}
                     </td>
+                    <td className="px-4 py-3 text-xs whitespace-nowrap">
+                      <span className="inline-flex items-center gap-2 text-text-secondary" title="Confirmed still exists / confirmed fixed">
+                        <span title={`${seen} confirmed they've seen this`}>👁 {seen}</span>
+                        <span title={`${fixed} say it's fixed`}>✅ {fixed}</span>
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-text-secondary text-xs whitespace-nowrap">{new Date(report.created_at).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
+                        {report.status !== 'resolved' && (
+                          <button onClick={() => handleStatusChange(report.id, 'resolved')} className="text-xs px-2 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100">Resolve</button>
+                        )}
                         <button onClick={() => setDetail(report)} className="text-xs px-2 py-1 rounded bg-black/[0.05] text-text-secondary hover:bg-black/[0.08]">View</button>
                         <button onClick={() => { setNoteModal(report.id); setNoteText(''); }} className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100">Note</button>
                         <button onClick={() => handleDelete(report.id)} className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100">Delete</button>
@@ -300,6 +312,8 @@ export default function AdminPage() {
       <div className="md:hidden space-y-3">
         {filteredReports.map((report) => {
           const cat = getCategoryById(report.category);
+          const seen = report.verifications?.filter((v) => v.type === 'confirmed_exists').length || 0;
+          const fixed = report.verifications?.filter((v) => v.type === 'confirmed_fixed').length || 0;
           return (
             <div key={report.id} className="bg-bg-elev rounded-xl border border-rule p-4 space-y-3">
               <div className="flex items-start justify-between gap-2">
@@ -310,16 +324,23 @@ export default function AdminPage() {
                 </button>
                 <StatusBadge status={report.status as ReportStatus} />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 text-xs text-text-secondary">
+                <span title="Confirmed they've seen this">👁 {seen} seen</span>
+                <span title="Say it's fixed">✅ {fixed} fixed</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
                 <select
                   value={report.status}
                   onChange={(e) => handleStatusChange(report.id, e.target.value)}
-                  className="rounded-md border border-rule bg-bg-elev py-1.5 px-2 text-xs flex-1"
+                  className="rounded-md border border-rule bg-bg-elev py-1.5 px-2 text-xs flex-1 min-w-[120px]"
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s.value} value={s.value}>{s.label}</option>
                   ))}
                 </select>
+                {report.status !== 'resolved' && (
+                  <button onClick={() => handleStatusChange(report.id, 'resolved')} className="text-xs px-3 py-1.5 rounded-lg bg-green-50 text-green-700">Resolve</button>
+                )}
                 <button onClick={() => { setNoteModal(report.id); setNoteText(''); }} className="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700">Note</button>
                 <button onClick={() => handleDelete(report.id)} className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-700">Delete</button>
               </div>
@@ -363,7 +384,8 @@ function StatCard({ label, value, tone, sub }: { label: string; value: string | 
 function ReportDetailBody({ report }: { report: Report }) {
   const cat = getCategoryById(report.category);
   const authority = AUTHORITY_EMAILS[report.road_authority];
-  const verifications = report.verifications?.length || 0;
+  const seen = report.verifications?.filter((v) => v.type === 'confirmed_exists').length || 0;
+  const fixed = report.verifications?.filter((v) => v.type === 'confirmed_fixed').length || 0;
   return (
     <div className="space-y-4 text-sm">
       {report.photo_url && (
@@ -383,7 +405,7 @@ function ReportDetailBody({ report }: { report: Report }) {
         <Field label="Councillor" value={report.districts?.councillor_name || '—'} />
         <Field label="Routed to" value={`${authority?.name || report.road_authority} (${authority?.email || ''})`} />
         <Field label="Contact" value={report.contact_name || report.contact_email ? `${report.contact_name || ''} ${report.contact_email ? `<${report.contact_email}>` : ''}`.trim() : 'Anonymous'} />
-        <Field label="Verifications" value={String(verifications)} />
+        <Field label="Votes" value={`👁 ${seen} seen · ✅ ${fixed} fixed`} />
         <Field label="Submitted" value={new Date(report.created_at).toLocaleString()} />
         <Field label="Resolved" value={report.resolved_at ? new Date(report.resolved_at).toLocaleString() : '—'} />
       </dl>

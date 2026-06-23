@@ -1,0 +1,29 @@
+To: Yuan Wang <yuan.wang@cbc.ca>
+From: Hudson Latimer <hudsonlatimer4@gmail.com>
+Subject: Re: CBC inquiry: SolveHFX
+
+Hi Yuan,
+
+Great chatting with you. Quick answers:
+
+We're at 50 reports so far.
+
+On talking to a user - I can't connect you with anyone, unfortunately.
+Every report has been submitted anonymously, so I don't have contact info
+for any of them. For the same reason I can't point you to specific feedback
+like the pothole/car-damage example - I don't collect names or stories, just
+the reports themselves.
+
+On the tech - yes. When someone hits "submit," the report is emailed out
+automatically within seconds. It goes to whichever authority is responsible
+(HRM 311, Halifax Transit, or the province for highways) and to the
+resident's district councillor. The emails come from a solvehfx.ca address
+to the public government inboxes - it's not a formal partnership with the
+city.
+
+And no, reports don't show who submitted them. They're anonymous by
+default; people can add an email if they want a reply, but that's optional.
+
+
+Best,
+Hudson

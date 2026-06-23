@@ -6,7 +6,6 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import IssuePin from './IssuePin';
 import StatusBadge from '@/components/reports/StatusBadge';
 import { getCategoryById } from '@/lib/districts';
-import { getDissolveState } from '@/lib/dissolve';
 import type { Report, ReportStatus } from '@/lib/types';
 import type { MapRef } from 'react-map-gl/mapbox';
 import Link from 'next/link';
@@ -35,7 +34,6 @@ const DISTRICT_VIEWS: Record<number, { lng: number; lat: number; zoom: number }>
 interface IssueMapProps {
   reports: Report[];
   focusDistrict?: number | null;
-  showArchived?: boolean;
 }
 
 const INITIAL_VIEW = {
@@ -52,7 +50,7 @@ const MAP_STYLES: { id: MapStyleId; label: string; url: string }[] = [
   { id: 'dark', label: 'Dark', url: 'mapbox://styles/mapbox/dark-v11' },
 ];
 
-export default function IssueMap({ reports, focusDistrict, showArchived = false }: IssueMapProps) {
+export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [styleId, setStyleId] = useState<MapStyleId>('satellite');
@@ -264,8 +262,9 @@ export default function IssueMap({ reports, focusDistrict, showArchived = false 
         <NavigationControl position="top-right" />
 
       {reports.map((report) => {
-        const dissolve = getDissolveState(report);
-        if (dissolve.archived && !showArchived) return null;
+        // Resolved issues drop off the map — they stay in the reports list,
+        // marked resolved. The map only shows what still needs attention.
+        if (report.status === 'resolved') return null;
         return (
           <Marker
             key={report.id}
@@ -278,8 +277,6 @@ export default function IssueMap({ reports, focusDistrict, showArchived = false 
               status={report.status}
               hasPhoto={!!report.photo_url}
               verificationCount={report.verifications?.length || 0}
-              opacity={dissolve.opacity}
-              fade={dissolve.progress * 0.7}
               onClick={() => handleMarkerClick(report)}
             />
           </Marker>

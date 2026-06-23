@@ -21,11 +21,11 @@ export default function MapFilters({
   onDistrictChange,
   onStatusChange,
 }: MapFiltersProps) {
+  // Resolved issues are not shown on the map, so they're not a filter option.
   const statuses: { value: string; label: string }[] = [
     { value: '', label: 'All Statuses' },
     { value: 'open', label: 'Open' },
     { value: 'in_progress', label: 'In Progress' },
-    { value: 'resolved', label: 'Resolved' },
   ];
 
   return (

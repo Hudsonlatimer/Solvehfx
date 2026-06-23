@@ -46,11 +46,11 @@ The [scorecards page](/scorecards) tracks how each district's councillor is resp
 
 Transparency is a feature. If your councillor is fast, you'll see it. If they're not, you'll see that too.
 
-## Resolved issues now "dissolve"
+## Resolved issues clear off the map
 
-This one's subtle but I'm proud of it. When an issue gets marked resolved, it doesn't just vanish or clutter the map forever. It **gradually fades** based on how long ago it was fixed, then quietly archives itself after a couple of weeks.
+When an issue gets marked resolved, it **drops off the map** — so the map only ever shows what still needs attention. Nothing's deleted: the report stays in the [reports feed](/reports), now marked **Resolved**, so there's always a public record of what got fixed and when.
 
-So the map and the [reports feed](/reports) always show you what still needs attention — fresh problems stay loud, fixed ones fade into the background. Nothing's ever deleted; there's a toggle to bring the archived ones back. It keeps the whole thing feeling alive instead of turning into a graveyard of old tickets.
+Fresh problems stay loud on the map; fixed ones move to the history. It keeps the map from turning into a graveyard of old tickets.
 
 ## What's next
 
