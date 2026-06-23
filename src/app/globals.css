@@ -207,3 +207,10 @@
 .issue-popup .mapboxgl-popup-close-button:hover {
   background: rgb(0 0 0 / 0.06);
 }
+
+.issue-popup .mapboxgl-popup-content {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
