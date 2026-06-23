@@ -107,3 +107,22 @@ VALUES
   (15, 'Lower Sackville-Beaver Bank', 'Billy Gillis', 'b.gillis@halifax.ca'),
   (16, 'Bedford-Wentworth', 'Jean St-Amand', 'j.stamand@halifax.ca')
 ON CONFLICT (id) DO NOTHING;
+
+-- 8. Row Level Security
+-- The public site queries with the anon key, so it needs READ access to the
+-- data it displays. Without these policies (and with RLS enabled), anon reads
+-- return zero rows silently and the site shows "0 reports" even though the
+-- data is there. All writes happen server-side via the service role, which
+-- bypasses RLS — so the public only ever gets read access here.
+ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE verifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE districts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public read reports" ON reports;
+CREATE POLICY "Public read reports" ON reports FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public read verifications" ON verifications;
+CREATE POLICY "Public read verifications" ON verifications FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public read districts" ON districts;
+CREATE POLICY "Public read districts" ON districts FOR SELECT USING (true);
