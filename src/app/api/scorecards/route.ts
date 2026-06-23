@@ -1,74 +1,95 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// District scorecards. We can't observe councillors' inboxes, so these metrics
+// are built only from what's public and verifiable: reports filed through
+// SolveHFX and whether they've been resolved (marked resolved by an admin or
+// confirmed fixed by the community).
 export async function GET() {
   try {
     const supabase = await createServiceClient();
 
-    // Get all reports with district info
     const { data: reports, error } = await supabase
       .from('reports')
-      .select('*, districts(*)')
+      .select('status, created_at, resolved_at, districts(*), verifications(id)')
       .order('created_at', { ascending: false });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Group by district and calculate stats
-    const statsByDistrict = new Map();
+    type Acc = {
+      district: unknown;
+      totalReports: number;
+      resolved: number;
+      open: number;
+      verifications: number;
+      resolveDaysSum: number;
+      resolvedWithTime: number;
+    };
 
-    reports?.forEach((report) => {
-      if (!report.districts) return;
+    const byDistrict = new Map<number, Acc>();
 
-      const districtId = report.districts.id;
-      if (!statsByDistrict.has(districtId)) {
-        statsByDistrict.set(districtId, {
-          district: report.districts,
+    (reports ?? []).forEach((r) => {
+      // supabase types the embedded relation loosely; narrow it here
+      const district = (r as unknown as { districts: { id: number } | null }).districts;
+      if (!district) return;
+      const id = district.id;
+
+      if (!byDistrict.has(id)) {
+        byDistrict.set(id, {
+          district,
           totalReports: 0,
-          responded: 0,
-          responseTimeSum: 0,
           resolved: 0,
-          responseCount: 0,
+          open: 0,
+          verifications: 0,
+          resolveDaysSum: 0,
+          resolvedWithTime: 0,
         });
       }
 
-      const stat = statsByDistrict.get(districtId);
-      stat.totalReports++;
+      const s = byDistrict.get(id)!;
+      s.totalReports++;
+      s.verifications += (r as unknown as { verifications?: unknown[] }).verifications?.length || 0;
 
-      // Count councillor responses
-      if (report.councillor_responded) {
-        stat.responded++;
-        if (report.councillor_response_date && report.created_at) {
-          const daysToRespond = Math.floor(
-            (new Date(report.councillor_response_date).getTime() - new Date(report.created_at).getTime()) /
-              (1000 * 60 * 60 * 24)
-          );
-          if (daysToRespond >= 0) {
-            stat.responseTimeSum += daysToRespond;
-            stat.responseCount++;
+      const resolved = r.status === 'resolved' || !!r.resolved_at;
+      if (resolved) {
+        s.resolved++;
+        if (r.resolved_at && r.created_at) {
+          const days = (new Date(r.resolved_at).getTime() - new Date(r.created_at).getTime()) / DAY_MS;
+          if (days >= 0) {
+            s.resolveDaysSum += days;
+            s.resolvedWithTime++;
           }
         }
-      }
-
-      // Count resolved reports
-      if (report.status === 'resolved' || report.resolved_at) {
-        stat.resolved++;
+      } else {
+        s.open++;
       }
     });
 
-    // Convert to array and calculate percentages
-    const stats = Array.from(statsByDistrict.values()).map((stat: any) => ({
-      district: stat.district,
-      totalReports: stat.totalReports,
-      responded: stat.responded,
-      responseRate: stat.totalReports > 0 ? (stat.responded / stat.totalReports) * 100 : 0,
-      avgDaysToRespond: stat.responseCount > 0 ? Math.round(stat.responseTimeSum / stat.responseCount) : 0,
-      resolved: stat.resolved,
-      resolutionRate: stat.totalReports > 0 ? (stat.resolved / stat.totalReports) * 100 : 0,
+    const stats = Array.from(byDistrict.values()).map((s) => ({
+      district: s.district,
+      totalReports: s.totalReports,
+      resolved: s.resolved,
+      open: s.open,
+      verifications: s.verifications,
+      resolutionRate: s.totalReports ? (s.resolved / s.totalReports) * 100 : 0,
+      avgDaysToResolve: s.resolvedWithTime ? Math.round(s.resolveDaysSum / s.resolvedWithTime) : null,
     }));
 
-    return NextResponse.json({ stats }, { status: 200 });
+    const totals = stats.reduce(
+      (acc, s) => {
+        acc.totalReports += s.totalReports;
+        acc.resolved += s.resolved;
+        acc.open += s.open;
+        return acc;
+      },
+      { totalReports: 0, resolved: 0, open: 0 }
+    );
+
+    return NextResponse.json({ stats, totals }, { status: 200 });
   } catch (error) {
     console.error('Failed to load scorecards:', error);
     return NextResponse.json({ error: 'Failed to load scorecards' }, { status: 500 });
