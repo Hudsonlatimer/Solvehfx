@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
 
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'huddydev0@gmail.com')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+function isAdmin(email: string | null | undefined): boolean {
+  return !!email && ADMIN_EMAILS.includes(email.toLowerCase());
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -53,6 +62,9 @@ export async function PATCH(
     if (!user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
+    if (!isAdmin(user.email)) {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
 
     const updates: Record<string, unknown> = {};
     if (status) {
@@ -89,6 +101,41 @@ export async function PATCH(
     console.error('Failed to update report:', error);
     return NextResponse.json(
       { error: 'Failed to update report' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const supabase = await createClient();
+    const serviceClient = await createServiceClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    if (!isAdmin(user.email)) {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    const { error } = await serviceClient.from('reports').delete().eq('id', id);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error('Failed to delete report:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete report' },
       { status: 500 }
     );
   }

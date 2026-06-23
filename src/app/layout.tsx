@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DM_Sans, Fraunces } from 'next/font/google';
+import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import Navbar from '@/components/layout/Navbar';
@@ -20,6 +21,7 @@ const fraunces = Fraunces({
 });
 
 const BASE_URL = 'https://solvehfx.ca';
+const GA_MEASUREMENT_ID = 'G-X7NDEMB16Z';
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -185,6 +187,18 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col font-[family-name:var(--font-body)]">
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

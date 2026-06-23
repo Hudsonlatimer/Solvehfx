@@ -90,8 +90,16 @@ export default function AdminPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this report? This cannot be undone.')) return;
+    const previous = reports;
     setReports((prev) => prev.filter((r) => r.id !== id));
-    await supabase.from('reports').delete().eq('id', id);
+    const res = await fetch(`/api/reports/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      setReports(previous);
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || 'Failed to delete report.');
+      return;
+    }
+    fetchReports();
   };
 
   const stats = useMemo(() => {
