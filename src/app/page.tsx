@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import Reveal from '@/components/ui/Reveal';
 import { ISSUE_CATEGORIES } from '@/lib/types';
-import { createServiceClient } from '@/lib/supabase/server';
+import { createPublicServerClient, createServiceClient } from '@/lib/supabase/server';
 import { unstable_cache } from 'next/cache';
 
 export const metadata: Metadata = {
@@ -58,44 +58,47 @@ const EMPTY_STATS: HomeStats = {
 const getHomeStats = unstable_cache(
   async (): Promise<HomeStats> => {
     try {
-      const supabase = await createServiceClient();
+      const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+        ? await createServiceClient()
+        : await createPublicServerClient();
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-      const withTimeout = <T,>(p: PromiseLike<T>, ms = 2500): Promise<T> =>
-        Promise.race([
-          p as Promise<T>,
-          new Promise<T>((_, reject) =>
-            setTimeout(() => reject(new Error('Supabase timeout')), ms)
-          ),
+      const [totalRes, resolvedMonthRes, allResolvedRes, resolvedReportsRes, recentRes, districtsRes] =
+        await Promise.all([
+          supabase.from('reports').select('*', { count: 'exact', head: true }),
+          supabase
+            .from('reports')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'resolved')
+            .gte('resolved_at', thirtyDaysAgo),
+          supabase
+            .from('reports')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'resolved'),
+          supabase
+            .from('reports')
+            .select('created_at, resolved_at')
+            .eq('status', 'resolved')
+            .not('resolved_at', 'is', null)
+            .limit(100),
+          supabase
+            .from('reports')
+            .select('id, title, category, address, status, created_at')
+            .order('created_at', { ascending: false })
+            .limit(6),
+          supabase.from('reports').select('district_id').not('district_id', 'is', null),
         ]);
 
-      const [totalRes, resolvedMonthRes, allResolvedRes, resolvedReportsRes, recentRes, districtsRes] =
-        await withTimeout(
-          Promise.all([
-            supabase.from('reports').select('*', { count: 'exact', head: true }),
-            supabase
-              .from('reports')
-              .select('*', { count: 'exact', head: true })
-              .eq('status', 'resolved')
-              .gte('resolved_at', thirtyDaysAgo),
-            supabase
-              .from('reports')
-              .select('*', { count: 'exact', head: true })
-              .eq('status', 'resolved'),
-            supabase
-              .from('reports')
-              .select('created_at, resolved_at')
-              .eq('status', 'resolved')
-              .not('resolved_at', 'is', null)
-              .limit(100),
-            supabase
-              .from('reports')
-              .select('id, title, category, address, status, created_at')
-              .order('created_at', { ascending: false })
-              .limit(6),
-            supabase.from('reports').select('district_id').not('district_id', 'is', null),
-          ])
-        );
+      if (
+        totalRes.error ||
+        resolvedMonthRes.error ||
+        allResolvedRes.error ||
+        resolvedReportsRes.error ||
+        recentRes.error ||
+        districtsRes.error
+      ) {
+        throw new Error('Failed to load homepage stats');
+      }
 
       let avgResolutionDays = 0;
       const resolvedReports = resolvedReportsRes.data;

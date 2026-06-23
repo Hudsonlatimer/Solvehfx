@@ -1,27 +1,9 @@
 import Link from 'next/link';
 
 const SOCIAL_LINKS = {
-  x: 'https://x.com/SolveHFX',
-  instagram: 'https://instagram.com/SolveHFX',
   facebook: 'https://facebook.com/SolveHFX',
 };
 
-function XIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  );
-}
-function InstagramIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
-      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-    </svg>
-  );
-}
 function FacebookIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -67,8 +49,6 @@ export default function Footer() {
             </p>
             <div className="mt-5 flex items-center gap-2">
               {[
-                { href: SOCIAL_LINKS.x, label: 'Follow SolveHFX on X', Icon: XIcon },
-                { href: SOCIAL_LINKS.instagram, label: 'Follow SolveHFX on Instagram', Icon: InstagramIcon },
                 { href: SOCIAL_LINKS.facebook, label: 'Follow SolveHFX on Facebook', Icon: FacebookIcon },
               ].map(({ href, label, Icon }) => (
                 <a

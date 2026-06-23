@@ -304,8 +304,8 @@ export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
         <Popup
           longitude={selectedReport.lng}
           latitude={selectedReport.lat}
-          anchor="bottom"
           offset={15}
+          className="issue-popup"
           onClose={() => setSelectedReport(null)}
           closeButton={true}
           closeOnClick={false}
