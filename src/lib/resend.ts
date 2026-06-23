@@ -15,6 +15,8 @@ interface DispatchParams {
   authority: RoadAuthority;
 }
 
+const OWNER_ALERT_EMAIL = 'hudsonlatimer4@gmail.com';
+
 function getPriority(category: string): string {
   if (category === 'snow_ice' || category === 'pothole') return 'P1 — High';
   return 'P2 — Standard';
@@ -98,9 +100,29 @@ solvehfx.ca`,
         })
       : Promise.resolve(null);
 
-  const results = await Promise.allSettled([authorityEmail, councillorEmail]);
+  const ownerAlertEmail = getResend().emails.send({
+    from: 'SolveHFX Alerts <reports@solvehfx.ca>',
+    to: [OWNER_ALERT_EMAIL],
+    subject: `[SolveHFX] New Submission ${report.reference_number} — ${categoryLabel}`,
+    text: `A new report was submitted.
+
+Reference: ${report.reference_number}
+Issue: ${categoryLabel}
+Title: ${report.title}
+Location: ${report.address || 'Not specified'}
+Authority: ${authorityInfo.name}
+District: ${district?.name || 'Unknown'}
+Priority: ${priority}
+
+View report: ${APP_URL}/reports/${report.id}
+Track report: ${APP_URL}/track/${report.reference_number}
+`,
+  });
+
+  const results = await Promise.allSettled([authorityEmail, councillorEmail, ownerAlertEmail]);
   return {
     authoritySent: results[0].status === 'fulfilled',
     councillorSent: results[1].status === 'fulfilled',
+    ownerAlertSent: results[2].status === 'fulfilled',
   };
 }
