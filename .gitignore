@@ -15,3 +15,6 @@ next-env.d.ts
 
 # large local binaries (not part of the app)
 public/*.exe
+
+# personal correspondence (local only)
+cbc-reply.txt
