@@ -233,17 +233,17 @@ export default function AdminPage() {
       {/* Desktop Table */}
       <div className="hidden md:block bg-bg-elev rounded-xl border border-rule overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="bg-bg border-b border-rule">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Issue</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Category</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Status</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">District</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Contact</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Votes</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Date</th>
-                <th className="px-4 py-3 text-left font-medium text-text-secondary">Actions</th>
+                <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Issue</th>
+                <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Category</th>
+                <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Status</th>
+                <th className="px-3 py-2.5 text-left font-medium text-text-secondary">District</th>
+                <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Contact</th>
+                <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Votes</th>
+                <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Date</th>
+                <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -253,14 +253,14 @@ export default function AdminPage() {
                 const fixed = report.verifications?.filter((v) => v.type === 'confirmed_fixed').length || 0;
                 return (
                   <tr key={report.id} className="border-b border-rule hover:bg-bg">
-                    <td className="px-4 py-3 max-w-[220px]">
+                    <td className="px-3 py-2.5 max-w-[220px]">
                       <button onClick={() => setDetail(report)} className="font-medium text-left hover:text-primary truncate block w-full">
                         {report.title}
                       </button>
                       <span className="text-[11px] font-mono text-text-muted">{report.reference_number}</span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">{cat?.icon} {cat?.label}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2.5 whitespace-nowrap">{cat?.icon} {cat?.label}</td>
+                    <td className="px-3 py-2.5">
                       <select
                         value={report.status}
                         onChange={(e) => handleStatusChange(report.id, e.target.value)}
@@ -272,22 +272,22 @@ export default function AdminPage() {
                         ))}
                       </select>
                     </td>
-                    <td className="px-4 py-3 text-text-secondary text-xs">{report.districts?.name || '—'}</td>
-                    <td className="px-4 py-3 text-xs">
+                    <td className="px-3 py-2.5 text-text-secondary text-xs">{report.districts?.name || '—'}</td>
+                    <td className="px-3 py-2.5 text-xs">
                       {report.contact_email || report.contact_name ? (
                         <span className="text-text-secondary">{report.contact_name || report.contact_email}</span>
                       ) : (
                         <span className="text-text-muted">Anonymous</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs whitespace-nowrap">
+                    <td className="px-3 py-2.5 text-xs whitespace-nowrap">
                       <span className="inline-flex items-center gap-2 text-text-secondary" title="Confirmed still exists / confirmed fixed">
                         <span title={`${seen} confirmed they've seen this`}>👁 {seen}</span>
                         <span title={`${fixed} say it's fixed`}>✅ {fixed}</span>
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-text-secondary text-xs whitespace-nowrap">{new Date(report.created_at).toLocaleDateString()}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2.5 text-text-secondary text-xs whitespace-nowrap">{new Date(report.created_at).toLocaleDateString()}</td>
+                    <td className="px-3 py-2.5">
                       <div className="flex gap-1">
                         {report.status !== 'resolved' && (
                           <button onClick={() => handleStatusChange(report.id, 'resolved')} className="text-xs px-2 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100">Resolve</button>
