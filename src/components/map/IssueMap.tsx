@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import IssuePin from './IssuePin';
@@ -50,6 +50,12 @@ const MAP_STYLES: { id: MapStyleId; label: string; url: string }[] = [
   { id: 'dark', label: 'Dark', url: 'mapbox://styles/mapbox/dark-v11' },
 ];
 
+const AUTHORITY_LABELS: Record<string, string> = {
+  hrm: 'HRM 311',
+  province: 'NS Public Works',
+  transit: 'Halifax Transit',
+};
+
 export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -57,6 +63,7 @@ export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
   const [is3D, setIs3D] = useState(false);
   const mapRef = useRef<MapRef>(null);
   const pendingFlyRef = useRef<number | null | undefined>(undefined);
+  const pendingFlyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const is3DRef = useRef(is3D);
   const styleIdRef = useRef<MapStyleId>(styleId);
 
@@ -68,6 +75,10 @@ export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
   }, [styleId]);
 
   const activeStyleUrl = MAP_STYLES.find((s) => s.id === styleId)!.url;
+  const visibleReports = useMemo(
+    () => reports.filter((report) => report.status !== 'resolved'),
+    [reports]
+  );
 
   // 3D is added against the raw mapbox instance (terrain + sky + extruded
   // buildings) so it survives base-style swaps. Typed loosely on purpose —
@@ -165,25 +176,34 @@ export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
     }
   }, []);
 
-  // When map loads, fly to pending district if any
   const handleMapLoad = useCallback(() => {
     setMapLoaded(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const map = mapRef.current?.getMap() as any;
-    if (map) {
-      // Re-add terrain/sky/buildings every time the base style finishes
-      // (re)loading — switching styles wipes custom layers.
-      map.on('style.load', () => {
-        if (is3DRef.current) apply3D();
-      });
-    }
     if (is3DRef.current) apply3D();
     if (pendingFlyRef.current !== undefined) {
-      // Small delay to ensure map is fully interactive
-      setTimeout(() => flyToDistrict(pendingFlyRef.current), 300);
+      pendingFlyTimeoutRef.current = setTimeout(() => flyToDistrict(pendingFlyRef.current), 300);
       pendingFlyRef.current = undefined;
     }
   }, [flyToDistrict, apply3D]);
+
+  useEffect(() => {
+    if (!mapLoaded) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = mapRef.current?.getMap() as any;
+    if (!map) return;
+    const onStyleLoad = () => {
+      if (is3DRef.current) apply3D();
+    };
+    map.on('style.load', onStyleLoad);
+    return () => {
+      map.off('style.load', onStyleLoad);
+    };
+  }, [mapLoaded, apply3D]);
+
+  useEffect(() => {
+    return () => {
+      if (pendingFlyTimeoutRef.current) clearTimeout(pendingFlyTimeoutRef.current);
+    };
+  }, []);
 
   // React to focusDistrict changes
   useEffect(() => {
@@ -261,10 +281,7 @@ export default function IssueMap({ reports, focusDistrict }: IssueMapProps) {
       >
         <NavigationControl position="top-right" />
 
-      {reports.map((report) => {
-        // Resolved issues drop off the map — they stay in the reports list,
-        // marked resolved. The map only shows what still needs attention.
-        if (report.status === 'resolved') return null;
+      {visibleReports.map((report) => {
         return (
           <Marker
             key={report.id}
@@ -321,6 +338,14 @@ function MapPopup({ report, onVerified }: { report: Report; onVerified: () => vo
   const daysSince = Math.floor(
     (Date.now() - new Date(report.created_at).getTime()) / (1000 * 60 * 60 * 24)
   );
+  const ageLabel =
+    daysSince < 1 ? 'today' :
+      daysSince < 30 ? `${daysSince}d ago` :
+        daysSince < 365 ? `${Math.floor(daysSince / 30)}mo ago` :
+          `${Math.floor(daysSince / 365)}y ago`;
+  const districtLabel = report.districts?.name ? `District ${report.districts.name}` : 'District unknown';
+  const authorityLabel = AUTHORITY_LABELS[report.road_authority] || 'Jurisdiction unknown';
+  const detailsText = report.description.length > 140 ? `${report.description.slice(0, 140).trim()}...` : report.description;
 
   const handleMarkFixed = async () => {
     setVerifying(true);
@@ -375,66 +400,83 @@ function MapPopup({ report, onVerified }: { report: Report; onVerified: () => vo
   };
 
   return (
-    <div className="min-w-[260px] max-w-[300px]">
-      {/* Photo */}
+    <div className="min-w-[290px] max-w-[340px] overflow-hidden rounded-xl border border-rule bg-white shadow-xl">
       {report.photo_url && (
-        <div className="relative w-full h-36 -mt-2.5 -mx-2.5 mb-2" style={{ width: 'calc(100% + 20px)' }}>
+        <div className="relative h-40 w-full">
           <Image
             src={report.photo_url}
             alt={report.title}
             fill
-            className="object-cover rounded-t-lg"
-            sizes="300px"
+            className="object-cover"
+            sizes="340px"
           />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-3 pb-2 pt-8">
+            <div className="inline-flex items-center rounded-md bg-black/45 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+              {cat?.icon} {cat?.label || 'Issue'}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Status + Category */}
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <StatusBadge status={report.status as ReportStatus} />
-        <span className="text-xs text-text-secondary">
-          {cat?.icon} {cat?.label}
-        </span>
+      <div className="space-y-3 p-3">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <StatusBadge status={report.status as ReportStatus} />
+          {!report.photo_url && (
+            <span className="inline-flex items-center rounded-md bg-bg px-2 py-0.5 text-[11px] font-medium text-text-secondary">
+              {cat?.icon} {cat?.label || 'Issue'}
+            </span>
+          )}
+          <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+            {authorityLabel}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-[16px] font-semibold leading-tight text-text-primary">
+            {report.title}
+          </p>
+          <p className="mt-1 text-[12.5px] leading-snug text-text-secondary">
+            {detailsText}
+          </p>
+        </div>
+
+        <div className="space-y-1.5 rounded-lg border border-rule bg-bg px-2.5 py-2 text-[12px]">
+          <p className="text-text-secondary">{report.address || 'Halifax, NS'}</p>
+          <div className="flex items-center justify-between gap-2 text-text-secondary">
+            <span>{districtLabel}</span>
+            <span className="font-medium">{ageLabel}</span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-text-muted">Reported {reportedDate}</span>
+            <span className="font-mono text-[11px] text-primary">{report.reference_number}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 text-[12px]">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-amber-900">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-amber-700">Still exists</p>
+            <p className="mt-0.5 text-[14px] font-semibold">{existsCount}</p>
+          </div>
+          <div className="rounded-lg border border-green-200 bg-green-50 px-2 py-1.5 text-green-900">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-green-700">Says fixed</p>
+            <p className="mt-0.5 text-[14px] font-semibold">{fixedCount}</p>
+          </div>
+        </div>
       </div>
 
-      {/* Title */}
-      <p className="font-semibold text-sm text-text-primary mb-1 leading-tight">
-        {report.title}
-      </p>
-
-      {/* Address + Date + Reference */}
-      <p className="text-xs text-text-secondary mb-0.5">{report.address || 'Halifax, NS'}</p>
-      <p className="text-xs text-text-secondary mb-1">
-        Reported {reportedDate} &middot; {daysSince === 0 ? 'today' : `${daysSince}d ago`}
-      </p>
-      <p className="text-xs font-mono text-primary mb-2">
-        Ref: <strong>{report.reference_number}</strong>
-      </p>
-
-      {/* Verification stats */}
-      <div className="flex items-center gap-3 text-xs mb-2 py-1.5 px-2 bg-bg rounded-lg">
-        <span title="People who confirmed this issue still exists">
-          👁 {existsCount} confirmed
-        </span>
-        <span title="People who say this is fixed">
-          ✅ {fixedCount} say fixed
-        </span>
-      </div>
-
-      {/* Community verification buttons */}
       {report.status !== 'resolved' && !fixVoted && (
-        <div className="flex gap-1.5 mb-2">
+        <div className="flex gap-1.5 px-3 pb-1">
           <button
             onClick={handleConfirmExists}
             disabled={verifying}
-            className="flex-1 text-xs font-medium py-1.5 px-2 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors disabled:opacity-50"
+            className="flex-1 rounded-lg border border-amber-300 bg-amber-50 px-2 py-2 text-[12px] font-semibold text-amber-800 transition-colors hover:bg-amber-100 disabled:opacity-50"
           >
             Still exists
           </button>
           <button
             onClick={handleMarkFixed}
             disabled={verifying}
-            className="flex-1 text-xs font-medium py-1.5 px-2 rounded-lg border border-green-200 bg-green-50 text-green-800 hover:bg-green-100 transition-colors disabled:opacity-50"
+            className="flex-1 rounded-lg border border-green-300 bg-green-50 px-2 py-2 text-[12px] font-semibold text-green-800 transition-colors hover:bg-green-100 disabled:opacity-50"
           >
             It&apos;s fixed!
           </button>
@@ -442,19 +484,18 @@ function MapPopup({ report, onVerified }: { report: Report; onVerified: () => vo
       )}
 
       {fixVoted && (
-        <p className="text-xs text-green-700 bg-green-50 rounded-lg py-1.5 px-2 mb-2">
+        <p className="mx-3 mb-1 rounded-lg bg-green-50 px-2 py-1.5 text-[12px] text-green-700">
           Thanks for your input!
         </p>
       )}
 
-      {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
+      {error && <p className="mx-3 mb-1 text-[12px] text-red-600">{error}</p>}
 
-      {/* View full report link */}
       <Link
         href={`/reports/${report.id}`}
-        className="text-xs font-medium text-primary hover:underline"
+        className="mx-3 mb-3 inline-flex items-center justify-center rounded-lg border border-rule px-2 py-1.5 text-[12px] font-semibold text-primary transition-colors hover:bg-primary/5"
       >
-        View full report &rarr;
+        View full report
       </Link>
     </div>
   );

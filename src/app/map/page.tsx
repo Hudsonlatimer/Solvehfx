@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import MapFilters from '@/components/map/MapFilters';
@@ -37,6 +37,7 @@ function MapPageContent() {
       if (district) params.set('district', district);
       if (status) params.set('status', status);
       params.set('limit', '500');
+      params.set('view', 'map');
 
       try {
         const res = await fetch(`/api/reports?${params}`);
@@ -55,7 +56,10 @@ function MapPageContent() {
 
   const activeFilters = [category, district, status].filter(Boolean).length;
   // Resolved issues are not displayed on the map.
-  const mapCount = reports.filter((r) => r.status !== 'resolved').length;
+  const mapCount = useMemo(
+    () => reports.filter((r) => r.status !== 'resolved').length,
+    [reports]
+  );
 
   return (
     <div className="h-[calc(100dvh-4rem)] flex flex-col md:flex-row bg-bg-elev">
