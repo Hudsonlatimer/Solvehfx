@@ -49,6 +49,7 @@ export default function AdminPage() {
   const [sort, setSort] = useState('newest');
 
   const [detail, setDetail] = useState<Report | null>(null);
+  const [deleteCandidate, setDeleteCandidate] = useState<Report | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -89,7 +90,6 @@ export default function AdminPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this report? This cannot be undone.')) return;
     setRefreshing(true);
     const res = await fetch(`/api/reports/${id}`, { method: 'DELETE' });
     if (!res.ok) {
@@ -169,6 +169,13 @@ export default function AdminPage() {
   if (!authorized || loading) {
     return <LoadingSpinner size="lg" className="py-20" />;
   }
+
+  const confirmDelete = async () => {
+    if (!deleteCandidate) return;
+    const id = deleteCandidate.id;
+    setDeleteCandidate(null);
+    await handleDelete(id);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -285,7 +292,7 @@ export default function AdminPage() {
                           <button onClick={() => handleStatusChange(report.id, 'resolved')} className="text-xs px-2 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100">Resolve</button>
                         )}
                         <button onClick={() => setDetail(report)} className="text-xs px-2 py-1 rounded bg-black/[0.05] text-text-secondary hover:bg-black/[0.08]">View</button>
-                        <button onClick={() => handleDelete(report.id)} className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100">Delete</button>
+                        <button onClick={() => setDeleteCandidate(report)} className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100">Delete</button>
                       </div>
                     </td>
                   </tr>
@@ -333,7 +340,7 @@ export default function AdminPage() {
                   <button onClick={() => handleStatusChange(report.id, 'resolved')} className="text-xs px-3 py-1.5 rounded-lg bg-green-50 text-green-700">Resolve</button>
                 )}
                 <button onClick={() => setDetail(report)} className="text-xs px-3 py-1.5 rounded-lg bg-black/[0.05] text-text-secondary">View</button>
-                <button onClick={() => handleDelete(report.id)} className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-700">Delete</button>
+                <button onClick={() => setDeleteCandidate(report)} className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-700">Delete</button>
               </div>
             </div>
           );
@@ -346,6 +353,36 @@ export default function AdminPage() {
       {/* Detail modal */}
       <Modal open={detail !== null} onClose={() => setDetail(null)} title={detail?.title || 'Report'}>
         {detail && <ReportDetailBody report={detail} />}
+      </Modal>
+
+      <Modal
+        open={deleteCandidate !== null}
+        onClose={() => setDeleteCandidate(null)}
+        title="Delete report"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-text-secondary leading-relaxed">
+            Delete this report permanently? This action cannot be undone.
+          </p>
+          {deleteCandidate && (
+            <div className="rounded-lg border border-rule bg-bg p-3">
+              <p className="text-sm font-medium text-text-primary truncate">
+                {deleteCandidate.title}
+              </p>
+              <p className="mt-1 text-xs font-mono text-text-muted">
+                {deleteCandidate.reference_number}
+              </p>
+            </div>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setDeleteCandidate(null)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={confirmDelete}>
+              Delete Report
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
