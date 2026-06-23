@@ -7,7 +7,6 @@ import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import StatusBadge from '@/components/reports/StatusBadge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { Textarea } from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import { createClient } from '@/lib/supabase/client';
 import { getCategoryById } from '@/lib/districts';
@@ -49,8 +48,6 @@ export default function AdminPage() {
   const [filterCategory, setFilterCategory] = useState('');
   const [sort, setSort] = useState('newest');
 
-  const [noteModal, setNoteModal] = useState<string | null>(null);
-  const [noteText, setNoteText] = useState('');
   const [detail, setDetail] = useState<Report | null>(null);
 
   useEffect(() => {
@@ -88,18 +85,6 @@ export default function AdminPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
-    fetchReports();
-  };
-
-  const handleAddNote = async () => {
-    if (!noteModal || !noteText.trim()) return;
-    await fetch(`/api/reports/${noteModal}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ note: noteText }),
-    });
-    setNoteModal(null);
-    setNoteText('');
     fetchReports();
   };
 
@@ -293,7 +278,6 @@ export default function AdminPage() {
                           <button onClick={() => handleStatusChange(report.id, 'resolved')} className="text-xs px-2 py-1 rounded bg-green-50 text-green-700 hover:bg-green-100">Resolve</button>
                         )}
                         <button onClick={() => setDetail(report)} className="text-xs px-2 py-1 rounded bg-black/[0.05] text-text-secondary hover:bg-black/[0.08]">View</button>
-                        <button onClick={() => { setNoteModal(report.id); setNoteText(''); }} className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100">Note</button>
                         <button onClick={() => handleDelete(report.id)} className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100">Delete</button>
                       </div>
                     </td>
@@ -341,7 +325,7 @@ export default function AdminPage() {
                 {report.status !== 'resolved' && (
                   <button onClick={() => handleStatusChange(report.id, 'resolved')} className="text-xs px-3 py-1.5 rounded-lg bg-green-50 text-green-700">Resolve</button>
                 )}
-                <button onClick={() => { setNoteModal(report.id); setNoteText(''); }} className="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700">Note</button>
+                <button onClick={() => setDetail(report)} className="text-xs px-3 py-1.5 rounded-lg bg-black/[0.05] text-text-secondary">View</button>
                 <button onClick={() => handleDelete(report.id)} className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-700">Delete</button>
               </div>
             </div>
@@ -351,17 +335,6 @@ export default function AdminPage() {
           <div className="text-center py-8 text-text-secondary text-sm">No reports match your filters.</div>
         )}
       </div>
-
-      {/* Note modal */}
-      <Modal open={noteModal !== null} onClose={() => setNoteModal(null)} title="Add Resolution Note">
-        <div className="space-y-4">
-          <Textarea label="Note" value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="Add an update about this report..." />
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setNoteModal(null)}>Cancel</Button>
-            <Button variant="primary" onClick={handleAddNote} disabled={!noteText.trim()}>Add Note</Button>
-          </div>
-        </div>
-      </Modal>
 
       {/* Detail modal */}
       <Modal open={detail !== null} onClose={() => setDetail(null)} title={detail?.title || 'Report'}>
