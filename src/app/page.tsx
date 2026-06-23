@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import Reveal from '@/components/ui/Reveal';
 import { ISSUE_CATEGORIES } from '@/lib/types';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
+import { unstable_cache } from 'next/cache';
 
 export const metadata: Metadata = {
   title: 'SolveHFX — Fix Halifax. Together.',
@@ -14,10 +15,9 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://solvehfx.ca' },
 };
 
-// Render per request so the live stats are always real (not baked in at build
-// time). Cold-start latency is handled elsewhere: the queries run in parallel
-// with a timeout, the keep-alive workflow keeps Supabase warm, and the auth
-// middleware no longer runs on public pages.
+// Render per request (so build-time zeros are never baked in), but the stats
+// themselves are cached for 60s via unstable_cache below — so all but one
+// request a minute serves instantly without touching the database.
 export const dynamic = 'force-dynamic';
 
 // The redesign uses a bold sans display style for headings (overriding the
@@ -33,75 +33,107 @@ type ReportRow = {
   created_at: string;
 };
 
-export default async function HomePage() {
-  let totalReports = 0;
-  let resolvedThisMonth = 0;
-  let totalResolved = 0;
-  let recentReports: ReportRow[] = [];
-  let uniqueDistrictCount = 16;
-  let avgResolutionDays = 0;
+type HomeStats = {
+  totalReports: number;
+  resolvedThisMonth: number;
+  totalResolved: number;
+  recentReports: ReportRow[];
+  uniqueDistrictCount: number;
+  avgResolutionDays: number;
+};
 
-  try {
-    const supabase = await createClient();
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+const EMPTY_STATS: HomeStats = {
+  totalReports: 0,
+  resolvedThisMonth: 0,
+  totalResolved: 0,
+  recentReports: [],
+  uniqueDistrictCount: 16,
+  avgResolutionDays: 0,
+};
 
-    const withTimeout = <T,>(p: PromiseLike<T>, ms = 2500): Promise<T> =>
-      Promise.race([
-        p as Promise<T>,
-        new Promise<T>((_, reject) =>
-          setTimeout(() => reject(new Error('Supabase timeout')), ms)
-        ),
-      ]);
+// Cached homepage stats. Uses the cookieless service client so the result can
+// be cached (cookies would force a fresh read every time), revalidated at most
+// once a minute. Populated lazily on the first runtime request — never at build
+// time — so it always reflects real data.
+const getHomeStats = unstable_cache(
+  async (): Promise<HomeStats> => {
+    try {
+      const supabase = await createServiceClient();
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    const [totalRes, resolvedMonthRes, allResolvedRes, resolvedReportsRes, recentRes, districtsRes] =
-      await withTimeout(
-        Promise.all([
-          supabase.from('reports').select('*', { count: 'exact', head: true }),
-          supabase
-            .from('reports')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'resolved')
-            .gte('resolved_at', thirtyDaysAgo),
-          supabase
-            .from('reports')
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'resolved'),
-          supabase
-            .from('reports')
-            .select('created_at, resolved_at')
-            .eq('status', 'resolved')
-            .not('resolved_at', 'is', null)
-            .limit(100),
-          supabase
-            .from('reports')
-            .select('id, title, category, address, status, created_at')
-            .order('created_at', { ascending: false })
-            .limit(6),
-          supabase.from('reports').select('district_id').not('district_id', 'is', null),
-        ])
-      );
+      const withTimeout = <T,>(p: PromiseLike<T>, ms = 2500): Promise<T> =>
+        Promise.race([
+          p as Promise<T>,
+          new Promise<T>((_, reject) =>
+            setTimeout(() => reject(new Error('Supabase timeout')), ms)
+          ),
+        ]);
 
-    totalReports = totalRes.count || 0;
-    resolvedThisMonth = resolvedMonthRes.count || 0;
-    totalResolved = allResolvedRes.count || 0;
+      const [totalRes, resolvedMonthRes, allResolvedRes, resolvedReportsRes, recentRes, districtsRes] =
+        await withTimeout(
+          Promise.all([
+            supabase.from('reports').select('*', { count: 'exact', head: true }),
+            supabase
+              .from('reports')
+              .select('*', { count: 'exact', head: true })
+              .eq('status', 'resolved')
+              .gte('resolved_at', thirtyDaysAgo),
+            supabase
+              .from('reports')
+              .select('*', { count: 'exact', head: true })
+              .eq('status', 'resolved'),
+            supabase
+              .from('reports')
+              .select('created_at, resolved_at')
+              .eq('status', 'resolved')
+              .not('resolved_at', 'is', null)
+              .limit(100),
+            supabase
+              .from('reports')
+              .select('id, title, category, address, status, created_at')
+              .order('created_at', { ascending: false })
+              .limit(6),
+            supabase.from('reports').select('district_id').not('district_id', 'is', null),
+          ])
+        );
 
-    const resolvedReports = resolvedReportsRes.data;
-    if (resolvedReports && resolvedReports.length > 0) {
-      const totalDays = resolvedReports.reduce((sum, r) => {
-        const days =
-          (new Date(r.resolved_at!).getTime() - new Date(r.created_at).getTime()) /
-          (1000 * 60 * 60 * 24);
-        return sum + days;
-      }, 0);
-      avgResolutionDays = Math.round(totalDays / resolvedReports.length);
+      let avgResolutionDays = 0;
+      const resolvedReports = resolvedReportsRes.data;
+      if (resolvedReports && resolvedReports.length > 0) {
+        const totalDays = resolvedReports.reduce((sum, r) => {
+          const days =
+            (new Date(r.resolved_at!).getTime() - new Date(r.created_at).getTime()) /
+            (1000 * 60 * 60 * 24);
+          return sum + days;
+        }, 0);
+        avgResolutionDays = Math.round(totalDays / resolvedReports.length);
+      }
+
+      return {
+        totalReports: totalRes.count || 0,
+        resolvedThisMonth: resolvedMonthRes.count || 0,
+        totalResolved: allResolvedRes.count || 0,
+        recentReports: recentRes.data || [],
+        uniqueDistrictCount: new Set(districtsRes.data?.map((r) => r.district_id)).size || 16,
+        avgResolutionDays,
+      };
+    } catch {
+      return EMPTY_STATS;
     }
+  },
+  ['home-stats'],
+  { revalidate: 60, tags: ['home-stats'] }
+);
 
-    recentReports = recentRes.data || [];
-    uniqueDistrictCount =
-      new Set(districtsRes.data?.map((r) => r.district_id)).size || 16;
-  } catch {
-    // Supabase unavailable or slow — render with defaults
-  }
+export default async function HomePage() {
+  const {
+    totalReports,
+    resolvedThisMonth,
+    totalResolved,
+    recentReports,
+    uniqueDistrictCount,
+    avgResolutionDays,
+  } = await getHomeStats();
 
   const resolutionRate =
     totalReports > 0 ? Math.round((totalResolved / totalReports) * 100) : 0;
