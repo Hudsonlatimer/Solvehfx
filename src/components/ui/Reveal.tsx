@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, type HTMLAttributes } from 'react';
 
-interface RevealProps extends HTMLAttributes<HTMLDivElement> {
+interface RevealProps extends HTMLAttributes<HTMLElement> {
   delay?: number;
-  as?: 'div' | 'section' | 'article' | 'header';
+  as?: 'div' | 'section' | 'article' | 'header' | 'li';
 }
 
 /**
@@ -18,7 +18,8 @@ export default function Reveal({
   as: Tag = 'div',
   ...rest
 }: RevealProps) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
+  const Comp = Tag as 'div';
 
   useEffect(() => {
     const el = ref.current;
@@ -44,8 +45,8 @@ export default function Reveal({
   }, [delay]);
 
   return (
-    <Tag ref={ref} className={`reveal ${className}`} {...rest}>
+    <Comp ref={ref as any} className={`reveal ${className}`} {...rest}>
       {children}
-    </Tag>
+    </Comp>
   );
 }

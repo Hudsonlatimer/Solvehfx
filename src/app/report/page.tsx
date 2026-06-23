@@ -20,6 +20,7 @@ import type { AnalyzePhotoResponse, District, RoadAuthority } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SPAM_RE = /(https?:\/\/|www\.|viagra|casino|crypto|telegram|whatsapp|bit\.ly)/i;
 
 const STEPS: { key: string; label: string; help: string }[] = [
   { key: 'location', label: 'Location', help: 'Where is the issue?' },
@@ -77,6 +78,18 @@ function ReportFlow() {
     existingReport: { title: string; distance: string };
   } | null>(null);
   const [forceDuplicate, setForceDuplicate] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [publicVisibilityAccepted, setPublicVisibilityAccepted] = useState(false);
+  const [website, setWebsite] = useState('');
+  const [submitError, setSubmitError] = useState('');
+  const [autoAdvanced, setAutoAdvanced] = useState(false);
+
+  const hasLowQualityContent = () => {
+    const t = title.trim();
+    const d = description.trim();
+    if (t.length < 6 || d.length < 20) return true;
+    return SPAM_RE.test(`${t} ${d}`);
+  };
 
   const handleLocationSelect = async (loc: { lat: number; lng: number; address: string }) => {
     setLat(loc.lat);
@@ -104,12 +117,33 @@ function ReportFlow() {
     if (result.description) setDescription(result.description);
     if (result.category) setCategory(result.category);
     setConfidence(result.confidence);
+    if (step === 1 && !autoAdvanced) {
+      setAutoAdvanced(true);
+      window.setTimeout(() => setStep(2), 500);
+    }
   };
 
   const handleSubmit = async (forceOverride?: boolean) => {
     // Reading `force` from a param avoids the stale-closure bug where clicking
     // "Submit Anyway" submitted before the forceDuplicate state had updated.
     const useForce = forceOverride ?? forceDuplicate;
+    setSubmitError('');
+
+    if (!termsAccepted || !publicVisibilityAccepted) {
+      setSubmitError('Please accept the legal terms and public visibility notice before submitting.');
+      return;
+    }
+
+    if (website.trim() !== '') {
+      setSubmitError('Submission blocked. Please try again.');
+      return;
+    }
+
+    if (hasLowQualityContent()) {
+      setSubmitError('Please provide a clearer title and description without links or promotional content.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       let photoUrl: string | null = null;
@@ -135,8 +169,8 @@ function ReportFlow() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title,
-          description,
+          title: title.trim(),
+          description: description.trim(),
           category,
           lat,
           lng,
@@ -147,6 +181,9 @@ function ReportFlow() {
           email: email.trim() || null,
           force: useForce,
           notify_councillor: true,
+          terms_accepted: termsAccepted,
+          public_visibility_accepted: publicVisibilityAccepted,
+          website: website.trim(),
         }),
       });
 
@@ -159,7 +196,10 @@ function ReportFlow() {
         return;
       }
 
-      if (!res.ok) throw new Error(data.error || 'Failed to submit report');
+      if (!res.ok) {
+        setSubmitError(data.error || 'Failed to submit report');
+        throw new Error(data.error || 'Failed to submit report');
+      }
 
       setReportId(data.report.id);
       setReferenceNumber(data.report.reference_number || null);
@@ -179,7 +219,7 @@ function ReportFlow() {
       case 1:
         return true;
       case 2:
-        return title.trim() !== '' && description.trim() !== '';
+        return title.trim().length >= 6 && description.trim().length >= 20;
       case 3:
         return emailValid;
       default:
@@ -324,6 +364,9 @@ function ReportFlow() {
                 <h2 id="step-review" className="sr-only">
                   Review your report
                 </h2>
+                <p className="mb-3 text-[12.5px] text-text-secondary">
+                  Tip: keep your title at least 6 characters and your description at least 20 characters so authorities have enough detail to act.
+                </p>
                 <AIReviewCard
                   title={title}
                   description={description}
@@ -334,6 +377,11 @@ function ReportFlow() {
                   onDescriptionChange={setDescription}
                   onCategoryChange={setCategory}
                 />
+                {(title.trim().length < 6 || description.trim().length < 20) && (
+                  <p className="mt-3 text-[12.5px] text-warning">
+                    Add a bit more detail before continuing.
+                  </p>
+                )}
               </section>
             )}
 
@@ -436,6 +484,44 @@ function ReportFlow() {
                   Confirm and submit
                 </h2>
 
+                <div className="mb-6 rounded-xl border border-rule bg-bg-elev p-4 space-y-3">
+                  <label className="flex items-start gap-2.5 text-[13px] text-text-secondary leading-relaxed">
+                    <input
+                      type="checkbox"
+                      checked={publicVisibilityAccepted}
+                      onChange={(e) => setPublicVisibilityAccepted(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-rule text-primary focus:ring-primary"
+                    />
+                    <span>
+                      I understand report details may be visible on public SolveHFX pages.
+                    </span>
+                  </label>
+                  <label className="flex items-start gap-2.5 text-[13px] text-text-secondary leading-relaxed">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-rule text-primary focus:ring-primary"
+                    />
+                    <span>
+                      I agree to the <Link href="/terms" className="text-primary hover:underline">Terms of Use</Link>{' '}
+                      and <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+                    </span>
+                  </label>
+                  <div aria-hidden className="sr-only">
+                    <label htmlFor="website">Website</label>
+                    <input
+                      id="website"
+                      name="website"
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                    />
+                  </div>
+                </div>
+
                 {duplicateWarning && (
                   <div className="mb-6 rounded-xl border border-warning/30 bg-warning/[0.06] p-4">
                     <div className="flex items-start gap-3">
@@ -465,6 +551,10 @@ function ReportFlow() {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {submitError && (
+                  <p className="mb-4 text-[12.5px] text-danger">{submitError}</p>
                 )}
 
                 <SubmitConfirmation

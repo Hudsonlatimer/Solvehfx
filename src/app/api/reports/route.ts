@@ -12,6 +12,8 @@ function generateReferenceNumber(): string {
   return `${prefix}-${timestamp}${random}`;
 }
 
+const SPAM_RE = /(https?:\/\/|www\.|viagra|casino|crypto|telegram|whatsapp|bit\.ly)/i;
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -82,6 +84,9 @@ export async function POST(request: NextRequest) {
       name,
       email,
       notify_councillor,
+      terms_accepted,
+      public_visibility_accepted,
+      website,
     } = body as {
       title: string;
       description: string;
@@ -96,11 +101,42 @@ export async function POST(request: NextRequest) {
       name?: string | null;
       email?: string | null;
       notify_councillor?: boolean;
+      terms_accepted?: boolean;
+      public_visibility_accepted?: boolean;
+      website?: string;
     };
 
     if (!title || !description || !category || lat == null || lng == null) {
       return NextResponse.json(
         { error: 'title, description, category, lat, and lng are required' },
+        { status: 400 }
+      );
+    }
+
+    const trimmedTitle = title.trim();
+    const trimmedDescription = description.trim();
+
+    if (website && website.trim() !== '') {
+      return NextResponse.json({ error: 'Invalid submission.' }, { status: 400 });
+    }
+
+    if (!terms_accepted || !public_visibility_accepted) {
+      return NextResponse.json(
+        { error: 'You must accept the legal and public visibility confirmations.' },
+        { status: 400 }
+      );
+    }
+
+    if (trimmedTitle.length < 6 || trimmedDescription.length < 20) {
+      return NextResponse.json(
+        { error: 'Please provide a clearer title and description.' },
+        { status: 400 }
+      );
+    }
+
+    if (SPAM_RE.test(`${trimmedTitle} ${trimmedDescription}`)) {
+      return NextResponse.json(
+        { error: 'Please remove promotional links or spam content.' },
         { status: 400 }
       );
     }
@@ -192,8 +228,8 @@ export async function POST(request: NextRequest) {
 
     // Insert report
     const row: Record<string, unknown> = {
-      title,
-      description,
+      title: trimmedTitle,
+      description: trimmedDescription,
       category,
       lat,
       lng,

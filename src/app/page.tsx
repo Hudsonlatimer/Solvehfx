@@ -165,14 +165,14 @@ export default async function HomePage() {
           <div className="max-w-xl">
             <h1
               style={SANS}
-              className="text-[clamp(2.75rem,7vw,5rem)] font-bold leading-[0.97] tracking-tight drop-shadow-sm"
+              className="hx-rise text-[clamp(2.75rem,7vw,5rem)] font-bold leading-[0.97] tracking-tight drop-shadow-sm"
             >
               <span className="text-white">Fix Halifax.</span>
               <br />
               <span className="text-accent">Together.</span>
             </h1>
 
-            <p className="mt-6 max-w-md text-[16.5px] leading-[1.55] text-white/85">
+            <p className="hx-rise mt-6 max-w-md text-[16.5px] leading-[1.55] text-white/85" style={{ animationDelay: '90ms' }}>
               Snap a photo of a pothole, broken light, or anything else. Our AI
               drafts the report. We send it straight to{' '}
               <span className="font-medium text-white">HRM 311</span> and your{' '}
@@ -180,7 +180,7 @@ export default async function HomePage() {
               Sixty seconds, no account.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
+            <div className="hx-rise mt-8 flex flex-wrap items-center gap-x-6 gap-y-4" style={{ animationDelay: '170ms' }}>
               <Link href="/report">
                 <Button variant="secondary" size="lg">
                   <CameraIcon /> Report an Issue
@@ -202,42 +202,50 @@ export default async function HomePage() {
       <section className="bg-bg">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard
-              iconBg="bg-primary"
-              label="Reports filed"
-              value={totalReports.toLocaleString('en-CA')}
-              icon={<PlaneIcon />}
-            />
-            <StatCard
-              iconBg="bg-success"
-              label="Resolved · 30d"
-              value={resolvedThisMonth.toLocaleString('en-CA')}
-              icon={<CheckIcon />}
-            />
-            <StatCard
-              iconBg="bg-primary"
-              label="HRM districts"
-              value={`${uniqueDistrictCount}/16`}
-              icon={<BuildingIcon />}
-            />
-            <Link
-              href="/track"
-              className="group flex items-center gap-3.5 rounded-xl border border-rule bg-bg-elev p-4 shadow-civic transition-colors hover:border-primary/30 hover:bg-primary/[0.02]"
-            >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/30 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M5 12h14M13 5l7 7-7 7" />
-                </svg>
-              </span>
-              <div className="min-w-0">
-                <p className="text-[13px] font-medium leading-tight text-text-primary">
-                  Already submitted a report?
-                </p>
-                <p className="mt-0.5 text-[11.5px] leading-snug text-text-secondary">
-                  Use your reference number to check status — no account needed.
-                </p>
-              </div>
-            </Link>
+            <Reveal delay={0}>
+              <StatCard
+                iconBg="bg-primary"
+                label="Reports filed"
+                value={totalReports.toLocaleString('en-CA')}
+                icon={<PlaneIcon />}
+              />
+            </Reveal>
+            <Reveal delay={70}>
+              <StatCard
+                iconBg="bg-success"
+                label="Resolved · 30d"
+                value={resolvedThisMonth.toLocaleString('en-CA')}
+                icon={<CheckIcon />}
+              />
+            </Reveal>
+            <Reveal delay={140}>
+              <StatCard
+                iconBg="bg-primary"
+                label="HRM districts"
+                value={`${uniqueDistrictCount}/16`}
+                icon={<BuildingIcon />}
+              />
+            </Reveal>
+            <Reveal delay={210}>
+              <Link
+                href="/track"
+                className="group flex items-center gap-3.5 rounded-xl border border-rule bg-bg-elev p-4 shadow-civic transition-colors hover:border-primary/30 hover:bg-primary/[0.02]"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/30 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-medium leading-tight text-text-primary">
+                    Already submitted a report?
+                  </p>
+                  <p className="mt-0.5 text-[11.5px] leading-snug text-text-secondary">
+                    Use your reference number to check status — no account needed.
+                  </p>
+                </div>
+              </Link>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -281,19 +289,21 @@ export default async function HomePage() {
                   CC&apos;d to your district councillor automatically.
                 </p>
                 <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                  {ROUTING.map((r) => (
-                    <div key={r.name} className="rounded-xl border border-rule bg-bg-elev p-4">
-                      <div className="mb-2.5 flex items-center gap-2.5">
-                        <span className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-primary px-1.5 text-[11px] font-bold text-white">
-                          {r.badge}
-                        </span>
-                        <h3 style={SANS} className="text-[13.5px] font-semibold tracking-tight text-text-primary">
-                          {r.name}
-                        </h3>
+                  {ROUTING.map((r, i) => (
+                    <Reveal key={r.name} delay={i * 80}>
+                      <div className="rounded-xl border border-rule bg-bg-elev p-4">
+                        <div className="mb-2.5 flex items-center gap-2.5">
+                          <span className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-primary px-1.5 text-[11px] font-bold text-white">
+                            {r.badge}
+                          </span>
+                          <h3 style={SANS} className="text-[13.5px] font-semibold tracking-tight text-text-primary">
+                            {r.name}
+                          </h3>
+                        </div>
+                        <p className="mb-2.5 text-[12.5px] leading-relaxed text-text-secondary">{r.desc}</p>
+                        <p className="break-all font-mono text-[11px] text-primary-light">{r.email}</p>
                       </div>
-                      <p className="mb-2.5 text-[12.5px] leading-relaxed text-text-secondary">{r.desc}</p>
-                      <p className="break-all font-mono text-[11px] text-primary-light">{r.email}</p>
-                    </div>
+                    </Reveal>
                   ))}
                 </div>
               </div>
@@ -313,20 +323,22 @@ export default async function HomePage() {
 
               <ol className="mt-7 space-y-6">
                 {STEPS.map((s, i) => (
-                  <li key={s.title} className="flex gap-4">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-white">
-                      {s.icon}
-                    </span>
-                    <div>
-                      <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary-light">
-                        Step {String(i + 1).padStart(2, '0')}
-                      </p>
-                      <h3 style={SANS} className="mt-0.5 text-[17px] font-semibold tracking-tight text-text-primary">
-                        {s.title}
-                      </h3>
-                      <p className="mt-1 text-[14px] leading-relaxed text-text-secondary">{s.desc}</p>
-                    </div>
-                  </li>
+                  <Reveal key={s.title} delay={i * 90}>
+                    <li className="flex gap-4">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+                        {s.icon}
+                      </span>
+                      <div>
+                        <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary-light">
+                          Step {String(i + 1).padStart(2, '0')}
+                        </p>
+                        <h3 style={SANS} className="mt-0.5 text-[17px] font-semibold tracking-tight text-text-primary">
+                          {s.title}
+                        </h3>
+                        <p className="mt-1 text-[14px] leading-relaxed text-text-secondary">{s.desc}</p>
+                      </div>
+                    </li>
+                  </Reveal>
                 ))}
               </ol>
             </div>
@@ -356,17 +368,18 @@ export default async function HomePage() {
 
           <Reveal delay={60}>
             <div className="grid grid-cols-3 overflow-hidden rounded-xl border-l border-t border-rule sm:grid-cols-5 lg:grid-cols-10">
-              {ISSUE_CATEGORIES.map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/report?category=${cat.id}`}
-                  className="flex flex-col items-center gap-2 border-b border-r border-rule p-3.5 text-center transition-colors hover:bg-primary/[0.04]"
-                >
-                  <span className="text-[20px] leading-none">{cat.icon}</span>
-                  <span className="text-[11px] font-medium leading-tight text-text-secondary">
-                    {cat.label}
-                  </span>
-                </Link>
+              {ISSUE_CATEGORIES.map((cat, i) => (
+                <Reveal key={cat.id} delay={(i % 10) * 35}>
+                  <Link
+                    href={`/report?category=${cat.id}`}
+                    className="flex flex-col items-center gap-2 border-b border-r border-rule p-3.5 text-center transition-colors hover:bg-primary/[0.04]"
+                  >
+                    <span className="text-[20px] leading-none">{cat.icon}</span>
+                    <span className="text-[11px] font-medium leading-tight text-text-secondary">
+                      {cat.label}
+                    </span>
+                  </Link>
+                </Reveal>
               ))}
             </div>
           </Reveal>
@@ -395,10 +408,10 @@ export default async function HomePage() {
             {recentReports && recentReports.length > 0 ? (
               <Reveal delay={60}>
                 <ul className="divide-y divide-rule rounded-xl border border-rule bg-bg-elev">
-                  {recentReports.map((r) => {
+                  {recentReports.map((r, i) => {
                     const cat = ISSUE_CATEGORIES.find((c) => c.id === r.category);
                     return (
-                      <li key={r.id}>
+                      <Reveal key={r.id} delay={i * 55} as="li">
                         <Link
                           href={`/reports/${r.id}`}
                           className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-primary/[0.02]"
@@ -424,7 +437,7 @@ export default async function HomePage() {
                             </time>
                           </div>
                         </Link>
-                      </li>
+                      </Reveal>
                     );
                   })}
                 </ul>
@@ -459,18 +472,18 @@ export default async function HomePage() {
                 </p>
 
                 <ul className="mt-6 space-y-5">
-                  {WHY.map((item) => (
-                    <li key={item.title} className="flex gap-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-accent">
+                  {WHY.map((item, i) => (
+                    <Reveal key={item.title} delay={i * 80} as="li" className="flex gap-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white">
                         {item.icon}
                       </span>
                       <div>
-                        <h3 style={SANS} className="text-[13.5px] font-semibold tracking-tight">
+                        <h3 style={SANS} className="text-[13.5px] font-semibold tracking-tight text-white">
                           {item.title}
                         </h3>
-                        <p className="mt-0.5 text-[12px] leading-relaxed text-white/65">{item.desc}</p>
+                        <p className="mt-0.5 text-[12px] leading-relaxed text-white/80">{item.desc}</p>
                       </div>
-                    </li>
+                    </Reveal>
                   ))}
                 </ul>
               </div>

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Sign In',
   description: 'Sign in to SolveHFX to track your civic issue reports and verify issues in your Halifax neighbourhood.',
