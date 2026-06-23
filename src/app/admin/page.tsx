@@ -14,7 +14,17 @@ import { getCategoryById } from '@/lib/districts';
 import { ISSUE_CATEGORIES, AUTHORITY_EMAILS } from '@/lib/types';
 import type { Report, ReportStatus } from '@/lib/types';
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || '';
+// Admin allow-list. Defaults to the project owner; override/extend with a
+// comma-separated NEXT_PUBLIC_ADMIN_EMAIL env var. (This value is public by
+// nature — actual access still requires logging in as one of these emails.)
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'huddydev0@gmail.com')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+function isAdmin(email: string | undefined | null): boolean {
+  return !!email && ADMIN_EMAILS.includes(email.toLowerCase());
+}
 
 const STATUS_OPTIONS: { value: ReportStatus; label: string }[] = [
   { value: 'open', label: 'Open' },
@@ -46,7 +56,7 @@ export default function AdminPage() {
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user || user.email !== ADMIN_EMAIL) {
+      if (!isAdmin(user?.email)) {
         router.push('/');
         return;
       }
