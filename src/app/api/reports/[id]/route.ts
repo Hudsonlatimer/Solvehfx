@@ -126,12 +126,33 @@ export async function DELETE(
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { error } = await serviceClient.from('reports').delete().eq('id', id);
+    const { data: existing } = await serviceClient
+      .from('reports')
+      .select('id')
+      .eq('id', id)
+      .single();
+    if (!existing) {
+      return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+    }
+
+    // Defensive cleanup. verifications is ON DELETE CASCADE, but deleting
+    // children explicitly keeps this resilient across legacy schemas.
+    await serviceClient.from('resolution_notes').delete().eq('report_id', id);
+    await serviceClient.from('verifications').delete().eq('report_id', id);
+
+    const { data: deletedRows, error } = await serviceClient
+      .from('reports')
+      .delete()
+      .eq('id', id)
+      .select('id');
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+    if (!deletedRows || deletedRows.length === 0) {
+      return NextResponse.json({ error: 'Delete did not complete' }, { status: 500 });
+    }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, deletedId: deletedRows[0].id });
   } catch (error) {
     console.error('Failed to delete report:', error);
     return NextResponse.json(

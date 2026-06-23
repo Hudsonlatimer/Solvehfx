@@ -90,16 +90,15 @@ export default function AdminPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this report? This cannot be undone.')) return;
-    const previous = reports;
-    setReports((prev) => prev.filter((r) => r.id !== id));
+    setRefreshing(true);
     const res = await fetch(`/api/reports/${id}`, { method: 'DELETE' });
     if (!res.ok) {
-      setReports(previous);
       const data = await res.json().catch(() => ({}));
       alert(data.error || 'Failed to delete report.');
+      setRefreshing(false);
       return;
     }
-    fetchReports();
+    await fetchReports();
   };
 
   const stats = useMemo(() => {
