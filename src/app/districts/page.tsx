@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { HRM_DISTRICTS } from '@/lib/districts';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicServerClient } from '@/lib/supabase/server';
 import type { Metadata } from 'next';
 import Reveal from '@/components/ui/Reveal';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
@@ -18,7 +18,10 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = 'force-dynamic';
+// ISR: served statically from the edge, regenerated in the background every
+// 60s. Uses the cookieless public client (public read RLS) so the page can be
+// cached instead of cold-rendering a serverless function on every visit.
+export const revalidate = 60;
 
 export default async function DistrictsPage() {
   const countMap = new Map<number, number>();
@@ -27,7 +30,7 @@ export default async function DistrictsPage() {
   let totalReports = 0;
 
   try {
-    const supabase = await createClient();
+    const supabase = await createPublicServerClient();
     const { data: reportCounts } = await supabase
       .from('reports')
       .select('district_id, status');

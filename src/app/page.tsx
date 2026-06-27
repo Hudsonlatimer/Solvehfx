@@ -15,10 +15,12 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://solvehfx.ca' },
 };
 
-// Render per request (so build-time zeros are never baked in), but the stats
-// themselves are cached for 60s via unstable_cache below — so all but one
-// request a minute serves instantly without touching the database.
-export const dynamic = 'force-dynamic';
+// Statically rendered + ISR: the HTML is served instantly from the edge CDN and
+// regenerated in the background at most once a minute (stale-while-revalidate),
+// so visitors never wait on a cold serverless function or Supabase queries on
+// the request path. Stats use the service-role client (bypasses RLS) and the DB
+// is reachable at build, so real numbers are baked in — not zeros.
+export const revalidate = 60;
 
 // The redesign uses a bold sans display style for headings (overriding the
 // site-wide serif) to match the civic-app reference layout.
