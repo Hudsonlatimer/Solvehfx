@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: 'Blog — Civic Reporting Tips for Halifax Residents',
   description:
     'Guides, tips, and explainers for reporting civic issues in Halifax. Learn how to report potholes, graffiti, broken streetlights, and more to HRM 311 and your district councillor.',
-  alternates: { canonical: 'https://solvehfx.ca/blog' },
+  alternates: { canonical: 'https://www.solvehfx.ca/blog' },
   openGraph: {
     title: 'SolveHFX Blog — Halifax Civic Reporting Guides',
     description:
       'Tips and guides for reporting potholes, graffiti, streetlights, and civic issues in Halifax.',
-    url: 'https://solvehfx.ca/blog',
+    url: 'https://www.solvehfx.ca/blog',
   },
 };
 
@@ -22,20 +22,20 @@ export default function BlogPage() {
     '@context': 'https://schema.org',
     '@type': 'Blog',
     name: 'SolveHFX Blog',
-    url: 'https://solvehfx.ca/blog',
+    url: 'https://www.solvehfx.ca/blog',
     description:
       'Civic reporting guides and updates for Halifax Regional Municipality residents.',
     publisher: {
       '@type': 'Organization',
       name: 'SolveHFX',
-      url: 'https://solvehfx.ca',
+      url: 'https://www.solvehfx.ca',
     },
     blogPost: BLOG_POSTS.map((p) => ({
       '@type': 'BlogPosting',
       headline: p.title,
       description: p.description,
       datePublished: p.date,
-      url: `https://solvehfx.ca/blog/${p.slug}`,
+      url: `https://www.solvehfx.ca/blog/${p.slug}`,
     })),
   };
 

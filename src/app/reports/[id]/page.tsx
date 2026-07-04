@@ -24,11 +24,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: `https://solvehfx.ca/reports/${id}` },
+    alternates: { canonical: `https://www.solvehfx.ca/reports/${id}` },
     openGraph: {
       title: `${title} — SolveHFX`,
       description,
-      url: `https://solvehfx.ca/reports/${id}`,
+      url: `https://www.solvehfx.ca/reports/${id}`,
       ...(data?.photo_url && {
         images: [{ url: data.photo_url, width: 800, height: 600, alt: title }],
       }),

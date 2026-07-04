@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: 'About SolveHFX — Independent Civic Reporting for Halifax',
   description:
     'SolveHFX is an independent civic reporting platform built by Halifax residents. AI-powered reports, smart routing to HRM 311, and councillor accountability.',
-  alternates: { canonical: 'https://solvehfx.ca/about' },
+  alternates: { canonical: 'https://www.solvehfx.ca/about' },
   openGraph: {
     title: 'About SolveHFX — Independent Civic Reporting',
     description:
       'Built by Halifax residents, for Halifax residents. AI-powered reporting to HRM 311 and your district councillor.',
-    url: 'https://solvehfx.ca/about',
+    url: 'https://www.solvehfx.ca/about',
   },
 };
 

@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: 'Terms of Use — SolveHFX',
   description:
     'Terms of Use for SolveHFX, including acceptable use, disclaimers, and service limitations.',
-  alternates: { canonical: 'https://solvehfx.ca/terms' },
+  alternates: { canonical: 'https://www.solvehfx.ca/terms' },
   openGraph: {
     title: 'Terms of Use — SolveHFX',
     description:
       'Read the terms and conditions for using SolveHFX civic reporting tools.',
-    url: 'https://solvehfx.ca/terms',
+    url: 'https://www.solvehfx.ca/terms',
   },
 };
 

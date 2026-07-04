@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: 'FAQ — SolveHFX Civic Reporting for Halifax',
   description:
     'Frequently asked questions about SolveHFX — how to report civic issues in Halifax, what happens to your report, privacy, and more.',
-  alternates: { canonical: 'https://solvehfx.ca/faq' },
+  alternates: { canonical: 'https://www.solvehfx.ca/faq' },
   openGraph: {
     title: 'FAQ — SolveHFX Halifax Civic Reporting',
     description:
       'How to report potholes, graffiti, and civic issues in Halifax. Privacy, AI analysis, district routing, and more.',
-    url: 'https://solvehfx.ca/faq',
+    url: 'https://www.solvehfx.ca/faq',
   },
 };
 

@@ -20,7 +20,7 @@ const fraunces = Fraunces({
   axes: ['opsz', 'SOFT'],
 });
 
-const BASE_URL = 'https://solvehfx.ca';
+const BASE_URL = 'https://www.solvehfx.ca';
 const GA_MEASUREMENT_ID = 'G-X7NDEMB16Z';
 
 export const metadata: Metadata = {

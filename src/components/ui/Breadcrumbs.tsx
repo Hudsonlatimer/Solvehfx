@@ -13,7 +13,7 @@ export default function Breadcrumbs({ items }: { items: Crumb[] }) {
       '@type': 'ListItem',
       position: i + 1,
       name: c.label,
-      item: c.href ? `https://solvehfx.ca${c.href}` : undefined,
+      item: c.href ? `https://www.solvehfx.ca${c.href}` : undefined,
     })),
   };
 

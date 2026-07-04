@@ -9,12 +9,12 @@ export const metadata: Metadata = {
   title: 'HRM Districts & Councillor Scorecards — SolveHFX',
   description:
     'See how many civic issues each Halifax district has, resolution rates, and councillor activity. Transparent accountability for all 16 HRM districts.',
-  alternates: { canonical: 'https://solvehfx.ca/districts' },
+  alternates: { canonical: 'https://www.solvehfx.ca/districts' },
   openGraph: {
     title: 'HRM Districts & Councillor Scorecards — SolveHFX',
     description:
       'Transparent accountability: see report counts and resolution rates for all 16 Halifax districts.',
-    url: 'https://solvehfx.ca/districts',
+    url: 'https://www.solvehfx.ca/districts',
   },
 };
 
@@ -62,7 +62,7 @@ export default async function DistrictsPage() {
       '@type': 'ListItem',
       position: i + 1,
       name: `District ${d.id} — ${d.name}`,
-      url: `https://solvehfx.ca/map?district=${d.id}`,
+      url: `https://www.solvehfx.ca/map?district=${d.id}`,
     })),
   };
 

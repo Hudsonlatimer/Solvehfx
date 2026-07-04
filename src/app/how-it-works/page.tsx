@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: 'How SolveHFX Works — Report Issues in 60 Seconds',
   description:
     'Report a civic issue in Halifax in 60 seconds. Snap a photo, AI drafts your report, and SolveHFX sends it to HRM 311 and your district councillor automatically.',
-  alternates: { canonical: 'https://solvehfx.ca/how-it-works' },
+  alternates: { canonical: 'https://www.solvehfx.ca/how-it-works' },
   openGraph: {
     title: 'How SolveHFX Works — 60 Second Civic Reporting',
     description:
       'Spot it, snap it, send it. AI drafts the report and we route it to HRM 311 and your councillor.',
-    url: 'https://solvehfx.ca/how-it-works',
+    url: 'https://www.solvehfx.ca/how-it-works',
   },
 };
 

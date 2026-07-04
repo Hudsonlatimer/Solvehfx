@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { BLOG_POSTS } from '@/lib/blog';
 
-const BASE = 'https://solvehfx.ca';
+const BASE = 'https://www.solvehfx.ca';
 
 type ChangeFreq = MetadataRoute.Sitemap[number]['changeFrequency'];
 

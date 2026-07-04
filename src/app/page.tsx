@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: 'SolveHFX — Fix Halifax. Together.',
   description:
     'Report potholes, graffiti, broken streetlights, and civic issues in Halifax. AI drafts your report and sends it to HRM 311 and your district councillor in 60 seconds.',
-  alternates: { canonical: 'https://solvehfx.ca' },
+  alternates: { canonical: 'https://www.solvehfx.ca' },
 };
 
 // Statically rendered + ISR: the HTML is served instantly from the edge CDN and

@@ -8,12 +8,12 @@ export const metadata: Metadata = {
   title: 'Privacy Policy — SolveHFX',
   description:
     'Privacy Policy for SolveHFX, including what data we collect, how we use it, and how long we keep it.',
-  alternates: { canonical: 'https://solvehfx.ca/privacy' },
+  alternates: { canonical: 'https://www.solvehfx.ca/privacy' },
   openGraph: {
     title: 'Privacy Policy — SolveHFX',
     description:
       'Learn what information SolveHFX collects, how reports are processed, and your privacy choices.',
-    url: 'https://solvehfx.ca/privacy',
+    url: 'https://www.solvehfx.ca/privacy',
   },
 };
 

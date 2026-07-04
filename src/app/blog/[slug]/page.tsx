@@ -21,11 +21,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: post.title,
     description: post.description,
-    alternates: { canonical: `https://solvehfx.ca/blog/${slug}` },
+    alternates: { canonical: `https://www.solvehfx.ca/blog/${slug}` },
     openGraph: {
       title: `${post.title} — SolveHFX`,
       description: post.description,
-      url: `https://solvehfx.ca/blog/${slug}`,
+      url: `https://www.solvehfx.ca/blog/${slug}`,
       type: 'article',
       publishedTime: post.date,
     },
@@ -52,18 +52,18 @@ export default async function BlogPostPage({ params }: Props) {
     author: {
       '@type': 'Organization',
       name: 'SolveHFX',
-      url: 'https://solvehfx.ca',
+      url: 'https://www.solvehfx.ca',
     },
     publisher: {
       '@type': 'Organization',
       name: 'SolveHFX',
-      url: 'https://solvehfx.ca',
+      url: 'https://www.solvehfx.ca',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://solvehfx.ca/icon-512.png',
+        url: 'https://www.solvehfx.ca/icon-512.png',
       },
     },
-    mainEntityOfPage: `https://solvehfx.ca/blog/${slug}`,
+    mainEntityOfPage: `https://www.solvehfx.ca/blog/${slug}`,
   };
 
   return (
