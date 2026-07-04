@@ -41,9 +41,12 @@ export async function GET(
       hrm_status = 'completed';
     }
 
-    if (confirmedFixed > 0 && confirmedExists === 0) {
+    // Require more than one independent confirmation before publicly flipping a
+    // report to "verified fixed" — a single confirmation shouldn't override the
+    // real status, especially since anonymous verification is allowed.
+    if (confirmedFixed >= 2 && confirmedExists === 0) {
       status = 'verified_fixed';
-      statusMessage = `Community verified fixed (${confirmedFixed} ${confirmedFixed === 1 ? 'confirmation' : 'confirmations'})`;
+      statusMessage = `Community verified fixed (${confirmedFixed} confirmations)`;
       hrm_status = 'verified_complete';
     }
 

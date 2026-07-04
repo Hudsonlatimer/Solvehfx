@@ -4,6 +4,17 @@ import type { Report, District, RoadAuthority } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
+    // This endpoint sends email from our verified domain to arbitrary
+    // councillor/authority addresses, so it must never be publicly callable.
+    // Normal submissions dispatch email in-process via /api/reports; this route
+    // is internal-only and requires a shared secret. If the secret isn't
+    // configured, fail closed.
+    const expected = process.env.INTERNAL_API_SECRET;
+    const provided = request.headers.get('x-internal-secret');
+    if (!expected || provided !== expected) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
     const { report, district, authority } = (await request.json()) as {
       report: Report;
       district: District | null;

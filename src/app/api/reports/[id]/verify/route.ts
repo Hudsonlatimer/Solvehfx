@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { getClientIp } from '@/lib/request';
 
 export async function POST(
   request: NextRequest,
@@ -40,7 +41,11 @@ export async function POST(
       return NextResponse.json({ error: 'Report not found' }, { status: 404 });
     }
 
-    // If logged in, check for duplicate verification
+    const clientIp = getClientIp(request);
+
+    // Prevent verification stuffing. Logged-in users are deduped by user_id;
+    // anonymous submissions are deduped by client IP so a single actor can't
+    // repeatedly flip a report's community-verification state.
     if (user) {
       const { data: existing } = await serviceClient
         .from('verifications')
@@ -55,18 +60,46 @@ export async function POST(
           { status: 409 }
         );
       }
+    } else if (clientIp !== 'unknown') {
+      const { data: existing } = await serviceClient
+        .from('verifications')
+        .select('id')
+        .eq('report_id', id)
+        .eq('client_ip', clientIp)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        return NextResponse.json(
+          { error: 'This report has already been verified from your network' },
+          { status: 409 }
+        );
+      }
     }
 
-    const { data: verification, error } = await serviceClient
+    const insertRow: Record<string, unknown> = {
+      report_id: id,
+      user_id: user?.id || null,
+      type,
+      photo_url: photo_url || null,
+      client_ip: clientIp,
+    };
+
+    let { data: verification, error } = await serviceClient
       .from('verifications')
-      .insert({
-        report_id: id,
-        user_id: user?.id || null,
-        type,
-        photo_url: photo_url || null,
-      })
+      .insert(insertRow)
       .select()
       .single();
+
+    // Backwards-compat: if the client_ip column hasn't been migrated yet, retry
+    // without it rather than failing the verification outright.
+    if (error && /client_ip/.test(error.message)) {
+      delete insertRow.client_ip;
+      ({ data: verification, error } = await serviceClient
+        .from('verifications')
+        .insert(insertRow)
+        .select()
+        .single());
+    }
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

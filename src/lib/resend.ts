@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import type { RoadAuthority, Report, District } from './types';
 import { AUTHORITY_EMAILS } from './types';
 import { getCategoryById } from './districts';
+import { sanitizeHeader } from './request';
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY!);
@@ -15,7 +16,7 @@ interface DispatchParams {
   authority: RoadAuthority;
 }
 
-const OWNER_ALERT_EMAIL = 'hudsonlatimer4@gmail.com';
+const OWNER_ALERT_EMAIL = process.env.OWNER_ALERT_EMAIL || 'hudsonlatimer4@gmail.com';
 
 function getPriority(category: string): string {
   if (category === 'snow_ice' || category === 'pothole') return 'P1 — High';
@@ -38,10 +39,15 @@ export async function dispatchEmails({ report, district, authority }: DispatchPa
   const categoryLabel = category?.label || report.category;
   const priority = getPriority(report.category);
 
+  // Subject lines must never carry raw newlines (email header injection) — strip
+  // control chars from any resident-supplied text before interpolating.
+  const safeTitle = sanitizeHeader(report.title);
+  const safeAddress = report.address ? sanitizeHeader(report.address) : '';
+
   const authorityEmail = getResend().emails.send({
     from: 'SolveHFX Reports <reports@solvehfx.ca>',
     to: [authorityInfo.email],
-    subject: `[SolveHFX] New Report: ${report.title} — ${report.address || 'Unknown location'} [Ref: ${report.reference_number}]`,
+    subject: `[SolveHFX] New Report: ${safeTitle} — ${safeAddress || 'Unknown location'} [Ref: ${report.reference_number}]`,
     text: `A resident has reported a civic issue via SolveHFX.
 
 Reference Number: ${report.reference_number}
@@ -74,7 +80,7 @@ solvehfx.ca`,
       ? getResend().emails.send({
           from: 'SolveHFX Reports <reports@solvehfx.ca>',
           to: [district.councillor_email],
-          subject: `[SolveHFX] Constituent Report: ${report.title} — ${report.address || 'Unknown'}, ${district.name} [Ref: ${report.reference_number}]`,
+          subject: `[SolveHFX] Constituent Report: ${safeTitle} — ${safeAddress || 'Unknown'}, ${district.name} [Ref: ${report.reference_number}]`,
           text: `A constituent in your district has submitted a civic issue report.
 
 Reference Number: ${report.reference_number}
@@ -108,7 +114,7 @@ solvehfx.ca`,
 
 Reference: ${report.reference_number}
 Issue: ${categoryLabel}
-Title: ${report.title}
+Title: ${safeTitle}
 Location: ${report.address || 'Not specified'}
 Authority: ${authorityInfo.name}
 District: ${district?.name || 'Unknown'}

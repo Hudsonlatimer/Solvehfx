@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { determineAuthority } from '@/lib/districts';
 import { dispatchEmails } from '@/lib/resend';
+import { getClientIp } from '@/lib/request';
 import type { RoadAuthority } from '@/lib/types';
 
 function generateReferenceNumber(): string {
@@ -140,6 +141,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Upper bounds keep oversized payloads out of the DB and email bodies.
+    if (trimmedTitle.length > 160 || trimmedDescription.length > 4000) {
+      return NextResponse.json(
+        { error: 'Title or description is too long.' },
+        { status: 400 }
+      );
+    }
+
     if (SPAM_RE.test(`${trimmedTitle} ${trimmedDescription}`)) {
       return NextResponse.json(
         { error: 'Please remove promotional links or spam content.' },
@@ -157,9 +166,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limiting: max 5 reports per IP per day
-    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
-    const today = new Date().toISOString().split('T')[0];
-    const ipKey = `rate:${clientIp}:${today}`;
+    const clientIp = getClientIp(request);
 
     // Check rate limit (in production, use Redis; for now, check DB)
     const { data: recentReports } = await serviceClient
@@ -202,7 +209,12 @@ export async function POST(request: NextRequest) {
               existingReport: {
                 title: existingReport.title,
                 createdAt: existingReport.created_at,
-                distance: `~${Math.round(Math.abs(lat - existingReport.lat) * 111)}m away`,
+                distance: `~${Math.round(
+                  Math.hypot(
+                    (lat - existingReport.lat) * 111_000,
+                    (lng - existingReport.lng) * 111_000 * Math.cos((lat * Math.PI) / 180)
+                  )
+                )}m away`,
               },
             },
           },
