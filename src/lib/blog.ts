@@ -10,6 +10,52 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'solvehfx-featured-on-cbc-news',
+    title: 'SolveHFX on CBC News: A Halifax Civic Tool Gets the Spotlight',
+    description:
+      'CBC News covered SolveHFX — the free tool that lets Halifax residents snap a photo and route a civic report to HRM 311 and their district councillor in about 60 seconds. Here\'s the story, the milestone, and what\'s next.',
+    date: '2026-07-04',
+    readTime: '3 min read',
+    category: 'News',
+    content: `
+SolveHFX just got picked up by **CBC News** — a nice moment for a tool that started as one Halifax resident's frustration with reporting a pothole and turning into a lot of "waiting and stalling."
+
+The story — *"Snap, tap and send: Programmer develops free tool for HRM residents to fast-track civic issues"* — walks through what SolveHFX does and why it exists. If you've landed here from that article: welcome. Here's the short version, and where things stand.
+
+## What SolveHFX actually does
+
+You snap a photo of a civic issue — a pothole, a dead streetlight, graffiti, illegal dumping — and the AI reads the photo, drafts a clear report, and figures out the right category. Then it routes that report to **HRM 311 *and* your district councillor** automatically.
+
+No account. No login. No phone menus. About **60 seconds**, start to finish.
+
+The part that saves you time is that you don't write the report — the AI does. The part that gets results is that your elected councillor gets CC'd on every single report, not just 311's queue.
+
+## Smart routing: the right desk, every time
+
+One thing that trips up a lot of Halifax residents is figuring out *who* actually fixes a given problem. A pothole on a residential street is HRM. That same pothole on a 100-series highway is **Nova Scotia Public Works**. A busted shelter on a bus route is **Halifax Transit**.
+
+SolveHFX detects which authority owns the issue and routes accordingly — so you don't have to know the jurisdiction map to get your report to the right place.
+
+## Where we're at
+
+SolveHFX has now carried **60+ reports** across HRM, with issues logged in **14 of 16 districts**. Those are real problems on real streets — now sitting in front of the people who can actually fix them, alongside a public record anyone can see.
+
+There's a live [issue map](/map) of what's been reported near you, [councillor scorecards](/scorecards) tracking response and resolution rates by district, and a [reports feed](/reports) that keeps a public record of what got fixed and when.
+
+## To be clear: SolveHFX is independent
+
+SolveHFX is not an HRM product. It's an independent project — not affiliated with, endorsed by, or connected to Halifax Regional Municipality. Reports are routed by email to publicly available government contacts. HRM's official channels still work exactly as they always have; SolveHFX just makes it faster to reach them and keeps your councillor in the loop.
+
+## What's next
+
+More reports, more districts fully active, and tighter routing so the right authority gets the right issue every time. The long-term goal is to help Halifax fix things faster by making it effortless to flag what's broken — and by pooling reports so patterns become impossible to ignore.
+
+If you're in Halifax, Dartmouth, Bedford, Sackville — anywhere in HRM — and something near you is busted:
+
+[Report it now](/report). 60 seconds, no account needed.
+    `,
+  },
+  {
     slug: 'solvehfx-updates-nearing-50-reports',
     title: 'SolveHFX Update: Closing In on 50 Reports for Halifax',
     description:
