@@ -136,13 +136,12 @@ export default function PhotoUploader({
             Drop a photo here, or tap to upload
           </p>
           <p className="mt-1 text-[13px] text-text-secondary">
-            On mobile this opens your camera · JPEG, PNG, WebP up to 10MB
+            Take a new photo or choose one from your library · JPEG, PNG, WebP up to 10MB
           </p>
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            capture="environment"
             className="hidden"
             onChange={handleFileChange}
           />
