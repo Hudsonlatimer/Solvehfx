@@ -8,7 +8,7 @@ export interface BlogPost {
   content: string;
 }
 
-export const BLOG_POSTS: BlogPost[] = [
+const OLDER_POSTS: BlogPost[] = [
   {
     slug: 'solvehfx-featured-on-cbc-news',
     title: 'SolveHFX on CBC News: A Halifax Civic Tool Gets the Spotlight',
@@ -2330,6 +2330,9 @@ That's accountability. Residents can see if their councillor's district gets fas
 [Check the map now](/map) and add verification to issues in your neighborhood.
     `,
   },
+];
+
+const NEW_POSTS: BlogPost[] = [
   {
     slug: 'solvehfx-status-update-emails',
     title: "SolveHFX Now Emails You When Your Report's Status Changes",
@@ -2485,6 +2488,10 @@ This guide is about **public bins** — the ones in parks, on sidewalks, at tran
     `,
   },
 ];
+
+// Newest first — feature announcements and new guides go here so they show
+// at the top of the blog listing rather than at the end of OLDER_POSTS.
+export const BLOG_POSTS: BlogPost[] = [...NEW_POSTS, ...OLDER_POSTS];
 
 export function getPostBySlug(slug: string): BlogPost | undefined {
   return BLOG_POSTS.find((post) => post.slug === slug);
