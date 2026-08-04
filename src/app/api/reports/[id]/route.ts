@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { sendStatusUpdateEmail } from '@/lib/resend';
 
 const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'huddydev0@gmail.com')
   .split(',')
@@ -95,6 +96,14 @@ export async function PATCH(
       .select('*, districts(*), verifications(*), resolution_notes(*)')
       .eq('id', id)
       .single();
+
+    // Let the resident know if they left contact details — don't block the
+    // admin's response on the email dispatch.
+    if (updated && (status || note)) {
+      sendStatusUpdateEmail({ report: updated, note }).catch((err) =>
+        console.error('Status update email failed:', err)
+      );
+    }
 
     return NextResponse.json(updated);
   } catch (error) {

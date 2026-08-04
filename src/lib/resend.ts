@@ -132,3 +132,54 @@ Track report: ${APP_URL}/track/${report.reference_number}
     ownerAlertSent: results[2].status === 'fulfilled',
   };
 }
+
+const STATUS_UPDATE_LABELS: Record<string, { label: string; blurb: string }> = {
+  open: {
+    label: 'Open',
+    blurb: 'Your report is filed and awaiting review.',
+  },
+  in_progress: {
+    label: 'In Progress',
+    blurb: 'Your report has been acknowledged and is being worked on.',
+  },
+  resolved: {
+    label: 'Resolved',
+    blurb: 'Your report has been marked resolved. Thank you for reporting it!',
+  },
+};
+
+interface StatusUpdateParams {
+  report: Report;
+  note?: string;
+}
+
+// Notifies a resident by email when their report's status changes or a
+// resolution note is added — only fires if they chose to share a contact
+// email at submission time (most reports are anonymous and skip this).
+export async function sendStatusUpdateEmail({ report, note }: StatusUpdateParams) {
+  const contactEmail = report.contact_email?.trim();
+  if (!contactEmail) return { sent: false };
+
+  const safeTitle = sanitizeHeader(report.title);
+  const statusInfo = STATUS_UPDATE_LABELS[report.status] || STATUS_UPDATE_LABELS.open;
+
+  const result = await getResend().emails.send({
+    from: 'SolveHFX Updates <reports@solvehfx.ca>',
+    to: [contactEmail],
+    subject: `[SolveHFX] Update on your report: ${safeTitle} [Ref: ${report.reference_number}]`,
+    text: `There's an update on your civic report.
+
+Reference Number: ${report.reference_number}
+Status: ${statusInfo.label}
+
+${statusInfo.blurb}
+${note ? `\nNote from the team:\n${note}\n` : ''}
+Track this report anytime: ${APP_URL}/track/${report.reference_number}
+
+---
+SolveHFX — Civic reporting for Halifax
+solvehfx.ca`,
+  });
+
+  return { sent: !result.error };
+}
