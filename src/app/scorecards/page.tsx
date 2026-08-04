@@ -208,6 +208,21 @@ export default function ScorecardsPage() {
                 <li>· We don&apos;t track councillor email replies — there&apos;s no public way to verify them.</li>
                 <li>· Independent public data; not affiliated with HRM. Districts with no reports yet aren&apos;t shown.</li>
               </ul>
+              <div className="mt-4 pt-4 border-t border-rule flex flex-wrap gap-x-4 gap-y-1.5 text-[13px]">
+                <span className="text-text-secondary">Open data:</span>
+                <a
+                  href="/api/reports/export?format=csv"
+                  className="text-primary hover:underline underline-offset-4"
+                >
+                  Download CSV
+                </a>
+                <a
+                  href="/api/reports/export?format=json"
+                  className="text-primary hover:underline underline-offset-4"
+                >
+                  View JSON
+                </a>
+              </div>
             </div>
           </Reveal>
         </div>
