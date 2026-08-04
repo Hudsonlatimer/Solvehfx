@@ -90,6 +90,11 @@ export default async function TrackRefPage({ params }: Props) {
     year: 'numeric', month: 'long', day: 'numeric',
   });
   const daysSince = Math.floor((Date.now() - new Date(report.created_at).getTime()) / (1000 * 60 * 60 * 24));
+  const estimatedResolutionDate = report.estimated_resolution_date
+    ? new Date(report.estimated_resolution_date).toLocaleDateString('en-CA', {
+        year: 'numeric', month: 'long', day: 'numeric',
+      })
+    : null;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -116,7 +121,14 @@ export default async function TrackRefPage({ params }: Props) {
         <div className="space-y-4">
           {[
             { label: 'Submitted', desc: `Report filed on ${createdDate}`, active: status.step >= 1 },
-            { label: 'Under Review', desc: 'Sent to authorities for review', active: status.step >= 2 },
+            {
+              label: 'Under Review',
+              desc:
+                estimatedResolutionDate && status.step < 3
+                  ? `Sent to authorities for review · Est. resolution: ${estimatedResolutionDate}`
+                  : 'Sent to authorities for review',
+              active: status.step >= 2,
+            },
             { label: 'Resolved', desc: report.resolved_at ? `Resolved on ${new Date(report.resolved_at).toLocaleDateString('en-CA')}` : 'Awaiting resolution', active: status.step >= 3 },
           ].map((item, i) => (
             <div key={item.label} className="flex gap-3">
