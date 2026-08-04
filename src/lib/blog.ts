@@ -2330,6 +2330,160 @@ That's accountability. Residents can see if their councillor's district gets fas
 [Check the map now](/map) and add verification to issues in your neighborhood.
     `,
   },
+  {
+    slug: 'solvehfx-status-update-emails',
+    title: "SolveHFX Now Emails You When Your Report's Status Changes",
+    description:
+      'If you left an email when you filed a SolveHFX report, you\'ll now get notified automatically when it moves to "in progress" or "resolved" — no need to keep checking the tracking page.',
+    date: '2026-08-01',
+    readTime: '2 min read',
+    category: 'Update',
+    content: `
+Small feature, but one we'd wanted for a while: if you leave an email address when you file a report on SolveHFX, you'll now get **an email automatically** whenever that report's status changes — moved to "in progress," marked "resolved," or given a note explaining what happened.
+
+## Why this matters
+
+Most reports on SolveHFX are filed anonymously, which is exactly how it should work for residents who just want to flag a pothole and move on. But if you *do* leave an email — because you want to know what happens next — you deserve to actually hear back, instead of having to remember to revisit your [tracking page](/track) every few days.
+
+Before this, that contact email sat in our database and did... nothing. Now it does the one thing it was there for.
+
+## How it works
+
+1. When you file a report, add your email in the contact step (still fully optional).
+2. When the status changes — or a resolution note gets added — you get a short email with the update and a link back to your report's tracking page.
+3. If you never left an email, nothing changes for you. Anonymous reports stay anonymous, and no notification is sent because there's nowhere to send it.
+
+## Still the fastest way to check yourself
+
+Don't want to wait on email? Every report gets a reference number (like \`SHX-XXXX\`) you can look up anytime at [solvehfx.ca/track](/track) — full status timeline, verification count, and days-since-filed, no login required.
+
+[Report an issue now](/report) — 60 seconds, and leave an email if you want to hear how it turns out.
+    `,
+  },
+  {
+    slug: 'solvehfx-open-data-export',
+    title: 'Open Data: Download Every SolveHFX Report as CSV or JSON',
+    description:
+      'SolveHFX reports are now available as a public, filterable open-data export — CSV or JSON, no login required. Built for residents, journalists, and anyone who wants to dig into the numbers themselves.',
+    date: '2026-08-04',
+    readTime: '2 min read',
+    category: 'Update',
+    content: `
+SolveHFX has always positioned itself around transparency — the [scorecards page](/scorecards) tracks resolution rates by district, and the [reports feed](/reports) keeps a public record of everything filed. Now you can take that data with you.
+
+## What's new
+
+A new open-data export sits alongside the scorecards: pick **CSV** for a spreadsheet-ready download, or **JSON** if you're building something. Both are filterable by category, district, or status, so you're not stuck downloading everything just to look at potholes in one district.
+
+[Grab it from the Scorecards page](/scorecards), or hit the endpoint directly:
+
+- \`solvehfx.ca/api/reports/export?format=csv\`
+- \`solvehfx.ca/api/reports/export?format=json\`
+
+## What's in it — and what isn't
+
+The export includes the same public fields you'd see on the [map](/map) or the [reports feed](/reports): title, description, category, location, district, status, and dates. It does **not** include anything a resident shared privately — no contact names, no emails, no IP addresses. Those never leave our servers, whether you're looking at one report or exporting five thousand of them.
+
+## Who this is for
+
+- **Journalists and researchers** who want to verify a claim about response times themselves instead of taking our word for it.
+- **Residents** curious whether their street's issue is part of a bigger pattern.
+- **Anyone building on top of civic data** — the export is free, requires no account, and there's no rate limit beyond a 5,000-row cap per request.
+
+This is public data about public streets. It should be easy to get at.
+
+[See the live numbers on Scorecards](/scorecards), or [report an issue](/report) to add to the dataset yourself.
+    `,
+  },
+  {
+    slug: 'report-hazardous-tree-halifax',
+    title: 'Report a Hazardous or Fallen Tree in Halifax',
+    description:
+      'Learn how to report dangerous, damaged, or fallen trees on Halifax streets and in HRM parks — what counts as an emergency, and how to get a crew out fast.',
+    date: '2026-08-04',
+    readTime: '3 min read',
+    category: 'Guide',
+    content: `
+Halifax loses trees every storm season — split limbs over sidewalks, leaning trunks after a windstorm, roots heaving up a curb. Most of it isn't an emergency, but some of it genuinely is, and HRM treats the two very differently.
+
+## Is it an emergency?
+
+If a tree or large limb is **down and blocking a road, sitting on power lines, or actively blocking access**, treat it as urgent — mention that explicitly in your report so it gets triaged fast. A leaning tree that hasn't fallen yet, or a dead limb still attached, is usually not an emergency but is still worth reporting before the next storm turns it into one.
+
+## How to Report a Hazardous Tree
+
+**Fastest way**: [Report on SolveHFX](/report)
+- Photo of the tree — wider shot showing the lean or damage, not just a close-up of the bark
+- Pin the exact location (street trees and park trees are handled by different crews, so location matters)
+- Note whether it's blocking anything right now
+
+**Direct to HRM**:
+- **311**: Call 311 or use [311.halifax.ca](https://311.halifax.ca)
+- **Email**: contactus@311.halifax.ca
+
+## What to Include
+
+- **Location**: is it a street tree, a park tree, or on the boundary with private property?
+- **What's at risk**: sidewalk, road, power line, playground, parked cars
+- **Condition**: leaning, split, dead limbs, visibly rotting trunk
+- **Photo**: from a distance that shows the full tree, not just the damaged part
+
+## How Long Until Someone Comes Out
+
+- **Active hazard blocking a road or on wires**: same day to 48 hours — this gets escalated immediately
+- **Leaning or clearly dead tree, not yet fallen**: 1–3 weeks for assessment
+- **General pruning/maintenance requests**: can take a full season, since it's scheduled around HRM's forestry rotation
+
+## Pro Tips
+
+1. **Never treat a tree on live power lines as a HRM-only issue** — call 311, but also consider flagging it as an electrical hazard; NS Power handles line contact, not HRM.
+2. **After a windstorm, report even minor damage** — HRM often does sweep inspections after major weather, and your report helps flag streets crews haven't gotten to yet.
+3. **Mention if it's near a school or playground** — proximity to kids bumps priority.
+
+[Report a hazardous tree now](/report) — takes about 60 seconds, no account needed.
+    `,
+  },
+  {
+    slug: 'report-overflowing-garbage-halifax',
+    title: 'Report Overflowing Garbage or Recycling Bins in Halifax',
+    description:
+      'How to report overflowing public garbage bins, missed recycling pickup, and litter buildup in HRM parks and streets.',
+    date: '2026-08-04',
+    readTime: '2 min read',
+    category: 'Guide',
+    content: `
+Overflowing public bins are one of those issues that's easy to walk past and easy to fix — if HRM knows about it. A single bin that's overflowing near a park or bus stop tends to snowball into a litter magnet fast.
+
+## How to Report It
+
+**Fastest way**: [Report on SolveHFX](/report)
+- Photo of the bin and the surrounding litter
+- Pin the exact location — which park entrance, which bus stop, which block
+- Note if it looks like a one-time overflow or a bin that's chronically full
+
+**Direct to HRM**:
+- **311**: [311.halifax.ca](https://311.halifax.ca) or call 311
+- **Email**: contactus@311.halifax.ca
+
+## Public Bins vs. Missed Household Pickup
+
+This guide is about **public bins** — the ones in parks, on sidewalks, at transit stops. If it's your own household garbage or recycling that wasn't picked up, that's a separate HRM Solid Waste process (still reportable through 311, but it's tracked differently and usually resolved on the next collection cycle rather than a special trip).
+
+## What Gets Priority
+
+- **Bins near schools, playgrounds, or transit stops**: faster turnaround, higher foot traffic
+- **Bins that are chronically overflowing** (same spot, repeatedly): worth flagging as a pattern — HRM can upsize or add a second bin if it keeps happening
+- **Litter spreading beyond the bin**: mention this explicitly, since it can trigger a broader cleanup rather than just an emptying
+
+## Pro Tips
+
+1. **Report the same bin every time it overflows** — a pattern of reports is what gets a bin flagged for a bigger container or more frequent pickup, not just a one-off emptying.
+2. **Mention nearby wildlife concerns** if relevant (raccoons, gulls) — it can bump priority in park settings.
+3. **If it's a private business's bin** (not municipal), it's not an HRM issue — report it to the business or property owner instead.
+
+[Report an overflowing bin now](/report) — 60 seconds, no account needed.
+    `,
+  },
 ];
 
 export function getPostBySlug(slug: string): BlogPost | undefined {
