@@ -282,6 +282,19 @@ export async function POST(request: NextRequest) {
         .single());
     }
 
+    // A stale session can carry a user_id that no longer exists in auth.users
+    // (e.g. the account was deleted after the browser cached its session).
+    // That should never block a resident from filing a report — retry as
+    // anonymous rather than surfacing a raw DB error.
+    if (error && /reports_user_id_fkey/.test(error.message)) {
+      row.user_id = null;
+      ({ data: report, error } = await serviceClient
+        .from('reports')
+        .insert(row)
+        .select('*')
+        .single());
+    }
+
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
