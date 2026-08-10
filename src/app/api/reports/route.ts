@@ -32,10 +32,18 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
 
+    // Never select '*' here — this endpoint is public and unauthenticated, and
+    // the reports table holds contact_name, contact_email, client_ip, and
+    // user_id alongside the public fields. Whitelist only what's safe to show.
+    const PUBLIC_FIELDS =
+      'id, reference_number, title, description, category, lat, lng, address, ' +
+      'district_id, road_authority, photo_url, status, created_at, resolved_at, ' +
+      'estimated_resolution_date, hrm_responded, councillor_responded, is_anonymous';
+
     const selectClause =
       view === 'map'
-        ? 'id, reference_number, title, description, category, lat, lng, address, district_id, road_authority, photo_url, status, created_at, resolved_at, districts(id,name,councillor_name,councillor_email), verifications(id,report_id,user_id,type,photo_url,created_at)'
-        : '*, districts(*), verifications(*)';
+        ? `${PUBLIC_FIELDS}, districts(id,name,councillor_name,councillor_email), verifications(id,report_id,type,photo_url,created_at)`
+        : `${PUBLIC_FIELDS}, districts(id,name,councillor_name,councillor_email), verifications(id,report_id,type,photo_url,created_at)`;
 
     let query = supabase
       .from('reports')

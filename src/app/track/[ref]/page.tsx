@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { createClient } from '@/lib/supabase/server';
 import { ISSUE_CATEGORIES } from '@/lib/types';
+import type { Report, District } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,21 +45,27 @@ const STATUS_CONFIG = {
   },
 };
 
+// Without generated DB types, Supabase infers the joined districts relation as
+// an array; it's to-one in practice, so shape it at this boundary.
+type TrackedReport = Omit<Report, 'districts'> & { districts: District | null };
+
 export default async function TrackRefPage({ params }: Props) {
   const { ref } = await params;
 
-  let report = null;
+  let report: TrackedReport | null = null;
   let verificationCount = 0;
 
   try {
     const supabase = await createClient();
+    // Public page, reachable by reference number alone — whitelist columns so
+    // contact details and client_ip stay server-side.
     const { data } = await supabase
       .from('reports')
-      .select('*, districts(*), verifications(*)')
+      .select('id, reference_number, title, description, category, lat, lng, address, district_id, road_authority, photo_url, status, created_at, resolved_at, estimated_resolution_date, districts(id,name,councillor_name), verifications(id,type,created_at)')
       .eq('reference_number', ref.toUpperCase())
       .single();
-    report = data;
-    verificationCount = data?.verifications?.length || 0;
+    report = data as unknown as TrackedReport;
+    verificationCount = report?.verifications?.length || 0;
   } catch {
     // Supabase unavailable
   }

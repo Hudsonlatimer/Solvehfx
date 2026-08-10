@@ -3,7 +3,6 @@ export type RoadAuthority = 'hrm' | 'province' | 'transit';
 
 export interface Report {
   id: string;
-  user_id: string | null;
   reference_number: string;
   title: string;
   description: string;
@@ -16,16 +15,21 @@ export interface Report {
   photo_url: string | null;
   status: ReportStatus;
   is_anonymous: boolean;
-  contact_name: string | null;
-  contact_email: string | null;
-  notify_councillor: boolean;
+
+  // Server-only fields. Public queries deliberately do NOT select these, so
+  // they're optional — anything reading them must handle their absence, and
+  // a public page that accidentally renders one won't type-check as non-null.
+  user_id?: string | null;
+  contact_name?: string | null;
+  contact_email?: string | null;
+  notify_councillor?: boolean;
 
   // Response tracking
   hrm_responded: boolean;
-  hrm_response_date: string | null;
+  hrm_response_date?: string | null;
   councillor_responded: boolean;
-  councillor_response_date: string | null;
-  hrm_work_order_id: string | null;
+  councillor_response_date?: string | null;
+  hrm_work_order_id?: string | null;
   estimated_resolution_date: string | null;
 
   // Consent audit trail (see CONSENT_VERSION in api/reports/route.ts)

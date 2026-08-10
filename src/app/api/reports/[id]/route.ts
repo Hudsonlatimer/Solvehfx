@@ -20,9 +20,17 @@ export async function GET(
     const { id } = await params;
     const supabase = await createClient();
 
+    // Public, unauthenticated endpoint — whitelist columns so contact details
+    // and client_ip never leave the server. (See the same note in ../route.ts.)
     const { data, error } = await supabase
       .from('reports')
-      .select('*, districts(*), verifications(*), resolution_notes(*)')
+      .select(
+        'id, reference_number, title, description, category, lat, lng, address, ' +
+          'district_id, road_authority, photo_url, status, created_at, resolved_at, ' +
+          'estimated_resolution_date, hrm_responded, councillor_responded, is_anonymous, ' +
+          'districts(id,name,councillor_name,councillor_email), ' +
+          'verifications(id,report_id,type,photo_url,created_at), resolution_notes(*)'
+      )
       .eq('id', id)
       .single();
 
