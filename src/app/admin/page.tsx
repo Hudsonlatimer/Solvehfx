@@ -110,6 +110,9 @@ export default function AdminPage() {
     const stale = reports.filter(
       (r) => r.status !== 'resolved' && new Date(r.created_at).getTime() < daysAgo(14)
     ).length;
+    // Reports submitted before the consent columns existed have nothing on
+    // file — surfaced so it's obvious which ones lack a recorded agreement.
+    const consented = reports.filter((r) => !!r.consent_accepted_at).length;
     return {
       total,
       open,
@@ -117,6 +120,7 @@ export default function AdminPage() {
       resolved,
       week,
       stale,
+      consented,
       resolutionRate: total ? Math.round((resolved / total) * 100) : 0,
     };
   }, [reports]);
@@ -141,7 +145,7 @@ export default function AdminPage() {
   }, [reports, search, filterStatus, filterCategory, sort]);
 
   const handleExportCSV = () => {
-    const headers = ['Reference', 'Title', 'Category', 'Status', 'Address', 'District', 'Authority', 'Contact name', 'Contact email', 'Created', 'Resolved'];
+    const headers = ['Reference', 'Title', 'Category', 'Status', 'Address', 'District', 'Authority', 'Contact name', 'Contact email', 'Created', 'Resolved', 'Consent accepted', 'Consent version'];
     const rows = filteredReports.map((r) => [
       r.reference_number || '',
       r.title,
@@ -154,6 +158,8 @@ export default function AdminPage() {
       r.contact_email || '',
       new Date(r.created_at).toISOString(),
       r.resolved_at ? new Date(r.resolved_at).toISOString() : '',
+      r.consent_accepted_at ? new Date(r.consent_accepted_at).toISOString() : '',
+      r.consent_version || '',
     ]);
     const esc = (c: string) => `"${String(c).replace(/"/g, '""')}"`;
     const csv = [headers.join(','), ...rows.map((r) => r.map(esc).join(','))].join('\n');
@@ -192,13 +198,19 @@ export default function AdminPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3 mb-6">
         <StatCard label="Total" value={stats.total} tone="text-primary" />
         <StatCard label="Open" value={stats.open} tone="text-status-open" />
         <StatCard label="In progress" value={stats.inProgress} tone="text-[#9a6a00]" />
         <StatCard label="Resolved" value={stats.resolved} tone="text-success" />
         <StatCard label="Resolution rate" value={`${stats.resolutionRate}%`} tone="text-primary" />
         <StatCard label="New · 7d" value={stats.week} tone="text-primary" sub={stats.stale ? `${stats.stale} stale (14d+)` : undefined} />
+        <StatCard
+          label="Consent on file"
+          value={`${stats.consented}/${stats.total}`}
+          tone={stats.consented === stats.total ? 'text-success' : 'text-text-primary'}
+          sub={stats.consented < stats.total ? `${stats.total - stats.consented} pre-consent` : undefined}
+        />
       </div>
 
       {/* Filters */}
@@ -426,6 +438,41 @@ function ReportDetailBody({ report }: { report: Report }) {
         <Field label="Submitted" value={new Date(report.created_at).toLocaleString()} />
         <Field label="Resolved" value={report.resolved_at ? new Date(report.resolved_at).toLocaleString() : '—'} />
       </dl>
+
+      {/* Consent audit trail — what this resident agreed to, and when. */}
+      <div
+        className={`rounded-lg border p-3 ${
+          report.consent_accepted_at
+            ? 'border-success/30 bg-success/[0.05]'
+            : 'border-warning/30 bg-warning/[0.06]'
+        }`}
+      >
+        <p className="text-xs font-semibold text-text-primary mb-1.5">
+          {report.consent_accepted_at ? '✅ Consent on file' : '⚠️ No consent recorded'}
+        </p>
+        {report.consent_accepted_at ? (
+          <>
+            <p className="text-[11.5px] text-text-secondary leading-relaxed">
+              Accepted {new Date(report.consent_accepted_at).toLocaleString()}
+              {report.consent_version && (
+                <> · wording version <span className="font-mono">{report.consent_version}</span></>
+              )}
+            </p>
+            <p className="text-[11.5px] text-text-secondary leading-relaxed mt-1">
+              Covers public display on SolveHFX, sharing on social media and with
+              news media, and inclusion in open data. Contact details excluded —
+              safe to post the photo, description, category, and general location.
+            </p>
+          </>
+        ) : (
+          <p className="text-[11.5px] text-text-secondary leading-relaxed">
+            Submitted before consent was recorded, so there is no stored record of
+            what this resident agreed to. Safe to display on SolveHFX pages as
+            before, but avoid using this report&apos;s photo for social media or
+            press without asking first.
+          </p>
+        )}
+      </div>
       <div className="flex flex-wrap gap-3 border-t border-rule pt-2">
         <Link href={`/reports/${report.id}`} className="text-primary text-xs hover:underline" target="_blank">Public page ↗</Link>
         <Link href={`/track/${report.reference_number}`} className="text-primary text-xs hover:underline" target="_blank">Tracking page ↗</Link>
