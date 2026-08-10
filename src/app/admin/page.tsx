@@ -9,7 +9,7 @@ import StatusBadge from '@/components/reports/StatusBadge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Modal from '@/components/ui/Modal';
 import { createClient } from '@/lib/supabase/client';
-import { getCategoryById } from '@/lib/districts';
+import { getCategoryById, HRM_DISTRICTS } from '@/lib/districts';
 import { ISSUE_CATEGORIES, AUTHORITY_EMAILS } from '@/lib/types';
 import type { Report, ReportStatus } from '@/lib/types';
 
@@ -47,6 +47,13 @@ export default function AdminPage() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [sort, setSort] = useState('newest');
+
+  // Advanced filters
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [filterDistrict, setFilterDistrict] = useState('');
+  const [filterVerify, setFilterVerify] = useState('');
+  const [filterPhoto, setFilterPhoto] = useState('');
+  const [filterConsent, setFilterConsent] = useState('');
 
   const [detail, setDetail] = useState<Report | null>(null);
   const [deleteCandidate, setDeleteCandidate] = useState<Report | null>(null);
@@ -130,6 +137,25 @@ export default function AdminPage() {
     let list = reports.filter((r) => {
       if (filterStatus && r.status !== filterStatus) return false;
       if (filterCategory && r.category !== filterCategory) return false;
+      if (filterDistrict && String(r.district_id ?? '') !== filterDistrict) return false;
+
+      if (filterVerify) {
+        const seen = r.verifications?.filter((v) => v.type === 'confirmed_exists').length || 0;
+        const fixed = r.verifications?.filter((v) => v.type === 'confirmed_fixed').length || 0;
+        if (filterVerify === 'fixed' && fixed === 0) return false;
+        if (filterVerify === 'seen' && seen === 0) return false;
+        if (filterVerify === 'any' && seen + fixed === 0) return false;
+        if (filterVerify === 'none' && seen + fixed > 0) return false;
+        // Community says fixed, but the report is still marked open/in progress.
+        if (filterVerify === 'fixed_unresolved' && (fixed === 0 || r.status === 'resolved')) return false;
+      }
+
+      if (filterPhoto === 'yes' && !r.photo_url) return false;
+      if (filterPhoto === 'no' && r.photo_url) return false;
+
+      if (filterConsent === 'yes' && !r.consent_accepted_at) return false;
+      if (filterConsent === 'no' && r.consent_accepted_at) return false;
+
       if (q) {
         const hay = `${r.title} ${r.description} ${r.address ?? ''} ${r.reference_number ?? ''} ${r.contact_email ?? ''} ${r.contact_name ?? ''}`.toLowerCase();
         if (!hay.includes(q)) return false;
@@ -142,7 +168,31 @@ export default function AdminPage() {
       return sort === 'oldest' ? at - bt : bt - at;
     });
     return list;
-  }, [reports, search, filterStatus, filterCategory, sort]);
+  }, [
+    reports,
+    search,
+    filterStatus,
+    filterCategory,
+    filterDistrict,
+    filterVerify,
+    filterPhoto,
+    filterConsent,
+    sort,
+  ]);
+
+  const activeAdvancedCount = [filterDistrict, filterVerify, filterPhoto, filterConsent].filter(
+    Boolean
+  ).length;
+
+  const clearFilters = () => {
+    setSearch('');
+    setFilterStatus('');
+    setFilterCategory('');
+    setFilterDistrict('');
+    setFilterVerify('');
+    setFilterPhoto('');
+    setFilterConsent('');
+  };
 
   const handleExportCSV = () => {
     const headers = ['Reference', 'Title', 'Category', 'Status', 'Address', 'District', 'Authority', 'Contact name', 'Contact email', 'Created', 'Resolved', 'Consent accepted', 'Consent version'];
@@ -238,8 +288,79 @@ export default function AdminPage() {
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
         </select>
+        <button
+          type="button"
+          onClick={() => setShowAdvanced((v) => !v)}
+          className={`w-full rounded-lg border py-2 px-3 text-sm sm:w-auto ${
+            activeAdvancedCount
+              ? 'border-primary/40 bg-primary/[0.06] text-primary'
+              : 'border-rule bg-bg-elev text-text-secondary hover:border-primary/40'
+          }`}
+        >
+          Advanced{activeAdvancedCount ? ` · ${activeAdvancedCount}` : ''} {showAdvanced ? '▴' : '▾'}
+        </button>
         <span className="num ml-auto text-xs text-text-muted">{filteredReports.length} shown</span>
       </div>
+
+      {showAdvanced && (
+        <div className="mb-4 flex flex-wrap items-center gap-2 sm:gap-3 rounded-xl border border-rule bg-bg-elev p-3">
+          <select
+            value={filterVerify}
+            onChange={(e) => setFilterVerify(e.target.value)}
+            className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg sm:w-auto"
+            aria-label="Filter by community verification"
+          >
+            <option value="">Any verification</option>
+            <option value="fixed_unresolved">✅ Says fixed, still open</option>
+            <option value="fixed">✅ Marked fixed by community</option>
+            <option value="seen">👁 Confirmed still there</option>
+            <option value="any">Has any verification</option>
+            <option value="none">No verifications yet</option>
+          </select>
+
+          <select
+            value={filterDistrict}
+            onChange={(e) => setFilterDistrict(e.target.value)}
+            className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg sm:w-auto"
+            aria-label="Filter by district"
+          >
+            <option value="">All districts</option>
+            {HRM_DISTRICTS.map((d) => (
+              <option key={d.id} value={String(d.id)}>{d.id}. {d.name}</option>
+            ))}
+          </select>
+
+          <select
+            value={filterPhoto}
+            onChange={(e) => setFilterPhoto(e.target.value)}
+            className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg sm:w-auto"
+            aria-label="Filter by photo"
+          >
+            <option value="">Photo: any</option>
+            <option value="yes">Has photo</option>
+            <option value="no">No photo</option>
+          </select>
+
+          <select
+            value={filterConsent}
+            onChange={(e) => setFilterConsent(e.target.value)}
+            className="w-full rounded-lg border border-rule py-2 px-3 text-sm bg-bg sm:w-auto"
+            aria-label="Filter by consent"
+          >
+            <option value="">Consent: any</option>
+            <option value="yes">Consent on file (safe to post)</option>
+            <option value="no">No consent recorded</option>
+          </select>
+
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="w-full rounded-lg border border-rule bg-bg py-2 px-3 text-sm text-text-secondary hover:border-primary/40 sm:ml-auto sm:w-auto"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
 
       {/* Desktop Table */}
       <div className="hidden lg:block bg-bg-elev rounded-xl border border-rule overflow-hidden">
@@ -254,7 +375,11 @@ export default function AdminPage() {
                 <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Contact</th>
                 <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Votes</th>
                 <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Date</th>
-                <th className="px-3 py-2.5 text-left font-medium text-text-secondary">Actions</th>
+                {/* Pinned so the action buttons stay reachable when the table
+                    scrolls horizontally instead of being cut off. */}
+                <th className="sticky right-0 z-10 bg-bg px-3 py-2.5 text-left font-medium text-text-secondary shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)]">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -263,7 +388,7 @@ export default function AdminPage() {
                 const seen = report.verifications?.filter((v) => v.type === 'confirmed_exists').length || 0;
                 const fixed = report.verifications?.filter((v) => v.type === 'confirmed_fixed').length || 0;
                 return (
-                  <tr key={report.id} className="border-b border-rule hover:bg-bg">
+                  <tr key={report.id} className="group border-b border-rule hover:bg-bg">
                     <td className="px-3 py-2.5 max-w-[220px]">
                       <button onClick={() => setDetail(report)} className="font-medium text-left hover:text-primary truncate block w-full">
                         {report.title}
@@ -298,7 +423,7 @@ export default function AdminPage() {
                       </span>
                     </td>
                     <td className="px-3 py-2.5 text-text-secondary text-xs whitespace-nowrap">{new Date(report.created_at).toLocaleDateString()}</td>
-                    <td className="px-3 py-2.5">
+                    <td className="sticky right-0 z-10 bg-bg-elev px-3 py-2.5 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.15)] group-hover:bg-bg">
                       <div className="flex gap-1">
                         {report.status !== 'resolved' && (
                           <button onClick={() => handleStatusChange(report.id, 'resolved')} className="min-h-10 rounded bg-green-50 px-3 py-2 text-sm text-green-700 hover:bg-green-100">Resolve</button>
