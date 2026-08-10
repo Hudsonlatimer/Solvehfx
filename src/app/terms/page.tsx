@@ -104,7 +104,46 @@ export default function TermsPage() {
           <Reveal delay={200}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                5. Prohibited conduct
+                5. Content licence and public use
+              </h2>
+              <p>
+                You keep ownership of everything you submit. By submitting a report,
+                you grant SolveHFX a non-exclusive, royalty-free, worldwide licence
+                to display, reproduce, and share the report content — the photo,
+                description, issue category, and general location — for purposes
+                connected to the service. This includes displaying it on public
+                SolveHFX pages such as the issue map, reports feed, and scorecards,
+                sharing it on social media or with news media to raise awareness of
+                civic issues, and including it in aggregated statistics or open data
+                exports.
+              </p>
+              <p className="mt-3">
+                Personal contact details are excluded from this licence. Your name,
+                email address, and IP address are never published, shared with media,
+                posted to social media, or included in any public export. They are
+                used only to route your report to the appropriate authority and, if
+                you chose to provide an email, to send you status updates.
+              </p>
+              <p className="mt-3">
+                You confirm you have the right to submit any image you upload, and
+                that it does not contain identifiable people, licence plates, or other
+                private information you do not have permission to share. If you would
+                like a report you submitted removed from public display, contact{' '}
+                <a
+                  className="text-primary hover:underline underline-offset-4"
+                  href="mailto:support@solvehfx.ca"
+                >
+                  support@solvehfx.ca
+                </a>{' '}
+                and we will review the request.
+              </p>
+            </div>
+          </Reveal>
+
+          <Reveal delay={240}>
+            <div>
+              <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
+                6. Prohibited conduct
               </h2>
               <ul className="space-y-2">
                 <li>No false, misleading, defamatory, or intentionally abusive reports.</li>
@@ -118,7 +157,7 @@ export default function TermsPage() {
           <Reveal delay={240}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                6. Moderation and enforcement
+                7. Moderation and enforcement
               </h2>
               <p>
                 We may review, limit, reject, remove, or suspend content and access
@@ -131,7 +170,7 @@ export default function TermsPage() {
           <Reveal delay={280}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                7. No guarantee of resolution
+                8. No guarantee of resolution
               </h2>
               <p>
                 SolveHFX cannot guarantee that any authority will respond to or
@@ -143,7 +182,7 @@ export default function TermsPage() {
           <Reveal delay={320}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                8. Availability and changes
+                9. Availability and changes
               </h2>
               <p>
                 We may modify, suspend, or discontinue parts of the service at any
@@ -156,7 +195,7 @@ export default function TermsPage() {
           <Reveal delay={360}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                9. Disclaimer of warranties
+                10. Disclaimer of warranties
               </h2>
               <p>
                 SolveHFX is provided on an as-is and as-available basis. To the
@@ -170,7 +209,7 @@ export default function TermsPage() {
           <Reveal delay={400}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                10. Limitation of liability
+                11. Limitation of liability
               </h2>
               <p>
                 To the fullest extent permitted by law, SolveHFX is provided on an
@@ -185,7 +224,7 @@ export default function TermsPage() {
           <Reveal delay={440}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                11. Indemnification
+                12. Indemnification
               </h2>
               <p>
                 You agree to defend, indemnify, and hold harmless SolveHFX and its
@@ -199,7 +238,7 @@ export default function TermsPage() {
           <Reveal delay={480}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                12. Governing law
+                13. Governing law
               </h2>
               <p>
                 These Terms are governed by the laws of Nova Scotia and applicable
@@ -212,7 +251,7 @@ export default function TermsPage() {
           <Reveal delay={520}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                13. Severability
+                14. Severability
               </h2>
               <p>
                 If any provision of these Terms is found unenforceable, the
@@ -224,7 +263,7 @@ export default function TermsPage() {
           <Reveal delay={560}>
             <div>
               <h2 className="text-[20px] text-text-primary tracking-tight mb-2">
-                14. Contact
+                15. Contact
               </h2>
               <p>
                 Questions about these Terms can be sent to{' '}

@@ -496,7 +496,13 @@ function ReportFlow() {
                       className="mt-0.5 h-5 w-5 shrink-0 rounded border-rule text-primary focus:ring-primary"
                     />
                     <span>
-                      I understand report details may be visible on public SolveHFX pages.
+                      I understand report details (photo, description, category, and
+                      general location) may appear on public SolveHFX pages and may be
+                      shared publicly, including on social media, to raise awareness of
+                      civic issues.{' '}
+                      <span className="text-text-primary">
+                        Your name and email are never published or shared.
+                      </span>
                     </span>
                   </label>
                   <label className="flex min-h-11 items-start gap-3 text-[13px] text-text-secondary leading-relaxed">

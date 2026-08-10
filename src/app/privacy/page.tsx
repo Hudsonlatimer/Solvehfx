@@ -115,6 +115,27 @@ export default function PrivacyPage() {
                 Do not include sensitive personal information in report text or
                 images.
               </p>
+              <p className="mt-3">
+                Report content — the photo, description, issue category, and general
+                location — may also be shared publicly beyond this website, including
+                on SolveHFX social media accounts or with news media, to raise
+                awareness of civic issues in Halifax.
+              </p>
+              <p className="mt-3">
+                Your personal details are never part of that. Names, email addresses,
+                and IP addresses are never published on this site, posted to social
+                media, shared with media, or included in public data exports. Contact
+                details are used only to route your report and, if you provided an
+                email, to send you status updates. If you want a report you submitted
+                removed from public display, email{' '}
+                <a
+                  className="text-primary hover:underline underline-offset-4"
+                  href="mailto:support@solvehfx.ca"
+                >
+                  support@solvehfx.ca
+                </a>
+                .
+              </p>
             </div>
           </Reveal>
 
