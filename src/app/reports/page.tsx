@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ReportCard from '@/components/reports/ReportCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { ISSUE_CATEGORIES } from '@/lib/types';
@@ -8,15 +9,46 @@ import { HRM_DISTRICTS } from '@/lib/districts';
 import type { Report } from '@/lib/types';
 
 export default function ReportsPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner size="lg" className="py-20" />}>
+      <ReportsList />
+    </Suspense>
+  );
+}
+
+function ReportsList() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [reports, setReports] = useState<Report[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [category, setCategory] = useState('');
-  const [district, setDistrict] = useState('');
-  const [status, setStatus] = useState('');
-  const [sort, setSort] = useState('newest');
   const limit = 12;
+
+  // The URL is the source of truth for page + filters, so opening a report and
+  // hitting Back returns you to the same page and filters you were browsing
+  // instead of resetting to page 1.
+  const pageParam = parseInt(searchParams.get('page') || '1', 10);
+  const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+  const category = searchParams.get('category') || '';
+  const district = searchParams.get('district') || '';
+  const status = searchParams.get('status') || '';
+  const sort = searchParams.get('sort') || 'newest';
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | number | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null || value === '') params.delete(key);
+        else params.set(key, String(value));
+      });
+      const qs = params.toString();
+      // replace() rather than push() so changing a filter doesn't stack a
+      // history entry the user has to click Back through.
+      router.replace(qs ? `/reports?${qs}` : '/reports', { scroll: false });
+    },
+    [router, searchParams]
+  );
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -46,6 +78,10 @@ export default function ReportsPage() {
   }, [category, district, status, sort, page]);
 
   const totalPages = Math.ceil(total / limit);
+  const goToPage = (next: number) => {
+    const clamped = Math.min(Math.max(1, next), Math.max(1, totalPages));
+    updateParams({ page: clamped === 1 ? null : clamped });
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -55,7 +91,7 @@ export default function ReportsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2 sm:gap-3 mb-6">
         <select
           value={category}
-          onChange={(e) => { setCategory(e.target.value); setPage(1); }}
+          onChange={(e) => updateParams({ category: e.target.value || null, page: null })}
           className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev w-full sm:w-auto"
         >
           <option value="">All Categories</option>
@@ -66,7 +102,7 @@ export default function ReportsPage() {
 
         <select
           value={district}
-          onChange={(e) => { setDistrict(e.target.value); setPage(1); }}
+          onChange={(e) => updateParams({ district: e.target.value || null, page: null })}
           className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev w-full sm:w-auto"
         >
           <option value="">All Districts</option>
@@ -77,7 +113,7 @@ export default function ReportsPage() {
 
         <select
           value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+          onChange={(e) => updateParams({ status: e.target.value || null, page: null })}
           className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev w-full sm:w-auto"
         >
           <option value="">All Statuses</option>
@@ -88,7 +124,9 @@ export default function ReportsPage() {
 
         <select
           value={sort}
-          onChange={(e) => setSort(e.target.value)}
+          onChange={(e) =>
+            updateParams({ sort: e.target.value === 'newest' ? null : e.target.value, page: null })
+          }
           className="rounded-lg border border-rule py-2 px-3 text-sm bg-bg-elev w-full sm:w-auto"
         >
           <option value="newest">Newest First</option>
@@ -119,7 +157,7 @@ export default function ReportsPage() {
           {totalPages > 1 && (
             <div className="flex justify-center gap-2 mt-8">
               <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => goToPage(page - 1)}
                 disabled={page === 1}
                 className="min-h-11 px-4 py-2 rounded-lg border border-rule text-sm disabled:opacity-50"
               >
@@ -129,7 +167,7 @@ export default function ReportsPage() {
                 Page {page} of {totalPages}
               </span>
               <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => goToPage(page + 1)}
                 disabled={page === totalPages}
                 className="min-h-11 px-4 py-2 rounded-lg border border-rule text-sm disabled:opacity-50"
               >
