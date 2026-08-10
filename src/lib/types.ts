@@ -28,6 +28,10 @@ export interface Report {
   hrm_work_order_id: string | null;
   estimated_resolution_date: string | null;
 
+  // Consent audit trail (see CONSENT_VERSION in api/reports/route.ts)
+  consent_accepted_at?: string | null;
+  consent_version?: string | null;
+
   created_at: string;
   resolved_at: string | null;
   districts?: District;

@@ -58,6 +58,11 @@ ALTER TABLE reports ADD COLUMN IF NOT EXISTS councillor_response_date TIMESTAMPT
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS hrm_work_order_id TEXT;
 ALTER TABLE reports ADD COLUMN IF NOT EXISTS estimated_resolution_date TIMESTAMPTZ;
 
+-- Consent audit trail: when the resident accepted the terms + public/social
+-- visibility notice at submission, and which version of that wording they saw.
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS consent_accepted_at TIMESTAMPTZ;
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS consent_version TEXT;
+
 -- 4. Create Verifications table
 CREATE TABLE IF NOT EXISTS verifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

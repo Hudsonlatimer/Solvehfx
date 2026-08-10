@@ -15,6 +15,10 @@ function generateReferenceNumber(): string {
 
 const SPAM_RE = /(https?:\/\/|www\.|viagra|casino|crypto|telegram|whatsapp|bit\.ly)/i;
 
+// Bump this whenever the Terms or the submit-step consent wording materially
+// changes, so each stored report records which version the resident agreed to.
+const CONSENT_VERSION = '2026-08-10';
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -263,6 +267,10 @@ export async function POST(request: NextRequest) {
       contact_name: name || null,
       contact_email: email || null,
       notify_councillor: notify_councillor || false,
+      // Record what the resident actually agreed to, and when. Both flags are
+      // validated as true above, so this is the audit trail for that consent.
+      consent_accepted_at: new Date().toISOString(),
+      consent_version: CONSENT_VERSION,
     };
 
     let { data: report, error } = await serviceClient
@@ -270,6 +278,18 @@ export async function POST(request: NextRequest) {
       .insert(row)
       .select('*')
       .single();
+
+    // Backwards-compat: consent columns are new. If the migration hasn't been
+    // run yet, drop them and retry rather than blocking submissions.
+    if (error && /consent_accepted_at|consent_version/.test(error.message)) {
+      delete row.consent_accepted_at;
+      delete row.consent_version;
+      ({ data: report, error } = await serviceClient
+        .from('reports')
+        .insert(row)
+        .select('*')
+        .single());
+    }
 
     // Backwards-compat: if the contact_name column hasn't been migrated yet,
     // retry without it rather than failing the whole submission.
